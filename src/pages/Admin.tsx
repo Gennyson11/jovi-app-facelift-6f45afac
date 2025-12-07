@@ -9,9 +9,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink } from 'lucide-react';
+import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link } from 'lucide-react';
 
 type StreamingStatus = 'online' | 'maintenance';
+type AccessType = 'credentials' | 'link_only';
 
 interface Platform {
   id: string;
@@ -19,6 +20,7 @@ interface Platform {
   icon_url: string | null;
   cover_image_url: string | null;
   status: StreamingStatus;
+  access_type: AccessType;
   login: string | null;
   password: string | null;
   website_url: string | null;
@@ -34,6 +36,7 @@ export default function Admin() {
   const [editingPlatform, setEditingPlatform] = useState<Platform | null>(null);
   const [platformName, setPlatformName] = useState('');
   const [platformStatus, setPlatformStatus] = useState<StreamingStatus>('online');
+  const [platformAccessType, setPlatformAccessType] = useState<AccessType>('credentials');
   const [platformCoverUrl, setPlatformCoverUrl] = useState('');
   const [platformLogin, setPlatformLogin] = useState('');
   const [platformPassword, setPlatformPassword] = useState('');
@@ -116,6 +119,7 @@ export default function Admin() {
       setEditingPlatform(platform);
       setPlatformName(platform.name);
       setPlatformStatus(platform.status || 'online');
+      setPlatformAccessType(platform.access_type || 'credentials');
       setPlatformCoverUrl(platform.cover_image_url || '');
       setPlatformLogin(platform.login || '');
       setPlatformPassword(platform.password || '');
@@ -124,6 +128,7 @@ export default function Admin() {
       setEditingPlatform(null);
       setPlatformName('');
       setPlatformStatus('online');
+      setPlatformAccessType('credentials');
       setPlatformCoverUrl('');
       setPlatformLogin('');
       setPlatformPassword('');
@@ -138,12 +143,18 @@ export default function Admin() {
       return;
     }
 
+    if (platformAccessType === 'link_only' && !platformWebsiteUrl.trim()) {
+      toast({ title: 'Erro', description: 'Link do site é obrigatório para acesso por link', variant: 'destructive' });
+      return;
+    }
+
     const platformData = {
       name: platformName,
       status: platformStatus,
+      access_type: platformAccessType,
       cover_image_url: platformCoverUrl || null,
-      login: platformLogin || null,
-      password: platformPassword || null,
+      login: platformAccessType === 'credentials' ? (platformLogin || null) : null,
+      password: platformAccessType === 'credentials' ? (platformPassword || null) : null,
       website_url: platformWebsiteUrl || null,
     };
 
@@ -241,10 +252,9 @@ export default function Admin() {
                   <TableRow>
                     <TableHead>Capa</TableHead>
                     <TableHead>Nome</TableHead>
-                    <TableHead>Login</TableHead>
-                    <TableHead>Senha</TableHead>
+                    <TableHead>Tipo</TableHead>
+                    <TableHead>Login/Link</TableHead>
                     <TableHead>Status</TableHead>
-                    <TableHead>Link</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -265,27 +275,60 @@ export default function Admin() {
                         )}
                       </TableCell>
                       <TableCell className="font-medium">{platform.name}</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
-                        {platform.login || '-'}
+                      <TableCell>
+                        <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${
+                          platform.access_type === 'credentials' 
+                            ? 'bg-primary/10 text-primary' 
+                            : 'bg-purple-500/10 text-purple-400'
+                        }`}>
+                          {platform.access_type === 'credentials' ? (
+                            <>
+                              <KeyRound className="w-3 h-3" />
+                              Login/Senha
+                            </>
+                          ) : (
+                            <>
+                              <Link className="w-3 h-3" />
+                              Apenas Link
+                            </>
+                          )}
+                        </span>
                       </TableCell>
-                      <TableCell className="font-mono text-sm">
-                        {platform.password ? (
-                          <div className="flex items-center gap-2">
-                            {showPasswords[platform.id] ? platform.password : '••••••••'}
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => togglePasswordVisibility(platform.id)}
-                            >
-                              {showPasswords[platform.id] ? (
-                                <EyeOff className="w-3 h-3" />
-                              ) : (
-                                <Eye className="w-3 h-3" />
-                              )}
-                            </Button>
+                      <TableCell className="text-sm">
+                        {platform.access_type === 'credentials' ? (
+                          <div className="space-y-1">
+                            <p className="text-muted-foreground">{platform.login || '-'}</p>
+                            {platform.password && (
+                              <div className="flex items-center gap-1 font-mono text-xs">
+                                {showPasswords[platform.id] ? platform.password : '••••••••'}
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-5 w-5"
+                                  onClick={() => togglePasswordVisibility(platform.id)}
+                                >
+                                  {showPasswords[platform.id] ? (
+                                    <EyeOff className="w-3 h-3" />
+                                  ) : (
+                                    <Eye className="w-3 h-3" />
+                                  )}
+                                </Button>
+                              </div>
+                            )}
                           </div>
-                        ) : '-'}
+                        ) : (
+                          platform.website_url ? (
+                            <a 
+                              href={platform.website_url} 
+                              target="_blank" 
+                              rel="noopener noreferrer"
+                              className="text-primary hover:underline inline-flex items-center gap-1"
+                            >
+                              <ExternalLink className="w-3 h-3" />
+                              Abrir
+                            </a>
+                          ) : '-'
+                        )}
                       </TableCell>
                       <TableCell>
                         <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
@@ -300,19 +343,6 @@ export default function Admin() {
                           )}
                           {platform.status === 'online' ? 'Online' : 'Manutenção'}
                         </span>
-                      </TableCell>
-                      <TableCell>
-                        {platform.website_url ? (
-                          <a 
-                            href={platform.website_url} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-primary hover:underline inline-flex items-center gap-1"
-                          >
-                            <ExternalLink className="w-3 h-3" />
-                            Abrir
-                          </a>
-                        ) : '-'}
                       </TableCell>
                       <TableCell className="text-right">
                         <div className="flex justify-end gap-2">
@@ -337,7 +367,7 @@ export default function Admin() {
                   ))}
                   {platforms.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                      <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                         Nenhuma plataforma cadastrada
                       </TableCell>
                     </TableRow>
@@ -369,31 +399,67 @@ export default function Admin() {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="platform-login">Login</Label>
-                <Input
-                  id="platform-login"
-                  value={platformLogin}
-                  onChange={(e) => setPlatformLogin(e.target.value)}
-                  placeholder="Email ou usuário"
-                  className="bg-background/50 border-border"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="platform-password">Senha</Label>
-                <Input
-                  id="platform-password"
-                  value={platformPassword}
-                  onChange={(e) => setPlatformPassword(e.target.value)}
-                  placeholder="Senha"
-                  className="bg-background/50 border-border"
-                />
+            {/* Access Type Selection */}
+            <div className="space-y-2">
+              <Label>Tipo de Acesso *</Label>
+              <div className="grid grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setPlatformAccessType('credentials')}
+                  className={`p-4 rounded-lg border-2 transition-all flex flex-col items-center gap-2 ${
+                    platformAccessType === 'credentials'
+                      ? 'border-primary bg-primary/10 text-primary'
+                      : 'border-border bg-background/50 text-muted-foreground hover:border-primary/50'
+                  }`}
+                >
+                  <KeyRound className="w-6 h-6" />
+                  <span className="text-sm font-medium">Login e Senha</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPlatformAccessType('link_only')}
+                  className={`p-4 rounded-lg border-2 transition-all flex flex-col items-center gap-2 ${
+                    platformAccessType === 'link_only'
+                      ? 'border-purple-500 bg-purple-500/10 text-purple-400'
+                      : 'border-border bg-background/50 text-muted-foreground hover:border-purple-500/50'
+                  }`}
+                >
+                  <Link className="w-6 h-6" />
+                  <span className="text-sm font-medium">Apenas Link</span>
+                </button>
               </div>
             </div>
 
+            {/* Conditional Fields based on Access Type */}
+            {platformAccessType === 'credentials' && (
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="platform-login">Login</Label>
+                  <Input
+                    id="platform-login"
+                    value={platformLogin}
+                    onChange={(e) => setPlatformLogin(e.target.value)}
+                    placeholder="Email ou usuário"
+                    className="bg-background/50 border-border"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="platform-password">Senha</Label>
+                  <Input
+                    id="platform-password"
+                    value={platformPassword}
+                    onChange={(e) => setPlatformPassword(e.target.value)}
+                    placeholder="Senha"
+                    className="bg-background/50 border-border"
+                  />
+                </div>
+              </div>
+            )}
+
             <div className="space-y-2">
-              <Label htmlFor="platform-website">Link do Site</Label>
+              <Label htmlFor="platform-website">
+                Link do Site {platformAccessType === 'link_only' ? '*' : ''}
+              </Label>
               <Input
                 id="platform-website"
                 value={platformWebsiteUrl}

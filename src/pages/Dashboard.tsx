@@ -5,9 +5,10 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Tv, LogOut, Eye, EyeOff, Copy, Loader2, CheckCircle, AlertTriangle, ExternalLink } from 'lucide-react';
+import { Tv, LogOut, Eye, EyeOff, Copy, Loader2, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link } from 'lucide-react';
 
 type StreamingStatus = 'online' | 'maintenance';
+type AccessType = 'credentials' | 'link_only';
 
 interface Platform {
   id: string;
@@ -15,6 +16,7 @@ interface Platform {
   icon_url: string | null;
   cover_image_url: string | null;
   status: StreamingStatus;
+  access_type: AccessType;
   login: string | null;
   password: string | null;
   website_url: string | null;
@@ -74,6 +76,18 @@ export default function Dashboard() {
     });
   };
 
+  const handlePlatformClick = (platform: Platform) => {
+    const isMaintenance = platform.status === 'maintenance';
+    
+    if (isMaintenance) return;
+
+    if (platform.access_type === 'link_only' && platform.website_url) {
+      window.open(platform.website_url, '_blank');
+    } else if (platform.access_type === 'credentials' && platform.login && platform.password) {
+      setSelectedPlatform(platform);
+    }
+  };
+
   if (authLoading || loading) {
     return (
       <div className="min-h-screen bg-background flex items-center justify-center">
@@ -127,22 +141,24 @@ export default function Dashboard() {
             Plataformas de Streaming
           </h2>
           <p className="text-muted-foreground">
-            Clique em uma plataforma para visualizar as credenciais
+            Clique em uma plataforma para visualizar as credenciais ou acessar o link
           </p>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {platforms.map((platform) => {
-            const hasCredential = !!(platform.login && platform.password);
+            const hasAccess = platform.access_type === 'link_only' 
+              ? !!platform.website_url 
+              : !!(platform.login && platform.password);
             const isMaintenance = platform.status === 'maintenance';
             
             return (
               <div 
                 key={platform.id}
                 className={`group cursor-pointer transition-all duration-300 ${
-                  !hasCredential || isMaintenance ? 'opacity-60' : ''
+                  !hasAccess || isMaintenance ? 'opacity-60' : ''
                 }`}
-                onClick={() => hasCredential && !isMaintenance && setSelectedPlatform(platform)}
+                onClick={() => handlePlatformClick(platform)}
               >
                 {/* Card Container */}
                 <div className="bg-card border border-border rounded-xl overflow-hidden hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10 transition-all duration-300">
@@ -173,6 +189,19 @@ export default function Dashboard() {
                       )}
                       {platform.status === 'online' ? 'Online' : 'Manutenção'}
                     </div>
+
+                    {/* Access Type Badge */}
+                    <div className={`absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold backdrop-blur-sm ${
+                      platform.access_type === 'credentials' 
+                        ? 'bg-primary/20 text-primary border border-primary/30' 
+                        : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                    }`}>
+                      {platform.access_type === 'credentials' ? (
+                        <KeyRound className="w-3 h-3" />
+                      ) : (
+                        <Link className="w-3 h-3" />
+                      )}
+                    </div>
                   </div>
 
                   {/* Footer */}
@@ -184,15 +213,21 @@ export default function Dashboard() {
                       <p className="text-xs text-muted-foreground mt-0.5">
                         {isMaintenance 
                           ? 'Em manutenção' 
-                          : hasCredential 
-                            ? 'Clique para ver credencial' 
-                            : 'Sem credencial'
+                          : hasAccess 
+                            ? platform.access_type === 'link_only' 
+                              ? 'Clique para acessar' 
+                              : 'Clique para ver credencial'
+                            : 'Sem acesso configurado'
                         }
                       </p>
                     </div>
-                    {hasCredential && !isMaintenance && (
+                    {hasAccess && !isMaintenance && (
                       <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                        <Eye className="w-5 h-5 text-primary" />
+                        {platform.access_type === 'link_only' ? (
+                          <ExternalLink className="w-5 h-5 text-primary" />
+                        ) : (
+                          <Eye className="w-5 h-5 text-primary" />
+                        )}
                       </div>
                     )}
                   </div>
@@ -203,7 +238,7 @@ export default function Dashboard() {
         </div>
       </main>
 
-      {/* Credential Dialog */}
+      {/* Credential Dialog - Only for credentials type */}
       <Dialog open={!!selectedPlatform} onOpenChange={() => {
         setSelectedPlatform(null);
         setShowPassword(false);
