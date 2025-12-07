@@ -10,22 +10,19 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
 import { Tv, Loader2 } from 'lucide-react';
 import { z } from 'zod';
-
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
-  password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
+  password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres')
 });
-
 const signupSchema = z.object({
   name: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
   email: z.string().email('Email inválido'),
   password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres'),
-  confirmPassword: z.string(),
-}).refine((data) => data.password === data.confirmPassword, {
+  confirmPassword: z.string()
+}).refine(data => data.password === data.confirmPassword, {
   message: "Senhas não coincidem",
-  path: ["confirmPassword"],
+  path: ["confirmPassword"]
 });
-
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -33,10 +30,16 @@ export default function Auth() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
-  const { signIn, user, role, loading } = useAuth();
+  const {
+    signIn,
+    user,
+    role,
+    loading
+  } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   useEffect(() => {
     if (!loading && user) {
       // Redireciona baseado na role, default para dashboard se role ainda não carregou
@@ -53,83 +56,84 @@ export default function Auth() {
       }
     }
   }, [user, role, loading, navigate]);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const validation = loginSchema.safeParse({ email, password });
+    const validation = loginSchema.safeParse({
+      email,
+      password
+    });
     if (!validation.success) {
       toast({
         title: 'Erro de validação',
         description: validation.error.errors[0].message,
-        variant: 'destructive',
+        variant: 'destructive'
       });
       return;
     }
-
     setIsLoading(true);
-    const { error } = await signIn(email, password);
+    const {
+      error
+    } = await signIn(email, password);
     setIsLoading(false);
-
     if (error) {
       toast({
         title: 'Erro ao entrar',
         description: 'Email ou senha incorretos',
-        variant: 'destructive',
+        variant: 'destructive'
       });
     }
   };
-
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
-    
-    const validation = signupSchema.safeParse({ name, email, password, confirmPassword });
+    const validation = signupSchema.safeParse({
+      name,
+      email,
+      password,
+      confirmPassword
+    });
     if (!validation.success) {
       toast({
         title: 'Erro de validação',
         description: validation.error.errors[0].message,
-        variant: 'destructive',
+        variant: 'destructive'
       });
       return;
     }
-
     setIsLoading(true);
-    
-    const { error } = await supabase.auth.signUp({
+    const {
+      error
+    } = await supabase.auth.signUp({
       email,
       password,
       options: {
         emailRedirectTo: `${window.location.origin}/`,
         data: {
-          name: name,
+          name: name
         }
       }
     });
-
     setIsLoading(false);
-
     if (error) {
       if (error.message.includes('already registered')) {
         toast({
           title: 'Erro',
           description: 'Este email já está cadastrado',
-          variant: 'destructive',
+          variant: 'destructive'
         });
       } else {
         toast({
           title: 'Erro ao cadastrar',
           description: error.message,
-          variant: 'destructive',
+          variant: 'destructive'
         });
       }
       return;
     }
-
     toast({
       title: 'Cadastro realizado!',
-      description: 'Aguarde a liberação do acesso pelo administrador.',
+      description: 'Aguarde a liberação do acesso pelo administrador.'
     });
-    
+
     // Clear form and switch to login
     setName('');
     setEmail('');
@@ -137,17 +141,12 @@ export default function Auth() {
     setConfirmPassword('');
     setActiveTab('login');
   };
-
   if (loading) {
-    return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
+    return <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
+  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
       <Card className="w-full max-w-md border-primary/20 bg-card/80 backdrop-blur-sm">
         <CardHeader className="text-center space-y-4">
           <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
@@ -155,7 +154,7 @@ export default function Auth() {
           </div>
           <div>
             <CardTitle className="text-2xl font-display text-foreground">
-              Jovitools Streamings
+              JoviTools GPainel 
             </CardTitle>
             <CardDescription className="text-muted-foreground mt-2">
               Acesse ou crie sua conta
@@ -173,36 +172,14 @@ export default function Auth() {
               <form onSubmit={handleLogin} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="login-email">Email</Label>
-                  <Input
-                    id="login-email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="bg-background/50 border-border"
-                    required
-                  />
+                  <Input id="login-email" type="email" placeholder="seu@email.com" value={email} onChange={e => setEmail(e.target.value)} className="bg-background/50 border-border" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="login-password">Senha</Label>
-                  <Input
-                    id="login-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="bg-background/50 border-border"
-                    required
-                  />
+                  <Input id="login-password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} className="bg-background/50 border-border" required />
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full bg-primary hover:bg-primary/90"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  ) : null}
+                <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isLoading}>
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                   Entrar
                 </Button>
               </form>
@@ -212,60 +189,22 @@ export default function Auth() {
               <form onSubmit={handleSignup} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="signup-name">Nome</Label>
-                  <Input
-                    id="signup-name"
-                    type="text"
-                    placeholder="Seu nome"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    className="bg-background/50 border-border"
-                    required
-                  />
+                  <Input id="signup-name" type="text" placeholder="Seu nome" value={name} onChange={e => setName(e.target.value)} className="bg-background/50 border-border" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-email">Email</Label>
-                  <Input
-                    id="signup-email"
-                    type="email"
-                    placeholder="seu@email.com"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    className="bg-background/50 border-border"
-                    required
-                  />
+                  <Input id="signup-email" type="email" placeholder="seu@email.com" value={email} onChange={e => setEmail(e.target.value)} className="bg-background/50 border-border" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Senha</Label>
-                  <Input
-                    id="signup-password"
-                    type="password"
-                    placeholder="••••••••"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="bg-background/50 border-border"
-                    required
-                  />
+                  <Input id="signup-password" type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} className="bg-background/50 border-border" required />
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="signup-confirm">Confirmar Senha</Label>
-                  <Input
-                    id="signup-confirm"
-                    type="password"
-                    placeholder="••••••••"
-                    value={confirmPassword}
-                    onChange={(e) => setConfirmPassword(e.target.value)}
-                    className="bg-background/50 border-border"
-                    required
-                  />
+                  <Input id="signup-confirm" type="password" placeholder="••••••••" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} className="bg-background/50 border-border" required />
                 </div>
-                <Button 
-                  type="submit" 
-                  className="w-full bg-primary hover:bg-primary/90"
-                  disabled={isLoading}
-                >
-                  {isLoading ? (
-                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
-                  ) : null}
+                <Button type="submit" className="w-full bg-primary hover:bg-primary/90" disabled={isLoading}>
+                  {isLoading ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : null}
                   Cadastrar
                 </Button>
                 <p className="text-xs text-center text-muted-foreground">
@@ -276,6 +215,5 @@ export default function Auth() {
           </Tabs>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 }
