@@ -1,12 +1,26 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import HeroSection from "@/components/HeroSection";
+import FeaturesSection from "@/components/FeaturesSection";
+import ToolsSection from "@/components/ToolsSection";
+import PricingSection from "@/components/PricingSection";
+import FAQSection from "@/components/FAQSection";
 
 const Index = () => {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background">
-      <div className="text-center">
-        <h1 className="mb-4 text-4xl font-bold">Welcome to Your Blank App</h1>
-        <p className="text-xl text-muted-foreground">Start building your amazing project here!</p>
-      </div>
+    <div className="min-h-screen bg-background overflow-x-hidden">
+      <HeroSection />
+      <FeaturesSection />
+      <ToolsSection />
+      <PricingSection />
+      <FAQSection />
+      
+      {/* Footer */}
+      <footer className="py-8 px-4 border-t border-border/30">
+        <div className="max-w-6xl mx-auto text-center">
+          <p className="text-muted-foreground text-sm">
+            © 2024 JoviTools. Todos os direitos reservados.
+          </p>
+        </div>
+      </footer>
     </div>
   );
 };
