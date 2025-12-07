@@ -6,12 +6,16 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Tv, LogOut, Eye, EyeOff, Copy, Loader2 } from 'lucide-react';
+import { Tv, LogOut, Eye, EyeOff, Copy, Loader2, CheckCircle, AlertTriangle } from 'lucide-react';
+
+type StreamingStatus = 'online' | 'maintenance';
 
 interface Platform {
   id: string;
   name: string;
   icon_url: string | null;
+  cover_image_url: string | null;
+  status: StreamingStatus;
 }
 
 interface Credential {
@@ -59,7 +63,7 @@ export default function Dashboard() {
       supabase.from('streaming_credentials').select('*'),
     ]);
 
-    if (platformsRes.data) setPlatforms(platformsRes.data);
+    if (platformsRes.data) setPlatforms(platformsRes.data as Platform[]);
     if (credentialsRes.data) setCredentials(credentialsRes.data);
     setLoading(false);
   };
@@ -145,25 +149,56 @@ export default function Dashboard() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {platforms.map((platform) => {
             const hasCredential = !!getCredentialForPlatform(platform.id);
+            const isMaintenance = platform.status === 'maintenance';
+            
             return (
               <Card 
                 key={platform.id}
-                className={`cursor-pointer transition-all duration-200 border-border hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 ${
-                  !hasCredential ? 'opacity-50' : ''
+                className={`cursor-pointer transition-all duration-200 border-border hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 relative overflow-hidden ${
+                  !hasCredential || isMaintenance ? 'opacity-70' : ''
                 }`}
-                onClick={() => hasCredential && setSelectedPlatform(platform)}
+                onClick={() => hasCredential && !isMaintenance && setSelectedPlatform(platform)}
               >
+                {/* Status Badge */}
+                <div className={`absolute top-2 right-2 z-10 inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-medium ${
+                  platform.status === 'online' 
+                    ? 'bg-green-500/20 text-green-400' 
+                    : 'bg-yellow-500/20 text-yellow-400'
+                }`}>
+                  {platform.status === 'online' ? (
+                    <CheckCircle className="w-3 h-3" />
+                  ) : (
+                    <AlertTriangle className="w-3 h-3" />
+                  )}
+                  {platform.status === 'online' ? 'Online' : 'Manutenção'}
+                </div>
+
                 <CardHeader className="pb-2">
-                  <div className="text-4xl mb-2">
-                    {platformIcons[platform.name] || '📺'}
-                  </div>
+                  {platform.cover_image_url ? (
+                    <div className="w-full h-20 mb-2 rounded-md overflow-hidden">
+                      <img 
+                        src={platform.cover_image_url} 
+                        alt={platform.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="text-4xl mb-2">
+                      {platformIcons[platform.name] || '📺'}
+                    </div>
+                  )}
                   <CardTitle className="text-lg text-foreground">
                     {platform.name}
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-sm text-muted-foreground">
-                    {hasCredential ? 'Credencial disponível' : 'Sem credencial'}
+                    {isMaintenance 
+                      ? 'Em manutenção' 
+                      : hasCredential 
+                        ? 'Credencial disponível' 
+                        : 'Sem credencial'
+                    }
                   </p>
                 </CardContent>
               </Card>
@@ -180,9 +215,17 @@ export default function Dashboard() {
         <DialogContent className="bg-card border-border">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3 text-foreground">
-              <span className="text-3xl">
-                {selectedPlatform && platformIcons[selectedPlatform.name]}
-              </span>
+              {selectedPlatform?.cover_image_url ? (
+                <img 
+                  src={selectedPlatform.cover_image_url} 
+                  alt={selectedPlatform.name}
+                  className="w-10 h-10 object-cover rounded"
+                />
+              ) : (
+                <span className="text-3xl">
+                  {selectedPlatform && platformIcons[selectedPlatform.name]}
+                </span>
+              )}
               {selectedPlatform?.name}
             </DialogTitle>
           </DialogHeader>
