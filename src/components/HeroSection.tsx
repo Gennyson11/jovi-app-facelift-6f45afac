@@ -1,4 +1,4 @@
-import { Play, ChevronRight } from "lucide-react";
+import { ChevronRight, Codepen } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-hacker.jpg";
 interface HeroSectionProps {
@@ -22,7 +22,7 @@ const HeroSection = ({
       <div className="relative z-10 max-w-5xl mx-auto text-center">
         {/* Logo/Icon */}
         <div className="mb-8 inline-flex items-center justify-center w-20 h-20 rounded-xl bg-primary/20 border border-primary/30 glow-cyan animate-float">
-          <Play className="w-10 h-10 text-primary fill-primary" />
+          <Codepen className="w-10 h-10 text-primary fill-primary" />
         </div>
 
         {/* Main Heading */}
