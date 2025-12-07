@@ -51,6 +51,7 @@ export type Database = {
       }
       streaming_platforms: {
         Row: {
+          access_type: Database["public"]["Enums"]["access_type"]
           cover_image_url: string | null
           created_at: string
           icon_url: string | null
@@ -63,6 +64,7 @@ export type Database = {
           website_url: string | null
         }
         Insert: {
+          access_type?: Database["public"]["Enums"]["access_type"]
           cover_image_url?: string | null
           created_at?: string
           icon_url?: string | null
@@ -75,6 +77,7 @@ export type Database = {
           website_url?: string | null
         }
         Update: {
+          access_type?: Database["public"]["Enums"]["access_type"]
           cover_image_url?: string | null
           created_at?: string
           icon_url?: string | null
@@ -123,6 +126,7 @@ export type Database = {
       }
     }
     Enums: {
+      access_type: "credentials" | "link_only"
       app_role: "admin" | "user"
       streaming_status: "online" | "maintenance"
     }
@@ -252,6 +256,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      access_type: ["credentials", "link_only"],
       app_role: ["admin", "user"],
       streaming_status: ["online", "maintenance"],
     },
