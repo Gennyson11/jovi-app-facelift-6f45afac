@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
@@ -6,9 +6,15 @@ const PRESENCE_CHANNEL_NAME = 'jovitools-online-users';
 
 export function usePresence(userId: string | undefined, userEmail: string | undefined, userName: string | null | undefined) {
   const [channel, setChannel] = useState<RealtimeChannel | null>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
+  const isSetupRef = useRef(false);
 
   useEffect(() => {
     if (!userId || !userEmail) return;
+    
+    // Prevent multiple setups
+    if (isSetupRef.current && channelRef.current) return;
+    isSetupRef.current = true;
 
     console.log('Setting up presence for user:', userId, userEmail);
 
@@ -37,13 +43,16 @@ export function usePresence(userId: string | undefined, userEmail: string | unde
         }
       });
 
+    channelRef.current = presenceChannel;
     setChannel(presenceChannel);
 
     return () => {
       console.log('Unsubscribing presence for user:', userId);
       presenceChannel.unsubscribe();
+      channelRef.current = null;
+      isSetupRef.current = false;
     };
-  }, [userId, userEmail, userName]);
+  }, [userId, userEmail]);
 
   return channel;
 }
