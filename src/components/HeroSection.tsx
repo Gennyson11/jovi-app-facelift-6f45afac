@@ -1,4 +1,4 @@
-import { Play } from "lucide-react";
+import { Play, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import heroImage from "@/assets/hero-hacker.jpg";
 
@@ -40,21 +40,22 @@ const HeroSection = () => {
           <div className="absolute inset-0 bg-gradient-to-t from-background/60 to-transparent pointer-events-none" />
         </div>
 
-        {/* Subtitle */}
-        <p className="text-lg md:text-xl text-foreground mb-2">
-          Tenha <span className="text-primary font-semibold">+70 ferramentas premium</span> de IA e Marketing Digital
-        </p>
-        <p className="text-muted-foreground mb-4">
-          em um só acesso, pagando apenas <span className="text-accent font-semibold">R$29,99/mês</span>
+        {/* Subtitle - Updated to match image */}
+        <h2 className="text-xl md:text-2xl font-semibold text-foreground mb-3">
+          Tenha <span className="text-primary">+115 ferramentas premium</span> de IA e Marketing Digital
+        </h2>
+        <p className="text-muted-foreground mb-4 max-w-2xl mx-auto">
+          Tenha +115 ferramentas premium de IA e Marketing Digital em um só acesso, pagando apenas R$29,99/mês Acesso imediato após a confirmação do pagamento<span className="text-accent font-semibold">R$29,99/mês</span>
         </p>
         <p className="text-primary text-sm flex items-center justify-center gap-2 mb-8">
           <span className="animate-pulse">✨</span>
           Acesso imediato após a confirmação do pagamento
         </p>
 
-        {/* CTA Button */}
-        <Button variant="hero" size="xl" className="px-12">
+        {/* CTA Button with arrow */}
+        <Button variant="hero" size="xl" className="px-12 group">
           Acessar Plataforma
+          <ChevronRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
         </Button>
       </div>
     </section>
