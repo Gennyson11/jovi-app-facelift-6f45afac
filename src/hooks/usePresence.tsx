@@ -1,18 +1,21 @@
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { RealtimeChannel } from '@supabase/supabase-js';
 
 const PRESENCE_CHANNEL_NAME = 'jovitools-online-users';
 
 export function usePresence(userId: string | undefined, userEmail: string | undefined, userName: string | null | undefined) {
-  const [channel, setChannel] = useState<RealtimeChannel | null>(null);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const isSetupRef = useRef(false);
+  const userIdRef = useRef(userId);
+
+  // Update ref when userId changes
+  userIdRef.current = userId;
 
   useEffect(() => {
     if (!userId || !userEmail) return;
     
-    // Prevent multiple setups
+    // Prevent multiple setups for the same user
     if (isSetupRef.current && channelRef.current) return;
     isSetupRef.current = true;
 
@@ -28,40 +31,59 @@ export function usePresence(userId: string | undefined, userEmail: string | unde
 
     presenceChannel
       .on('presence', { event: 'sync' }, () => {
-        console.log('Presence synced for user:', userId);
+        console.log('Presence synced for user:', userIdRef.current);
       })
       .subscribe(async (status) => {
         console.log('Presence channel status:', status);
         if (status === 'SUBSCRIBED') {
-          const trackResult = await presenceChannel.track({
+          await presenceChannel.track({
             user_id: userId,
             user_email: userEmail,
             user_name: userName || userEmail.split('@')[0],
             online_at: new Date().toISOString(),
           });
-          console.log('Track result:', trackResult);
         }
       });
 
     channelRef.current = presenceChannel;
-    setChannel(presenceChannel);
 
     return () => {
-      console.log('Unsubscribing presence for user:', userId);
-      presenceChannel.unsubscribe();
-      channelRef.current = null;
+      console.log('Unsubscribing presence for user:', userIdRef.current);
+      if (channelRef.current) {
+        channelRef.current.unsubscribe();
+        channelRef.current = null;
+      }
       isSetupRef.current = false;
     };
-  }, [userId, userEmail]);
+  }, [userId, userEmail, userName]);
 
-  return channel;
+  return channelRef.current;
 }
 
 export function useOnlineUsers() {
   const [onlineUsers, setOnlineUsers] = useState<{ user_id: string; user_email: string; user_name: string; online_at: string }[]>([]);
   const [onlineCount, setOnlineCount] = useState(0);
+  const channelRef = useRef<RealtimeChannel | null>(null);
+  const isSetupRef = useRef(false);
+
+  const parsePresenceState = useCallback((state: Record<string, unknown[]>) => {
+    const users: { user_id: string; user_email: string; user_name: string; online_at: string }[] = [];
+    
+    Object.keys(state).forEach((key) => {
+      const presences = state[key] as unknown as { user_id: string; user_email: string; user_name: string; online_at: string }[];
+      if (presences && presences.length > 0) {
+        users.push(presences[0]);
+      }
+    });
+
+    return users;
+  }, []);
 
   useEffect(() => {
+    // Prevent multiple setups
+    if (isSetupRef.current && channelRef.current) return;
+    isSetupRef.current = true;
+
     console.log('Setting up admin presence listener');
 
     const presenceChannel = supabase.channel(PRESENCE_CHANNEL_NAME);
@@ -71,16 +93,9 @@ export function useOnlineUsers() {
         const state = presenceChannel.presenceState();
         console.log('Admin received presence state:', state);
         
-        const users: { user_id: string; user_email: string; user_name: string; online_at: string }[] = [];
-        
-        Object.keys(state).forEach((key) => {
-          const presences = state[key] as unknown as { user_id: string; user_email: string; user_name: string; online_at: string }[];
-          if (presences && presences.length > 0) {
-            users.push(presences[0]);
-          }
-        });
-
+        const users = parsePresenceState(state);
         console.log('Parsed online users:', users);
+        
         setOnlineUsers(users);
         setOnlineCount(users.length);
       })
@@ -94,11 +109,17 @@ export function useOnlineUsers() {
         console.log('Admin presence channel status:', status);
       });
 
+    channelRef.current = presenceChannel;
+
     return () => {
       console.log('Unsubscribing admin presence listener');
-      presenceChannel.unsubscribe();
+      if (channelRef.current) {
+        channelRef.current.unsubscribe();
+        channelRef.current = null;
+      }
+      isSetupRef.current = false;
     };
-  }, []);
+  }, [parsePresenceState]);
 
   return { onlineUsers, onlineCount };
 }
