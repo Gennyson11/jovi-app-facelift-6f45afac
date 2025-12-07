@@ -311,27 +311,24 @@ export default function Dashboard() {
 
         {/* News/Announcements Section */}
         {visibleNews.length > 0 && <div className="mb-6 space-y-3">
-            {visibleNews.map(newsItem => <div key={newsItem.id} className="relative rounded-xl bg-card border-2 border-transparent overflow-hidden" style={{
-          background: 'linear-gradient(hsl(var(--card)), hsl(var(--card))) padding-box, linear-gradient(90deg, hsl(180 100% 50%), hsl(280 100% 60%), hsl(140 100% 50%)) border-box'
-        }}>
+            {visibleNews.map(newsItem => <div key={newsItem.id} className="relative rounded-xl overflow-hidden border-2 border-orange-500/50 bg-gradient-to-r from-orange-500/20 via-amber-500/15 to-orange-500/20 shadow-lg shadow-orange-500/20">
                 <div className="p-4">
                   <div className="flex items-start gap-4">
-                    <div className="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-violet-500 to-purple-600 flex items-center justify-center shadow-lg shadow-purple-500/30">
-                      <Megaphone className="w-6 h-6 text-white" />
+                    <div className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg shadow-orange-500/40 animate-pulse">
+                      <Megaphone className="w-7 h-7 text-white" />
                     </div>
                     <div className="flex-1">
-                      <div className="inline-flex items-center gap-1 px-3 py-1 rounded-full bg-yellow-500/20 border border-yellow-500/50 mb-2">
-                        <span className="text-yellow-400 text-xs">📢</span>
-                        <span className="text-yellow-400 font-bold text-xs uppercase tracking-wide">AVISOS</span>
-                        <span className="text-yellow-400 text-xs">​</span>
+                      <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-orange-500/30 border border-orange-400 mb-2">
+                        <span className="text-orange-300 text-xs">🔔</span>
+                        <span className="text-orange-300 font-bold text-xs uppercase tracking-wide">AVISO IMPORTANTE</span>
                       </div>
-                      <h3 className="font-bold text-yellow-400 text-base mb-1">
+                      <h3 className="font-bold text-orange-400 text-lg mb-1">
                         {newsItem.title}
                       </h3>
-                      <p className="text-muted-foreground text-sm whitespace-pre-wrap">
+                      <p className="text-orange-100/90 text-sm whitespace-pre-wrap">
                         {newsItem.content}
                       </p>
-                      <p className="text-xs text-muted-foreground/60 mt-2 flex items-center gap-1">
+                      <p className="text-xs text-orange-300/60 mt-2 flex items-center gap-1">
                         📅 {new Date(newsItem.created_at).toLocaleDateString('pt-BR', {
                     day: '2-digit',
                     month: 'long',
