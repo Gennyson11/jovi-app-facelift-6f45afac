@@ -15,6 +15,14 @@ import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Ima
 
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
+type PlatformCategory = 'ai_tools' | 'streamings' | 'software' | 'bonus_courses';
+
+const CATEGORY_LABELS: Record<PlatformCategory, string> = {
+  'ai_tools': 'Ferramentas IAs & Variadas',
+  'streamings': 'Streamings',
+  'software': 'Software',
+  'bonus_courses': 'Bônus: Cursos',
+};
 
 interface Platform {
   id: string;
@@ -23,6 +31,7 @@ interface Platform {
   cover_image_url: string | null;
   status: StreamingStatus;
   access_type: AccessType;
+  category: PlatformCategory;
   login: string | null;
   password: string | null;
   website_url: string | null;
@@ -74,6 +83,7 @@ export default function Admin() {
   const [platformLogin, setPlatformLogin] = useState('');
   const [platformPassword, setPlatformPassword] = useState('');
   const [platformWebsiteUrl, setPlatformWebsiteUrl] = useState('');
+  const [platformCategory, setPlatformCategory] = useState<PlatformCategory>('streamings');
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -377,6 +387,7 @@ export default function Admin() {
       setPlatformLogin(platform.login || '');
       setPlatformPassword(platform.password || '');
       setPlatformWebsiteUrl(platform.website_url || '');
+      setPlatformCategory(platform.category || 'streamings');
     } else {
       setEditingPlatform(null);
       setPlatformName('');
@@ -386,6 +397,7 @@ export default function Admin() {
       setPlatformLogin('');
       setPlatformPassword('');
       setPlatformWebsiteUrl('');
+      setPlatformCategory('streamings');
     }
     setPlatformDialogOpen(true);
   };
@@ -405,6 +417,7 @@ export default function Admin() {
       name: platformName,
       status: platformStatus,
       access_type: platformAccessType,
+      category: platformCategory,
       cover_image_url: platformCoverUrl || null,
       login: platformAccessType === 'credentials' ? (platformLogin || null) : null,
       password: platformAccessType === 'credentials' ? (platformPassword || null) : null,
@@ -509,7 +522,7 @@ export default function Admin() {
           <TabsContent value="platforms">
             <Card className="border-border">
               <CardHeader className="flex flex-row items-center justify-between">
-                <CardTitle className="text-foreground">Plataformas de Streaming</CardTitle>
+                <CardTitle className="text-foreground">Gerenciar Plataformas</CardTitle>
                 <Button onClick={() => openPlatformDialog()} size="sm">
                   <Plus className="w-4 h-4 mr-2" />
                   Nova Plataforma
@@ -522,8 +535,8 @@ export default function Admin() {
                       <TableRow>
                         <TableHead>Capa</TableHead>
                         <TableHead>Nome</TableHead>
+                        <TableHead>Categoria</TableHead>
                         <TableHead>Tipo</TableHead>
-                        <TableHead>Login/Link</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
@@ -545,6 +558,11 @@ export default function Admin() {
                             )}
                           </TableCell>
                           <TableCell className="font-medium">{platform.name}</TableCell>
+                          <TableCell>
+                            <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-secondary text-secondary-foreground">
+                              {CATEGORY_LABELS[platform.category] || platform.category}
+                            </span>
+                          </TableCell>
                           <TableCell>
                             <span className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium ${
                               platform.access_type === 'credentials' 
@@ -867,14 +885,29 @@ export default function Admin() {
           </DialogHeader>
           <div className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="platform-name">Nome da Streaming *</Label>
+              <Label htmlFor="platform-name">Nome da Plataforma *</Label>
               <Input
                 id="platform-name"
                 value={platformName}
                 onChange={(e) => setPlatformName(e.target.value)}
-                placeholder="Ex: Netflix"
+                placeholder="Ex: Netflix, ChatGPT, Canva..."
                 className="bg-background/50 border-border"
               />
+            </div>
+
+            {/* Category Selection */}
+            <div className="space-y-2">
+              <Label htmlFor="platform-category">Categoria *</Label>
+              <select
+                id="platform-category"
+                value={platformCategory}
+                onChange={(e) => setPlatformCategory(e.target.value as PlatformCategory)}
+                className="w-full h-10 px-3 rounded-md border border-input bg-background text-foreground"
+              >
+                {Object.entries(CATEGORY_LABELS).map(([value, label]) => (
+                  <option key={value} value={value}>{label}</option>
+                ))}
+              </select>
             </div>
 
             {/* Access Type Selection */}
