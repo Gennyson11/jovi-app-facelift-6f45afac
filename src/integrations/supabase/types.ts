@@ -85,6 +85,7 @@ export type Database = {
       streaming_platforms: {
         Row: {
           access_type: Database["public"]["Enums"]["access_type"]
+          category: Database["public"]["Enums"]["platform_category"]
           cover_image_url: string | null
           created_at: string
           icon_url: string | null
@@ -98,6 +99,7 @@ export type Database = {
         }
         Insert: {
           access_type?: Database["public"]["Enums"]["access_type"]
+          category?: Database["public"]["Enums"]["platform_category"]
           cover_image_url?: string | null
           created_at?: string
           icon_url?: string | null
@@ -111,6 +113,7 @@ export type Database = {
         }
         Update: {
           access_type?: Database["public"]["Enums"]["access_type"]
+          category?: Database["public"]["Enums"]["platform_category"]
           cover_image_url?: string | null
           created_at?: string
           icon_url?: string | null
@@ -197,6 +200,11 @@ export type Database = {
     Enums: {
       access_type: "credentials" | "link_only"
       app_role: "admin" | "user"
+      platform_category:
+        | "ai_tools"
+        | "streamings"
+        | "software"
+        | "bonus_courses"
       streaming_status: "online" | "maintenance"
     }
     CompositeTypes: {
@@ -327,6 +335,12 @@ export const Constants = {
     Enums: {
       access_type: ["credentials", "link_only"],
       app_role: ["admin", "user"],
+      platform_category: [
+        "ai_tools",
+        "streamings",
+        "software",
+        "bonus_courses",
+      ],
       streaming_status: ["online", "maintenance"],
     },
   },

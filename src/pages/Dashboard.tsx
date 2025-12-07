@@ -9,6 +9,16 @@ import { Tv, LogOut, Eye, EyeOff, Copy, Loader2, CheckCircle, AlertTriangle, Ext
 
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
+type PlatformCategory = 'ai_tools' | 'streamings' | 'software' | 'bonus_courses';
+
+const CATEGORY_CONFIG: Record<PlatformCategory, { label: string; icon: string; color: string }> = {
+  'ai_tools': { label: 'Ferramentas IAs & Variadas', icon: '🤖', color: 'from-purple-500 to-pink-500' },
+  'streamings': { label: 'Streamings', icon: '📺', color: 'from-red-500 to-orange-500' },
+  'software': { label: 'Software', icon: '💻', color: 'from-blue-500 to-cyan-500' },
+  'bonus_courses': { label: 'Bônus: Cursos', icon: '🎓', color: 'from-green-500 to-emerald-500' },
+};
+
+const CATEGORY_ORDER: PlatformCategory[] = ['ai_tools', 'streamings', 'software', 'bonus_courses'];
 
 interface Platform {
   id: string;
@@ -17,6 +27,7 @@ interface Platform {
   cover_image_url: string | null;
   status: StreamingStatus;
   access_type: AccessType;
+  category: PlatformCategory;
   login: string | null;
   password: string | null;
   website_url: string | null;
@@ -322,137 +333,153 @@ export default function Dashboard() {
           </div>
         )}
 
-        <div className="mb-8">
-          <h2 className="text-2xl font-display font-bold text-foreground mb-2">
-            Plataformas de Streaming
-          </h2>
-          <p className="text-muted-foreground">
-            {hasAccess 
-              ? 'Clique em uma plataforma para visualizar as credenciais ou acessar o link'
-              : 'As plataformas estarão disponíveis após a liberação do seu acesso'
-            }
-          </p>
-        </div>
-
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {platforms.map((platform) => {
-            const hasPlatformAccess = platform.access_type === 'link_only' 
-              ? !!platform.website_url 
-              : !!(platform.login && platform.password);
-            const isMaintenance = platform.status === 'maintenance';
-            const isBlocked = !hasPlatformSpecificAccess(platform.id);
-            
-            return (
-              <div 
-                key={platform.id}
-                className={`group cursor-pointer transition-all duration-300 ${
-                  !hasPlatformAccess || isMaintenance || isBlocked ? 'opacity-60' : ''
-                }`}
-                onClick={() => {
-                  if (isBlocked) {
-                    window.open('https://bit.ly/whatsapp-suportejt', '_blank');
-                  } else {
-                    handlePlatformClick(platform);
-                  }
-                }}
-              >
-                {/* Card Container */}
-                <div className={`bg-card border border-border rounded-xl overflow-hidden transition-all duration-300 ${
-                  isBlocked 
-                    ? 'grayscale hover:grayscale-0 hover:border-green-500/50' 
-                    : 'hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10'
-                }`}>
-                  {/* Cover Image Area */}
-                  <div className="relative aspect-video bg-gradient-to-br from-secondary to-background">
-                    {platform.cover_image_url ? (
-                      <img 
-                        src={platform.cover_image_url} 
-                        alt={platform.name}
-                        className="w-full h-full object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full flex items-center justify-center">
-                        <span className="text-6xl">{platformIcons[platform.name] || '📺'}</span>
-                      </div>
-                    )}
-
-                    {/* Blocked Overlay */}
-                    {isBlocked && (
-                      <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center gap-3 group-hover:bg-green-900/80 transition-colors">
-                        <Lock className="w-8 h-8 text-white/80 group-hover:hidden" />
-                        <ExternalLink className="w-8 h-8 text-green-400 hidden group-hover:block animate-pulse" />
-                        <div className="bg-green-500 px-4 py-2 rounded-lg shadow-lg shadow-green-500/30">
-                          <p className="text-white text-sm font-bold text-center">
-                            🔓 Clique aqui para adquirir seu acesso
-                          </p>
-                        </div>
-                      </div>
-                    )}
-
-                    {/* Access Type Badge */}
-                    {!isBlocked && (
-                      <div className={`absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold backdrop-blur-sm ${
-                        platform.access_type === 'credentials' 
-                          ? 'bg-primary/20 text-primary border border-primary/30' 
-                          : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
-                      }`}>
-                        {platform.access_type === 'credentials' ? (
-                          <KeyRound className="w-3 h-3" />
-                        ) : (
-                          <Link className="w-3 h-3" />
-                        )}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* Status Bar - Below Image */}
-                  <div className={`w-full py-2 px-4 flex items-center justify-center gap-2 text-sm font-bold ${
-                    platform.status === 'online' 
-                      ? 'bg-emerald-500 text-white' 
-                      : 'bg-yellow-500 text-black'
-                  }`}>
-                    {platform.status === 'online' ? (
-                      <CheckCircle className="w-4 h-4" />
-                    ) : (
-                      <AlertTriangle className="w-4 h-4" />
-                    )}
-                    {platform.status === 'online' ? 'ONLINE' : 'MANUTENÇÃO'}
-                  </div>
-
-                  {/* Footer */}
-                  <div className="p-4 flex items-center justify-between">
-                    <div>
-                      <h3 className="font-display font-bold text-foreground uppercase tracking-wide">
-                        {platform.name}
-                      </h3>
-                      <p className="text-xs text-muted-foreground mt-0.5">
-                        {isBlocked 
-                          ? 'Acesso bloqueado'
-                          : isMaintenance 
-                            ? 'Em manutenção' 
-                            : hasPlatformAccess 
-                              ? platform.access_type === 'link_only' 
-                                ? 'Clique para acessar' 
-                                : 'Clique para ver credencial'
-                              : 'Sem acesso configurado'
-                        }
-                      </p>
-                    </div>
-                    {!isBlocked && hasPlatformAccess && !isMaintenance && (
-                      <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                        {platform.access_type === 'link_only' ? (
-                          <ExternalLink className="w-5 h-5 text-primary" />
-                        ) : (
-                          <Eye className="w-5 h-5 text-primary" />
-                        )}
-                      </div>
-                    )}
-                  </div>
+        {/* Categories */}
+        {CATEGORY_ORDER.map((categoryKey) => {
+          const categoryPlatforms = platforms.filter(p => p.category === categoryKey);
+          if (categoryPlatforms.length === 0) return null;
+          
+          const config = CATEGORY_CONFIG[categoryKey];
+          
+          return (
+            <div key={categoryKey} className="mb-10">
+              {/* Category Header */}
+              <div className="flex items-center gap-3 mb-6">
+                <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${config.color} flex items-center justify-center shadow-lg`}>
+                  <span className="text-xl">{config.icon}</span>
+                </div>
+                <div>
+                  <h2 className="text-xl font-display font-bold text-foreground">
+                    {config.label}
+                  </h2>
+                  <p className="text-sm text-muted-foreground">
+                    {categoryPlatforms.length} {categoryPlatforms.length === 1 ? 'plataforma' : 'plataformas'}
+                  </p>
                 </div>
               </div>
-            );
-          })}
-        </div>
+
+              {/* Platforms Grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {categoryPlatforms.map((platform) => {
+                  const hasPlatformAccess = platform.access_type === 'link_only' 
+                    ? !!platform.website_url 
+                    : !!(platform.login && platform.password);
+                  const isMaintenance = platform.status === 'maintenance';
+                  const isBlocked = !hasPlatformSpecificAccess(platform.id);
+                  
+                  return (
+                    <div 
+                      key={platform.id}
+                      className={`group cursor-pointer transition-all duration-300 ${
+                        !hasPlatformAccess || isMaintenance || isBlocked ? 'opacity-60' : ''
+                      }`}
+                      onClick={() => {
+                        if (isBlocked) {
+                          window.open('https://bit.ly/whatsapp-suportejt', '_blank');
+                        } else {
+                          handlePlatformClick(platform);
+                        }
+                      }}
+                    >
+                      {/* Card Container */}
+                      <div className={`bg-card border border-border rounded-xl overflow-hidden transition-all duration-300 ${
+                        isBlocked 
+                          ? 'grayscale hover:grayscale-0 hover:border-green-500/50' 
+                          : 'hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10'
+                      }`}>
+                        {/* Cover Image Area */}
+                        <div className="relative aspect-video bg-gradient-to-br from-secondary to-background">
+                          {platform.cover_image_url ? (
+                            <img 
+                              src={platform.cover_image_url} 
+                              alt={platform.name}
+                              className="w-full h-full object-cover"
+                            />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                              <span className="text-6xl">{platformIcons[platform.name] || config.icon}</span>
+                            </div>
+                          )}
+
+                          {/* Blocked Overlay */}
+                          {isBlocked && (
+                            <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center gap-3 group-hover:bg-green-900/80 transition-colors">
+                              <Lock className="w-8 h-8 text-white/80 group-hover:hidden" />
+                              <ExternalLink className="w-8 h-8 text-green-400 hidden group-hover:block animate-pulse" />
+                              <div className="bg-green-500 px-4 py-2 rounded-lg shadow-lg shadow-green-500/30">
+                                <p className="text-white text-sm font-bold text-center">
+                                  🔓 Clique aqui para adquirir seu acesso
+                                </p>
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Access Type Badge */}
+                          {!isBlocked && (
+                            <div className={`absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold backdrop-blur-sm ${
+                              platform.access_type === 'credentials' 
+                                ? 'bg-primary/20 text-primary border border-primary/30' 
+                                : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'
+                            }`}>
+                              {platform.access_type === 'credentials' ? (
+                                <KeyRound className="w-3 h-3" />
+                              ) : (
+                                <Link className="w-3 h-3" />
+                              )}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Status Bar - Below Image */}
+                        <div className={`w-full py-2 px-4 flex items-center justify-center gap-2 text-sm font-bold ${
+                          platform.status === 'online' 
+                            ? 'bg-emerald-500 text-white' 
+                            : 'bg-yellow-500 text-black'
+                        }`}>
+                          {platform.status === 'online' ? (
+                            <CheckCircle className="w-4 h-4" />
+                          ) : (
+                            <AlertTriangle className="w-4 h-4" />
+                          )}
+                          {platform.status === 'online' ? 'ONLINE' : 'MANUTENÇÃO'}
+                        </div>
+
+                        {/* Footer */}
+                        <div className="p-4 flex items-center justify-between">
+                          <div>
+                            <h3 className="font-display font-bold text-foreground uppercase tracking-wide">
+                              {platform.name}
+                            </h3>
+                            <p className="text-xs text-muted-foreground mt-0.5">
+                              {isBlocked 
+                                ? 'Acesso bloqueado'
+                                : isMaintenance 
+                                  ? 'Em manutenção' 
+                                  : hasPlatformAccess 
+                                    ? platform.access_type === 'link_only' 
+                                      ? 'Clique para acessar' 
+                                      : 'Clique para ver credencial'
+                                    : 'Sem acesso configurado'
+                              }
+                            </p>
+                          </div>
+                          {!isBlocked && hasPlatformAccess && !isMaintenance && (
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                              {platform.access_type === 'link_only' ? (
+                                <ExternalLink className="w-5 h-5 text-primary" />
+                              ) : (
+                                <Eye className="w-5 h-5 text-primary" />
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          );
+        })}
       </main>
 
       {/* Credential Dialog - Only for credentials type */}
