@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,12 +10,16 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { Tv, LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield } from 'lucide-react';
+import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle } from 'lucide-react';
+
+type StreamingStatus = 'online' | 'maintenance';
 
 interface Platform {
   id: string;
   name: string;
   icon_url: string | null;
+  cover_image_url: string | null;
+  status: StreamingStatus;
 }
 
 interface Credential {
@@ -36,6 +40,10 @@ export default function Admin() {
   const [platformDialogOpen, setPlatformDialogOpen] = useState(false);
   const [editingPlatform, setEditingPlatform] = useState<Platform | null>(null);
   const [platformName, setPlatformName] = useState('');
+  const [platformStatus, setPlatformStatus] = useState<StreamingStatus>('online');
+  const [platformCoverUrl, setPlatformCoverUrl] = useState('');
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   
   // Credential Dialog
   const [credentialDialogOpen, setCredentialDialogOpen] = useState(false);
@@ -71,8 +79,8 @@ export default function Admin() {
       supabase.from('streaming_credentials').select('*, platform:streaming_platforms(*)'),
     ]);
 
-    if (platformsRes.data) setPlatforms(platformsRes.data);
-    if (credentialsRes.data) setCredentials(credentialsRes.data);
+    if (platformsRes.data) setPlatforms(platformsRes.data as Platform[]);
+    if (credentialsRes.data) setCredentials(credentialsRes.data as Credential[]);
     setLoading(false);
   };
 
@@ -81,14 +89,51 @@ export default function Admin() {
     navigate('/auth');
   };
 
+  // Image upload
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({ title: 'Erro', description: 'Selecione um arquivo de imagem', variant: 'destructive' });
+      return;
+    }
+
+    setUploadingImage(true);
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${Date.now()}.${fileExt}`;
+
+    const { data, error } = await supabase.storage
+      .from('streaming-covers')
+      .upload(fileName, file);
+
+    if (error) {
+      toast({ title: 'Erro', description: 'Falha ao fazer upload da imagem', variant: 'destructive' });
+      setUploadingImage(false);
+      return;
+    }
+
+    const { data: urlData } = supabase.storage
+      .from('streaming-covers')
+      .getPublicUrl(data.path);
+
+    setPlatformCoverUrl(urlData.publicUrl);
+    setUploadingImage(false);
+    toast({ title: 'Sucesso', description: 'Imagem carregada' });
+  };
+
   // Platform CRUD
   const openPlatformDialog = (platform?: Platform) => {
     if (platform) {
       setEditingPlatform(platform);
       setPlatformName(platform.name);
+      setPlatformStatus(platform.status || 'online');
+      setPlatformCoverUrl(platform.cover_image_url || '');
     } else {
       setEditingPlatform(null);
       setPlatformName('');
+      setPlatformStatus('online');
+      setPlatformCoverUrl('');
     }
     setPlatformDialogOpen(true);
   };
@@ -99,10 +144,16 @@ export default function Admin() {
       return;
     }
 
+    const platformData = {
+      name: platformName,
+      status: platformStatus,
+      cover_image_url: platformCoverUrl || null,
+    };
+
     if (editingPlatform) {
       const { error } = await supabase
         .from('streaming_platforms')
-        .update({ name: platformName })
+        .update(platformData)
         .eq('id', editingPlatform.id);
       
       if (error) {
@@ -113,7 +164,7 @@ export default function Admin() {
     } else {
       const { error } = await supabase
         .from('streaming_platforms')
-        .insert({ name: platformName });
+        .insert(platformData);
       
       if (error) {
         toast({ title: 'Erro', description: 'Falha ao criar plataforma', variant: 'destructive' });
@@ -343,14 +394,43 @@ export default function Admin() {
                 <Table>
                   <TableHeader>
                     <TableRow>
+                      <TableHead>Capa</TableHead>
                       <TableHead>Nome</TableHead>
+                      <TableHead>Status</TableHead>
                       <TableHead className="text-right">Ações</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {platforms.map((platform) => (
                       <TableRow key={platform.id}>
+                        <TableCell>
+                          {platform.cover_image_url ? (
+                            <img 
+                              src={platform.cover_image_url} 
+                              alt={platform.name}
+                              className="w-12 h-12 object-cover rounded-md"
+                            />
+                          ) : (
+                            <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center">
+                              <Image className="w-5 h-5 text-muted-foreground" />
+                            </div>
+                          )}
+                        </TableCell>
                         <TableCell className="font-medium">{platform.name}</TableCell>
+                        <TableCell>
+                          <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                            platform.status === 'online' 
+                              ? 'bg-green-500/10 text-green-500' 
+                              : 'bg-yellow-500/10 text-yellow-500'
+                          }`}>
+                            {platform.status === 'online' ? (
+                              <CheckCircle className="w-3 h-3" />
+                            ) : (
+                              <AlertTriangle className="w-3 h-3" />
+                            )}
+                            {platform.status === 'online' ? 'Online' : 'Manutenção'}
+                          </span>
+                        </TableCell>
                         <TableCell className="text-right">
                           <div className="flex justify-end gap-2">
                             <Button
@@ -382,7 +462,7 @@ export default function Admin() {
 
       {/* Platform Dialog */}
       <Dialog open={platformDialogOpen} onOpenChange={setPlatformDialogOpen}>
-        <DialogContent className="bg-card border-border">
+        <DialogContent className="bg-card border-border max-w-md">
           <DialogHeader>
             <DialogTitle className="text-foreground">
               {editingPlatform ? 'Editar Plataforma' : 'Nova Plataforma'}
@@ -398,6 +478,63 @@ export default function Admin() {
                 placeholder="Ex: Netflix"
                 className="bg-background/50 border-border"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="platform-status">Status</Label>
+              <select
+                id="platform-status"
+                value={platformStatus}
+                onChange={(e) => setPlatformStatus(e.target.value as StreamingStatus)}
+                className="w-full h-10 px-3 rounded-md border border-input bg-background text-foreground"
+              >
+                <option value="online">Online</option>
+                <option value="maintenance">Manutenção</option>
+              </select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Imagem de Capa</Label>
+              <div className="flex flex-col gap-3">
+                {platformCoverUrl && (
+                  <div className="relative">
+                    <img 
+                      src={platformCoverUrl} 
+                      alt="Preview" 
+                      className="w-full h-32 object-cover rounded-md"
+                    />
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="absolute top-2 right-2 h-6 w-6"
+                      onClick={() => setPlatformCoverUrl('')}
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </Button>
+                  </div>
+                )}
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={handleImageUpload}
+                  className="hidden"
+                />
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => fileInputRef.current?.click()}
+                  disabled={uploadingImage}
+                  className="w-full"
+                >
+                  {uploadingImage ? (
+                    <Loader2 className="w-4 h-4 animate-spin mr-2" />
+                  ) : (
+                    <Upload className="w-4 h-4 mr-2" />
+                  )}
+                  {uploadingImage ? 'Enviando...' : 'Fazer upload de imagem'}
+                </Button>
+              </div>
             </div>
           </div>
           <DialogFooter>

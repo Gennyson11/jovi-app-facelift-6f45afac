@@ -51,24 +51,30 @@ export type Database = {
       }
       streaming_platforms: {
         Row: {
+          cover_image_url: string | null
           created_at: string
           icon_url: string | null
           id: string
           name: string
+          status: Database["public"]["Enums"]["streaming_status"]
           updated_at: string
         }
         Insert: {
+          cover_image_url?: string | null
           created_at?: string
           icon_url?: string | null
           id?: string
           name: string
+          status?: Database["public"]["Enums"]["streaming_status"]
           updated_at?: string
         }
         Update: {
+          cover_image_url?: string | null
           created_at?: string
           icon_url?: string | null
           id?: string
           name?: string
+          status?: Database["public"]["Enums"]["streaming_status"]
           updated_at?: string
         }
         Relationships: []
@@ -109,6 +115,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      streaming_status: "online" | "maintenance"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -237,6 +244,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      streaming_status: ["online", "maintenance"],
     },
   },
 } as const
