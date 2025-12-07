@@ -72,27 +72,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Ignore TOKEN_REFRESHED and INITIAL_SESSION to prevent page reloads
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, newSession) => {
-        if (!isMounted) return;
-        
-        // Only handle explicit auth changes
-        if (event === 'SIGNED_IN') {
-          // Only update if user actually changed (new login)
-          if (newSession?.user?.id !== user?.id) {
-            setSession(newSession);
-            setUser(newSession?.user ?? null);
-            
-            if (newSession?.user) {
-              fetchUserRole(newSession.user.id).then(userRole => {
-                if (isMounted) setRole(userRole);
-              });
-            }
-          }
-        } else if (event === 'SIGNED_OUT') {
+        // Only handle explicit auth changes - ignore everything else
+        if (event === 'SIGNED_OUT') {
           setSession(null);
           setUser(null);
           setRole(null);
+        } else if (event === 'SIGNED_IN' && newSession?.user) {
+          // Only update if this is actually a new user login
+          setSession(newSession);
+          setUser(newSession.user);
+          
+          // Defer role fetch to avoid deadlock
+          setTimeout(() => {
+            fetchUserRole(newSession.user.id).then(userRole => {
+              setRole(userRole);
+            });
+          }, 0);
         }
         // Explicitly ignore: TOKEN_REFRESHED, INITIAL_SESSION, PASSWORD_RECOVERY, USER_UPDATED
+        // These events should NOT trigger any state updates or re-renders
       }
     );
 
