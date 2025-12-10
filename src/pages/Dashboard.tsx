@@ -92,6 +92,9 @@ export default function Dashboard() {
     toast
   } = useToast();
 
+  // Track user presence for real-time monitoring
+  usePresence(user?.id, user?.email, user?.email?.split('@')[0] || null);
+
   // Ref to track if data has been fetched for the current user
   const hasFetchedRef = useRef(false);
   const currentUserIdRef = useRef<string | null>(null);
