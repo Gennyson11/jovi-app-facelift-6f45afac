@@ -4,6 +4,13 @@ import { RealtimeChannel } from '@supabase/supabase-js';
 
 const PRESENCE_CHANNEL_NAME = 'jovitools-online-users';
 
+interface OnlineUser {
+  user_id: string;
+  user_email: string;
+  user_name: string;
+  online_at: string;
+}
+
 export function usePresence(userId: string | undefined, userEmail: string | undefined, userName: string | null | undefined) {
   const channelRef = useRef<RealtimeChannel | null>(null);
   const isSetupRef = useRef(false);
@@ -36,12 +43,13 @@ export function usePresence(userId: string | undefined, userEmail: string | unde
       .subscribe(async (status) => {
         console.log('Presence channel status:', status);
         if (status === 'SUBSCRIBED') {
-          await presenceChannel.track({
+          const trackResult = await presenceChannel.track({
             user_id: userId,
             user_email: userEmail,
             user_name: userName || userEmail.split('@')[0],
             online_at: new Date().toISOString(),
           });
+          console.log('Track result:', trackResult);
         }
       });
 
@@ -61,18 +69,22 @@ export function usePresence(userId: string | undefined, userEmail: string | unde
 }
 
 export function useOnlineUsers() {
-  const [onlineUsers, setOnlineUsers] = useState<{ user_id: string; user_email: string; user_name: string; online_at: string }[]>([]);
+  const [onlineUsers, setOnlineUsers] = useState<OnlineUser[]>([]);
   const [onlineCount, setOnlineCount] = useState(0);
   const channelRef = useRef<RealtimeChannel | null>(null);
   const isSetupRef = useRef(false);
 
   const parsePresenceState = useCallback((state: Record<string, unknown[]>) => {
-    const users: { user_id: string; user_email: string; user_name: string; online_at: string }[] = [];
+    const users: OnlineUser[] = [];
     
     Object.keys(state).forEach((key) => {
-      const presences = state[key] as unknown as { user_id: string; user_email: string; user_name: string; online_at: string }[];
+      const presences = state[key] as unknown as OnlineUser[];
       if (presences && presences.length > 0) {
-        users.push(presences[0]);
+        // Filter out listener entries (admin observer)
+        const userPresence = presences[0];
+        if (userPresence.user_id && !key.startsWith('admin-listener')) {
+          users.push(userPresence);
+        }
       }
     });
 
@@ -86,7 +98,14 @@ export function useOnlineUsers() {
 
     console.log('Setting up admin presence listener');
 
-    const presenceChannel = supabase.channel(PRESENCE_CHANNEL_NAME);
+    // Admin listener needs to join the same channel to see presence
+    const presenceChannel = supabase.channel(PRESENCE_CHANNEL_NAME, {
+      config: {
+        presence: {
+          key: `admin-listener-${Date.now()}`,
+        },
+      },
+    });
 
     presenceChannel
       .on('presence', { event: 'sync' }, () => {
@@ -105,8 +124,15 @@ export function useOnlineUsers() {
       .on('presence', { event: 'leave' }, ({ key, leftPresences }) => {
         console.log('User left:', key, leftPresences);
       })
-      .subscribe((status) => {
+      .subscribe(async (status) => {
         console.log('Admin presence channel status:', status);
+        if (status === 'SUBSCRIBED') {
+          // Track as listener to properly join the presence channel
+          await presenceChannel.track({
+            is_listener: true,
+            online_at: new Date().toISOString(),
+          });
+        }
       });
 
     channelRef.current = presenceChannel;
