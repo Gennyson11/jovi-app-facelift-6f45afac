@@ -108,6 +108,10 @@ export default function Admin() {
   const [platformCategory, setPlatformCategory] = useState<PlatformCategory>('streamings');
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  
+  // New platform access distribution
+  const [accessDistribution, setAccessDistribution] = useState<'none' | 'all_active' | 'select'>('none');
+  const [selectedUsersForAccess, setSelectedUsersForAccess] = useState<string[]>([]);
 
   // User Permissions Dialog
   const [permissionsDialogOpen, setPermissionsDialogOpen] = useState(false);
@@ -479,6 +483,16 @@ export default function Admin() {
     });
   };
 
+  // Get active users (users with has_access = true and not expired)
+  const getActiveUsers = () => {
+    const now = new Date();
+    return users.filter(u => {
+      if (!u.has_access) return false;
+      if (!u.access_expires_at) return true; // Lifetime access
+      return new Date(u.access_expires_at) > now;
+    });
+  };
+
   // Platform CRUD
   const openPlatformDialog = (platform?: Platform) => {
     if (platform) {
@@ -491,6 +505,9 @@ export default function Admin() {
       setPlatformPassword(platform.password || '');
       setPlatformWebsiteUrl(platform.website_url || '');
       setPlatformCategory(platform.category || 'streamings');
+      // Don't show access distribution when editing
+      setAccessDistribution('none');
+      setSelectedUsersForAccess([]);
     } else {
       setEditingPlatform(null);
       setPlatformName('');
@@ -501,6 +518,9 @@ export default function Admin() {
       setPlatformPassword('');
       setPlatformWebsiteUrl('');
       setPlatformCategory('streamings');
+      // Reset access distribution for new platforms
+      setAccessDistribution('none');
+      setSelectedUsersForAccess([]);
     }
     setPlatformDialogOpen(true);
   };
@@ -549,8 +569,9 @@ export default function Admin() {
       });
     } else {
       const {
+        data: newPlatform,
         error
-      } = await supabase.from('streaming_platforms').insert(platformData);
+      } = await supabase.from('streaming_platforms').insert(platformData).select().single();
       if (error) {
         toast({
           title: 'Erro',
@@ -559,10 +580,49 @@ export default function Admin() {
         });
         return;
       }
-      toast({
-        title: 'Sucesso',
-        description: 'Plataforma criada'
-      });
+      
+      // Grant access to users based on distribution selection
+      if (newPlatform && accessDistribution !== 'none') {
+        const activeUsers = getActiveUsers();
+        const usersToGrant = accessDistribution === 'all_active' 
+          ? activeUsers.map(u => u.id)
+          : selectedUsersForAccess;
+        
+        if (usersToGrant.length > 0) {
+          const accessEntries = usersToGrant.map(userId => ({
+            user_id: userId,
+            platform_id: newPlatform.id
+          }));
+          
+          const { error: accessError } = await supabase
+            .from('user_platform_access')
+            .insert(accessEntries);
+          
+          if (accessError) {
+            console.error('Error granting access:', accessError);
+            toast({
+              title: 'Aviso',
+              description: `Plataforma criada, mas houve erro ao distribuir acessos`,
+              variant: 'destructive'
+            });
+          } else {
+            toast({
+              title: 'Sucesso',
+              description: `Plataforma criada e acesso liberado para ${usersToGrant.length} usuário(s)`
+            });
+          }
+        } else {
+          toast({
+            title: 'Sucesso',
+            description: 'Plataforma criada'
+          });
+        }
+      } else {
+        toast({
+          title: 'Sucesso',
+          description: 'Plataforma criada'
+        });
+      }
     }
     setPlatformDialogOpen(false);
     fetchData();
@@ -1220,6 +1280,141 @@ export default function Admin() {
                 </Button>
               </div>
             </div>
+
+            {/* Access Distribution - Only show when creating new platform */}
+            {!editingPlatform && (
+              <div className="space-y-3 border-t border-border pt-4">
+                <Label className="text-sm font-medium flex items-center gap-2">
+                  <Users className="w-4 h-4" />
+                  Distribuir Acesso aos Usuários
+                </Label>
+                <div className="grid grid-cols-1 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAccessDistribution('none');
+                      setSelectedUsersForAccess([]);
+                    }}
+                    className={`p-3 rounded-lg border text-left transition-all ${
+                      accessDistribution === 'none'
+                        ? 'border-primary bg-primary/10 text-primary'
+                        : 'border-border bg-background/50 text-muted-foreground hover:border-primary/50'
+                    }`}
+                  >
+                    <span className="text-sm font-medium">Não distribuir automaticamente</span>
+                    <p className="text-xs opacity-70">Você poderá liberar o acesso manualmente depois</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAccessDistribution('all_active');
+                      setSelectedUsersForAccess([]);
+                    }}
+                    className={`p-3 rounded-lg border text-left transition-all ${
+                      accessDistribution === 'all_active'
+                        ? 'border-green-500 bg-green-500/10 text-green-500'
+                        : 'border-border bg-background/50 text-muted-foreground hover:border-green-500/50'
+                    }`}
+                  >
+                    <span className="text-sm font-medium flex items-center gap-2">
+                      <UserCheck className="w-4 h-4" />
+                      Liberar para todos os usuários ativos ({getActiveUsers().length})
+                    </span>
+                    <p className="text-xs opacity-70">Usuários com plano ativo receberão acesso automaticamente</p>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setAccessDistribution('select');
+                      setSelectedUsersForAccess([]);
+                    }}
+                    className={`p-3 rounded-lg border text-left transition-all ${
+                      accessDistribution === 'select'
+                        ? 'border-purple-500 bg-purple-500/10 text-purple-400'
+                        : 'border-border bg-background/50 text-muted-foreground hover:border-purple-500/50'
+                    }`}
+                  >
+                    <span className="text-sm font-medium">Selecionar usuários específicos</span>
+                    <p className="text-xs opacity-70">Escolha manualmente quem receberá acesso</p>
+                  </button>
+                </div>
+
+                {/* User selection list - only show when 'select' is chosen */}
+                {accessDistribution === 'select' && (
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <p className="text-sm text-muted-foreground">
+                        Selecione os usuários:
+                      </p>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setSelectedUsersForAccess(getActiveUsers().map(u => u.id))}
+                        >
+                          <CheckSquare className="w-4 h-4 mr-2" />
+                          Todos ativos
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setSelectedUsersForAccess([])}
+                        >
+                          Limpar
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="border border-border rounded-lg divide-y divide-border max-h-[200px] overflow-y-auto">
+                      {users.map(user => {
+                        const isActive = getActiveUsers().some(u => u.id === user.id);
+                        return (
+                          <label
+                            key={user.id}
+                            className="flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors"
+                          >
+                            <Checkbox
+                              checked={selectedUsersForAccess.includes(user.id)}
+                              onCheckedChange={() => {
+                                setSelectedUsersForAccess(prev =>
+                                  prev.includes(user.id)
+                                    ? prev.filter(id => id !== user.id)
+                                    : [...prev, user.id]
+                                );
+                              }}
+                            />
+                            <div className="flex-1 min-w-0">
+                              <span className="font-medium text-sm truncate block">
+                                {user.name || user.email}
+                              </span>
+                              <span className="text-xs text-muted-foreground truncate block">
+                                {user.email}
+                              </span>
+                            </div>
+                            <span
+                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${
+                                isActive
+                                  ? 'bg-green-500/10 text-green-500'
+                                  : 'bg-red-500/10 text-red-500'
+                              }`}
+                            >
+                              {isActive ? 'Ativo' : 'Inativo'}
+                            </span>
+                          </label>
+                        );
+                      })}
+                      {users.length === 0 && (
+                        <p className="text-center text-muted-foreground py-8">
+                          Nenhum usuário cadastrado
+                        </p>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground text-center">
+                      {selectedUsersForAccess.length} usuário(s) selecionado(s)
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setPlatformDialogOpen(false)}>
