@@ -58,7 +58,7 @@ const HeroSection = ({
 
         {/* Subtitle */}
         <p className="text-xl md:text-2xl text-foreground mb-2">
-          Tenha <span className="text-accent font-semibold">+115 ferramentas premium</span> de IA e Marketing Digital
+          Tenha <span className="text-accent font-semibold">mais de +50 ferramentas premium</span> de IA e Marketing Digital
         </p>
         <p className="text-lg md:text-xl text-foreground mb-4">
           em um só acesso, pagando apenas <span className="text-primary font-semibold">R$37,00/mês</span>
