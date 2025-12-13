@@ -2,7 +2,7 @@ import { Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const benefits = [
-  "Acesso a +115 ferramentas premium",
+  "Acesso a mais de +50 ferramentas premium",
   "Inteligências Artificiais de última geração",
   "Ferramentas de espionagem e mineração",
   "Design e edição profissional ilimitados",
