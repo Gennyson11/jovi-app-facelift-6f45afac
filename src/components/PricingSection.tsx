@@ -184,7 +184,7 @@ const PricingSection = () => {
               variant="default"
               size="lg"
               className="w-full mt-8 bg-primary hover:bg-primary/90 text-primary-foreground font-display font-bold text-lg py-6"
-              onClick={() => window.open('https://pay.cakto.com.br/4bhp5xu_549865', '_blank')}
+              onClick={() => window.open('https://pay.cakto.com.br/rjwpjtb_686697', '_blank')}
             >
               ASSINAR AGORA
             </Button>
