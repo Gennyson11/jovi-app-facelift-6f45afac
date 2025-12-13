@@ -387,7 +387,7 @@ export default function Dashboard() {
               const isBlocked = !hasPlatformSpecificAccess(platform.id);
               return <div key={platform.id} className={`group cursor-pointer transition-all duration-300 ${!hasPlatformAccess || isMaintenance || isBlocked ? 'opacity-60' : ''}`} onClick={() => {
                 if (isBlocked) {
-                  window.location.href = '/#pricing';
+                  window.location.href = '/planos';
                 } else {
                   handlePlatformClick(platform);
                 }
