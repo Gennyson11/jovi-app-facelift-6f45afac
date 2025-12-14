@@ -487,13 +487,13 @@ export default function Dashboard() {
                   {platformCredentials.length > 1 && (
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-semibold text-primary uppercase tracking-wide">
-                        Credencial {index + 1}
+                        Acesso {String(index + 1).padStart(2, '0')}
                       </span>
                       <Button size="sm" variant="outline" onClick={() => {
                         navigator.clipboard.writeText(`Login: ${cred.login}\nSenha: ${cred.password}`);
                         toast({
                           title: '✅ Copiado!',
-                          description: `Credencial ${index + 1} copiada`
+                          description: `Acesso ${String(index + 1).padStart(2, '0')} copiado`
                         });
                       }}>
                         <Copy className="w-3 h-3 mr-1" />
