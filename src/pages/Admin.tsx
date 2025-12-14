@@ -102,8 +102,7 @@ export default function Admin() {
   const [platformStatus, setPlatformStatus] = useState<StreamingStatus>('online');
   const [platformAccessType, setPlatformAccessType] = useState<AccessType>('credentials');
   const [platformCoverUrl, setPlatformCoverUrl] = useState('');
-  const [platformLogin, setPlatformLogin] = useState('');
-  const [platformPassword, setPlatformPassword] = useState('');
+  const [platformCredentials, setPlatformCredentials] = useState<Array<{ login: string; password: string }>>([{ login: '', password: '' }]);
   const [platformWebsiteUrl, setPlatformWebsiteUrl] = useState('');
   const [platformCategory, setPlatformCategory] = useState<PlatformCategory>('streamings');
   const [uploadingImage, setUploadingImage] = useState(false);
@@ -494,28 +493,40 @@ export default function Admin() {
   };
 
   // Platform CRUD
-  const openPlatformDialog = (platform?: Platform) => {
+  const openPlatformDialog = async (platform?: Platform) => {
     if (platform) {
       setEditingPlatform(platform);
       setPlatformName(platform.name);
       setPlatformStatus(platform.status || 'online');
       setPlatformAccessType(platform.access_type || 'credentials');
       setPlatformCoverUrl(platform.cover_image_url || '');
-      setPlatformLogin(platform.login || '');
-      setPlatformPassword(platform.password || '');
       setPlatformWebsiteUrl(platform.website_url || '');
       setPlatformCategory(platform.category || 'streamings');
       // Don't show access distribution when editing
       setAccessDistribution('none');
       setSelectedUsersForAccess([]);
+      
+      // Load existing credentials from streaming_credentials table
+      const { data: credentials } = await supabase
+        .from('streaming_credentials')
+        .select('login, password')
+        .eq('platform_id', platform.id);
+      
+      if (credentials && credentials.length > 0) {
+        setPlatformCredentials(credentials.map(c => ({ login: c.login, password: c.password })));
+      } else if (platform.login || platform.password) {
+        // Fallback to old single credential if exists
+        setPlatformCredentials([{ login: platform.login || '', password: platform.password || '' }]);
+      } else {
+        setPlatformCredentials([{ login: '', password: '' }]);
+      }
     } else {
       setEditingPlatform(null);
       setPlatformName('');
       setPlatformStatus('online');
       setPlatformAccessType('credentials');
       setPlatformCoverUrl('');
-      setPlatformLogin('');
-      setPlatformPassword('');
+      setPlatformCredentials([{ login: '', password: '' }]);
       setPlatformWebsiteUrl('');
       setPlatformCategory('streamings');
       // Reset access distribution for new platforms
@@ -547,8 +558,8 @@ export default function Admin() {
       access_type: platformAccessType,
       category: platformCategory,
       cover_image_url: platformCoverUrl || null,
-      login: platformAccessType === 'credentials' ? platformLogin || null : null,
-      password: platformAccessType === 'credentials' ? platformPassword || null : null,
+      login: platformAccessType === 'credentials' && platformCredentials[0]?.login ? platformCredentials[0].login : null,
+      password: platformAccessType === 'credentials' && platformCredentials[0]?.password ? platformCredentials[0].password : null,
       website_url: platformWebsiteUrl || null
     };
     if (editingPlatform) {
@@ -563,6 +574,25 @@ export default function Admin() {
         });
         return;
       }
+      
+      // Update credentials in streaming_credentials table
+      if (platformAccessType === 'credentials') {
+        // Delete existing credentials
+        await supabase.from('streaming_credentials').delete().eq('platform_id', editingPlatform.id);
+        
+        // Insert new credentials
+        const validCredentials = platformCredentials.filter(c => c.login || c.password);
+        if (validCredentials.length > 0) {
+          await supabase.from('streaming_credentials').insert(
+            validCredentials.map(c => ({
+              platform_id: editingPlatform.id,
+              login: c.login,
+              password: c.password
+            }))
+          );
+        }
+      }
+      
       toast({
         title: 'Sucesso',
         description: 'Plataforma atualizada'
@@ -579,6 +609,20 @@ export default function Admin() {
           variant: 'destructive'
         });
         return;
+      }
+      
+      // Save credentials to streaming_credentials table
+      if (newPlatform && platformAccessType === 'credentials') {
+        const validCredentials = platformCredentials.filter(c => c.login || c.password);
+        if (validCredentials.length > 0) {
+          await supabase.from('streaming_credentials').insert(
+            validCredentials.map(c => ({
+              platform_id: newPlatform.id,
+              login: c.login,
+              password: c.password
+            }))
+          );
+        }
       }
       
       // Grant access to users based on distribution selection
@@ -1238,16 +1282,61 @@ export default function Admin() {
             </div>
 
             {/* Conditional Fields based on Access Type */}
-            {platformAccessType === 'credentials' && <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="platform-login">Login</Label>
-                  <Input id="platform-login" value={platformLogin} onChange={e => setPlatformLogin(e.target.value)} placeholder="Email ou usuário" className="bg-background/50 border-border" />
+            {platformAccessType === 'credentials' && (
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <Label>Credenciais</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPlatformCredentials([...platformCredentials, { login: '', password: '' }])}
+                  >
+                    <Plus className="w-4 h-4 mr-1" />
+                    Adicionar
+                  </Button>
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="platform-password">Senha</Label>
-                  <Input id="platform-password" value={platformPassword} onChange={e => setPlatformPassword(e.target.value)} placeholder="Senha" className="bg-background/50 border-border" />
-                </div>
-              </div>}
+                {platformCredentials.map((cred, index) => (
+                  <div key={index} className="flex gap-2 items-start">
+                    <div className="flex-1 grid grid-cols-2 gap-2">
+                      <Input
+                        value={cred.login}
+                        onChange={e => {
+                          const updated = [...platformCredentials];
+                          updated[index].login = e.target.value;
+                          setPlatformCredentials(updated);
+                        }}
+                        placeholder="Login/Email"
+                        className="bg-background/50 border-border"
+                      />
+                      <Input
+                        value={cred.password}
+                        onChange={e => {
+                          const updated = [...platformCredentials];
+                          updated[index].password = e.target.value;
+                          setPlatformCredentials(updated);
+                        }}
+                        placeholder="Senha"
+                        className="bg-background/50 border-border"
+                      />
+                    </div>
+                    {platformCredentials.length > 1 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="h-10 w-10 text-destructive hover:text-destructive"
+                        onClick={() => {
+                          setPlatformCredentials(platformCredentials.filter((_, i) => i !== index));
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="platform-website">
