@@ -64,6 +64,10 @@ interface News {
   is_active: boolean;
   created_at: string;
 }
+interface Credential {
+  login: string;
+  password: string;
+}
 const platformIcons: Record<string, string> = {
   'Netflix': '🎬',
   'Amazon Prime Video': '📦',
@@ -75,12 +79,13 @@ const platformIcons: Record<string, string> = {
 export default function Dashboard() {
   const [platforms, setPlatforms] = useState<Platform[]>([]);
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null);
-  const [showPassword, setShowPassword] = useState(false);
+  const [showPassword, setShowPassword] = useState<Record<number, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userPlatformAccess, setUserPlatformAccess] = useState<string[]>([]);
   const [news, setNews] = useState<News[]>([]);
   const [dismissedNews, setDismissedNews] = useState<string[]>([]);
+  const [platformCredentials, setPlatformCredentials] = useState<Credential[]>([]);
   const {
     user,
     signOut,
@@ -176,7 +181,7 @@ export default function Dashboard() {
     if (isAccessExpired()) return false;
     return userPlatformAccess.includes(platformId);
   };
-  const handlePlatformClick = (platform: Platform) => {
+  const handlePlatformClick = async (platform: Platform) => {
     // Check if user has access to this specific platform
     if (!hasPlatformSpecificAccess(platform.id)) {
       toast({
@@ -190,7 +195,22 @@ export default function Dashboard() {
     if (isMaintenance) return;
     if (platform.access_type === 'link_only' && platform.website_url) {
       window.open(platform.website_url, '_blank');
-    } else if (platform.access_type === 'credentials' && platform.login && platform.password) {
+    } else if (platform.access_type === 'credentials') {
+      // Load credentials from streaming_credentials table
+      const { data: credentials } = await supabase
+        .from('streaming_credentials')
+        .select('login, password')
+        .eq('platform_id', platform.id);
+      
+      if (credentials && credentials.length > 0) {
+        setPlatformCredentials(credentials);
+      } else if (platform.login && platform.password) {
+        // Fallback to old single credential
+        setPlatformCredentials([{ login: platform.login, password: platform.password }]);
+      } else {
+        setPlatformCredentials([]);
+      }
+      setShowPassword({});
       setSelectedPlatform(platform);
     }
   };
@@ -448,9 +468,10 @@ export default function Dashboard() {
       {/* Credential Dialog - Only for credentials type */}
       <Dialog open={!!selectedPlatform} onOpenChange={() => {
       setSelectedPlatform(null);
-      setShowPassword(false);
+      setShowPassword({});
+      setPlatformCredentials([]);
     }}>
-        <DialogContent className="bg-card border-border">
+        <DialogContent className="bg-card border-border max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3 text-foreground">
               {selectedPlatform?.cover_image_url ? <img src={selectedPlatform.cover_image_url} alt={selectedPlatform.name} className="w-10 h-10 object-cover rounded" /> : <span className="text-3xl">
@@ -460,48 +481,71 @@ export default function Dashboard() {
             </DialogTitle>
           </DialogHeader>
           
-          {selectedPlatform?.login && selectedPlatform?.password ? <div className="space-y-4 mt-4">
-              {/* Copy All Button */}
-              <Button className="w-full" onClick={() => {
-            navigator.clipboard.writeText(`Login: ${selectedPlatform.login}\nSenha: ${selectedPlatform.password}`);
-            toast({
-              title: '✅ Copiado!',
-              description: 'Login e senha copiados para a área de transferência'
-            });
-          }}>
-                <Copy className="w-4 h-4 mr-2" />
-                Copiar Login e Senha
-              </Button>
+          {platformCredentials.length > 0 ? <div className="space-y-4 mt-4">
+              {platformCredentials.map((cred, index) => (
+                <div key={index} className="space-y-3 p-4 rounded-lg bg-background/30 border border-border">
+                  {platformCredentials.length > 1 && (
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="text-xs font-semibold text-primary uppercase tracking-wide">
+                        Credencial {index + 1}
+                      </span>
+                      <Button size="sm" variant="outline" onClick={() => {
+                        navigator.clipboard.writeText(`Login: ${cred.login}\nSenha: ${cred.password}`);
+                        toast({
+                          title: '✅ Copiado!',
+                          description: `Credencial ${index + 1} copiada`
+                        });
+                      }}>
+                        <Copy className="w-3 h-3 mr-1" />
+                        Copiar
+                      </Button>
+                    </div>
+                  )}
+                  
+                  {platformCredentials.length === 1 && (
+                    <Button className="w-full mb-3" onClick={() => {
+                      navigator.clipboard.writeText(`Login: ${cred.login}\nSenha: ${cred.password}`);
+                      toast({
+                        title: '✅ Copiado!',
+                        description: 'Login e senha copiados para a área de transferência'
+                      });
+                    }}>
+                      <Copy className="w-4 h-4 mr-2" />
+                      Copiar Login e Senha
+                    </Button>
+                  )}
 
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">Login</label>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-background/50 border border-border rounded-md px-3 py-2 text-foreground cursor-pointer hover:bg-background/70 transition-colors" onClick={() => copyToClipboard(selectedPlatform.login!, 'Login')}>
-                    {selectedPlatform.login}
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Login</label>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 bg-background/50 border border-border rounded-md px-3 py-2 text-foreground cursor-pointer hover:bg-background/70 transition-colors text-sm" onClick={() => copyToClipboard(cred.login, 'Login')}>
+                        {cred.login}
+                      </div>
+                      <Button variant="outline" size="icon" onClick={() => copyToClipboard(cred.login, 'Login')}>
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <Button variant="outline" size="icon" onClick={() => copyToClipboard(selectedPlatform.login!, 'Login')}>
-                    <Copy className="w-4 h-4" />
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">Senha</label>
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 bg-background/50 border border-border rounded-md px-3 py-2 text-foreground font-mono cursor-pointer hover:bg-background/70 transition-colors" onClick={() => copyToClipboard(selectedPlatform.password!, 'Senha')}>
-                    {showPassword ? selectedPlatform.password : '••••••••'}
+                  
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-muted-foreground">Senha</label>
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 bg-background/50 border border-border rounded-md px-3 py-2 text-foreground font-mono cursor-pointer hover:bg-background/70 transition-colors text-sm" onClick={() => copyToClipboard(cred.password, 'Senha')}>
+                        {showPassword[index] ? cred.password : '••••••••'}
+                      </div>
+                      <Button variant="outline" size="icon" onClick={() => setShowPassword(prev => ({ ...prev, [index]: !prev[index] }))}>
+                        {showPassword[index] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </Button>
+                      <Button variant="outline" size="icon" onClick={() => copyToClipboard(cred.password, 'Senha')}>
+                        <Copy className="w-4 h-4" />
+                      </Button>
+                    </div>
                   </div>
-                  <Button variant="outline" size="icon" onClick={() => setShowPassword(!showPassword)}>
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </Button>
-                  <Button variant="outline" size="icon" onClick={() => copyToClipboard(selectedPlatform.password!, 'Senha')}>
-                    <Copy className="w-4 h-4" />
-                  </Button>
                 </div>
-              </div>
+              ))}
 
               {/* Website Link */}
-              {selectedPlatform.website_url && <Button variant="outline" className="w-full" onClick={() => window.open(selectedPlatform.website_url!, '_blank')}>
+              {selectedPlatform?.website_url && <Button variant="outline" className="w-full" onClick={() => window.open(selectedPlatform.website_url!, '_blank')}>
                   <ExternalLink className="w-4 h-4 mr-2" />
                   Abrir Site
                 </Button>}
