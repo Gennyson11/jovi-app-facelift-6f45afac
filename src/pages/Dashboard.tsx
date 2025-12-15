@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { Tv, LogOut, Eye, EyeOff, Copy, Loader2, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Lock, Clock, Megaphone, X, MousePointerClick } from 'lucide-react';
+import DashboardSidebar from '@/components/DashboardSidebar';
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
 type PlatformCategory = 'ai_tools' | 'streamings' | 'software' | 'bonus_courses';
@@ -92,6 +93,7 @@ export default function Dashboard() {
   const [dismissedNews, setDismissedNews] = useState<string[]>([]);
   const [platformCredentials, setPlatformCredentials] = useState<Credential[]>([]);
   const [platformClicks, setPlatformClicks] = useState<Record<string, number>>({});
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
   const {
     user,
     signOut,
@@ -285,34 +287,50 @@ export default function Dashboard() {
     if (daysRemaining === 1) return '1 dia restante';
     return `${daysRemaining} dias restantes`;
   };
-  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
-      {/* Header */}
-      <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-magenta to-primary flex items-center justify-center shadow-lg shadow-magenta/30">
-              <Tv className="w-6 h-6 text-white" />
+
+  // Filter platforms by active category
+  const filteredPlatforms = activeCategory 
+    ? platforms.filter(p => p.category === activeCategory)
+    : platforms;
+
+  const filteredCategoryOrder = activeCategory 
+    ? CATEGORY_ORDER.filter(cat => cat === activeCategory)
+    : CATEGORY_ORDER;
+
+  return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex w-full">
+      {/* Sidebar */}
+      <DashboardSidebar
+        userProfile={userProfile}
+        onLogout={handleLogout}
+        activeCategory={activeCategory}
+        onCategorySelect={setActiveCategory}
+      />
+
+      {/* Main Content Area */}
+      <div className="flex-1 min-w-0">
+        {/* Header */}
+        <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40">
+          <div className="px-4 lg:px-8 py-4 flex items-center justify-between">
+            <div className="flex items-center gap-3 ml-12 lg:ml-0">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-magenta to-primary flex items-center justify-center shadow-lg shadow-magenta/30">
+                <Tv className="w-5 h-5 text-white" />
+              </div>
+              <div>
+                <h1 className="text-lg font-display font-bold bg-gradient-to-r from-cyan to-primary bg-clip-text text-transparent">
+                  JoviTools
+                </h1>
+                <p className="text-xs text-muted-foreground">
+                  {userProfile ? `Olá, ${userProfile.name || userProfile.email}` : 'Painel de Controle'}
+                </p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-xl font-display font-bold bg-gradient-to-r from-cyan to-primary bg-clip-text text-transparent">
-                GPainel Controle 
-              </h1>
-              <p className="text-sm text-muted-foreground">
-                {userProfile ? `Olá, ${userProfile.name || userProfile.email}` : 'Vamos criar algo incrível juntos'}
-              </p>
+            <div className="flex items-center gap-3">
+              {hasAccess && getRemainingDaysText() && <span className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${userProfile?.access_expires_at === null ? 'bg-purple-500/10 text-purple-400' : 'bg-primary/10 text-primary'}`}>
+                  {getRemainingDaysText()}
+                </span>}
             </div>
           </div>
-          <div className="flex items-center gap-3">
-            {hasAccess && getRemainingDaysText() && <span className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${userProfile?.access_expires_at === null ? 'bg-purple-500/10 text-purple-400' : 'bg-primary/10 text-primary'}`}>
-                {getRemainingDaysText()}
-              </span>}
-            <Button variant="outline" size="sm" onClick={handleLogout} className="border-border hover:bg-destructive hover:text-destructive-foreground">
-              <LogOut className="w-4 h-4 mr-2" />
-              Sair
-            </Button>
-          </div>
-        </div>
-      </header>
+        </header>
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-8">
@@ -431,8 +449,8 @@ export default function Dashboard() {
           </div>}
 
         {/* Categories */}
-        {CATEGORY_ORDER.map(categoryKey => {
-        const categoryPlatforms = platforms.filter(p => p.category === categoryKey);
+        {filteredCategoryOrder.map(categoryKey => {
+        const categoryPlatforms = filteredPlatforms.filter(p => p.category === categoryKey);
         if (categoryPlatforms.length === 0) return null;
         const config = CATEGORY_CONFIG[categoryKey];
         return <div key={categoryKey} className="mb-10">
@@ -525,6 +543,7 @@ export default function Dashboard() {
             </div>;
       })}
       </main>
+      </div>
 
       {/* Credential Dialog - Only for credentials type */}
       <Dialog open={!!selectedPlatform} onOpenChange={() => {
