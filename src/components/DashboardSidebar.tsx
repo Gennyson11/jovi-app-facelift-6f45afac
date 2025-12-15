@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Wrench, 
-  Tv2, 
+  Clapperboard,
   Monitor,
   Library, 
   Gift, 
@@ -33,7 +33,7 @@ interface DashboardSidebarProps {
 
 const DASHBOARD_ITEMS = [
   { id: 'ferramentas', label: 'Ferramentas', icon: Wrench, category: 'ai_tools' },
-  { id: 'streamings', label: 'Streamings', icon: Tv2, category: 'streamings' },
+  { id: 'streamings', label: 'Streamings', icon: Clapperboard, category: 'streamings' },
   { id: 'softwares', label: 'Softwares', icon: Monitor, category: 'software' },
   { id: 'biblioteca', label: 'Biblioteca', icon: Library, category: 'bonus_courses' },
 ];
