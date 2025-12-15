@@ -172,8 +172,8 @@ export default function JoviAIChat() {
           <Sparkles className="w-5 h-5 text-white" />
         </div>
         <div>
-          <h2 className="font-semibold text-foreground">Jovizeira</h2>
-          <p className="text-xs text-muted-foreground">Gerador de imagens com IA</p>
+          <h2 className="font-semibold text-foreground">Sirius</h2>
+          <p className="text-xs text-muted-foreground">Assistente IA da JoviTools</p>
         </div>
       </div>
 
