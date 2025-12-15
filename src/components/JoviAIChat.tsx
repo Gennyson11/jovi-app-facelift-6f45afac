@@ -247,7 +247,7 @@ export default function JoviAIChat() {
                     {message.isLoading ? (
                       <div className="flex items-center gap-2 py-1">
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        <span className="text-sm">Gerando imagem...</span>
+                        <span className="text-sm">Pensando...</span>
                       </div>
                     ) : (
                       <>
