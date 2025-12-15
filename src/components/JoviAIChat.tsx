@@ -273,20 +273,18 @@ export default function JoviAIChat() {
   return (
     <div className="flex flex-col h-[calc(100vh-200px)] max-h-[800px] bg-background rounded-xl border border-border overflow-hidden">
       {/* Header */}
-      <div className="flex flex-col gap-4 px-6 py-4 border-b border-border bg-card">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-              <Sparkles className="w-5 h-5 text-white" />
-            </div>
-            <div>
-              <h2 className="font-semibold text-foreground">Zara</h2>
-              <p className="text-xs text-muted-foreground">Assistente IA da JoviTools</p>
-            </div>
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-foreground">Zara</h2>
+            <p className="text-xs text-muted-foreground">Assistente IA da JoviTools</p>
           </div>
         </div>
         
-        {/* Coins Display Card */}
+        {/* Compact Coins Display */}
         <CoinsDisplay coins={coins} maxCoins={20} />
       </div>
 
