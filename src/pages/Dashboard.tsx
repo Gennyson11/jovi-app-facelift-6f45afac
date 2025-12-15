@@ -6,7 +6,7 @@ import { usePresence } from '@/hooks/usePresence';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Tv, LogOut, Eye, EyeOff, Copy, Loader2, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Lock, Clock, Megaphone, X, MousePointerClick } from 'lucide-react';
+import { LogOut, Eye, EyeOff, Copy, Loader2, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Lock, Clock, Megaphone, X, MousePointerClick, Zap } from 'lucide-react';
 import DashboardSidebar from '@/components/DashboardSidebar';
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
@@ -69,7 +69,6 @@ interface Credential {
   login: string;
   password: string;
 }
-
 interface PlatformClick {
   platform_id: string;
   click_count: number;
@@ -111,20 +110,17 @@ export default function Dashboard() {
   // Ref to track if data has been fetched for the current user
   const hasFetchedRef = useRef(false);
   const currentUserIdRef = useRef<string | null>(null);
-
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/login');
     }
   }, [user, authLoading, navigate]);
-
   useEffect(() => {
     // Only fetch data if user exists and we haven't fetched for this user yet
     if (user?.id && user.id !== currentUserIdRef.current) {
       currentUserIdRef.current = user.id;
       hasFetchedRef.current = false;
     }
-    
     if (user?.id && !hasFetchedRef.current) {
       hasFetchedRef.current = true;
       fetchData();
@@ -134,11 +130,9 @@ export default function Dashboard() {
     setLoading(true);
 
     // Fetch platforms, news, and click counts
-    const [platformsRes, newsRes, clicksRes] = await Promise.all([
-      supabase.from('streaming_platforms').select('*').order('name'), 
-      supabase.from('news').select('*').eq('is_active', true).order('created_at', { ascending: false }),
-      supabase.from('platform_clicks').select('platform_id, click_count')
-    ]);
+    const [platformsRes, newsRes, clicksRes] = await Promise.all([supabase.from('streaming_platforms').select('*').order('name'), supabase.from('news').select('*').eq('is_active', true).order('created_at', {
+      ascending: false
+    }), supabase.from('platform_clicks').select('platform_id, click_count')]);
     if (platformsRes.data) setPlatforms(platformsRes.data as Platform[]);
     if (newsRes.data) setNews(newsRes.data as News[]);
     if (clicksRes.data) {
@@ -201,36 +195,30 @@ export default function Dashboard() {
   // Increment click count for a platform
   const incrementClickCount = async (platformId: string) => {
     // First check if record exists
-    const { data: existing } = await supabase
-      .from('platform_clicks')
-      .select('click_count')
-      .eq('platform_id', platformId)
-      .maybeSingle();
-    
+    const {
+      data: existing
+    } = await supabase.from('platform_clicks').select('click_count').eq('platform_id', platformId).maybeSingle();
     if (existing) {
       // Update existing record
-      await supabase
-        .from('platform_clicks')
-        .update({ click_count: existing.click_count + 1 })
-        .eq('platform_id', platformId);
-      
+      await supabase.from('platform_clicks').update({
+        click_count: existing.click_count + 1
+      }).eq('platform_id', platformId);
       setPlatformClicks(prev => ({
         ...prev,
         [platformId]: (prev[platformId] || 0) + 1
       }));
     } else {
       // Insert new record
-      await supabase
-        .from('platform_clicks')
-        .insert({ platform_id: platformId, click_count: 1 });
-      
+      await supabase.from('platform_clicks').insert({
+        platform_id: platformId,
+        click_count: 1
+      });
       setPlatformClicks(prev => ({
         ...prev,
         [platformId]: 1
       }));
     }
   };
-
   const handlePlatformClick = async (platform: Platform) => {
     // Check if user has access to this specific platform
     if (!hasPlatformSpecificAccess(platform.id)) {
@@ -246,21 +234,21 @@ export default function Dashboard() {
 
     // Increment click count
     incrementClickCount(platform.id);
-
     if (platform.access_type === 'link_only' && platform.website_url) {
       window.open(platform.website_url, '_blank');
     } else if (platform.access_type === 'credentials') {
       // Load credentials from streaming_credentials table
-      const { data: credentials } = await supabase
-        .from('streaming_credentials')
-        .select('login, password')
-        .eq('platform_id', platform.id);
-      
+      const {
+        data: credentials
+      } = await supabase.from('streaming_credentials').select('login, password').eq('platform_id', platform.id);
       if (credentials && credentials.length > 0) {
         setPlatformCredentials(credentials);
       } else if (platform.login && platform.password) {
         // Fallback to old single credential
-        setPlatformCredentials([{ login: platform.login, password: platform.password }]);
+        setPlatformCredentials([{
+          login: platform.login,
+          password: platform.password
+        }]);
       } else {
         setPlatformCredentials([]);
       }
@@ -289,22 +277,11 @@ export default function Dashboard() {
   };
 
   // Filter platforms by active category
-  const filteredPlatforms = activeCategory 
-    ? platforms.filter(p => p.category === activeCategory)
-    : platforms;
-
-  const filteredCategoryOrder = activeCategory 
-    ? CATEGORY_ORDER.filter(cat => cat === activeCategory)
-    : CATEGORY_ORDER;
-
+  const filteredPlatforms = activeCategory ? platforms.filter(p => p.category === activeCategory) : platforms;
+  const filteredCategoryOrder = activeCategory ? CATEGORY_ORDER.filter(cat => cat === activeCategory) : CATEGORY_ORDER;
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex w-full">
       {/* Sidebar */}
-      <DashboardSidebar
-        userProfile={userProfile}
-        onLogout={handleLogout}
-        activeCategory={activeCategory}
-        onCategorySelect={setActiveCategory}
-      />
+      <DashboardSidebar userProfile={userProfile} onLogout={handleLogout} activeCategory={activeCategory} onCategorySelect={setActiveCategory} />
 
       {/* Main Content Area */}
       <div className="flex-1 min-w-0">
@@ -313,7 +290,7 @@ export default function Dashboard() {
           <div className="px-4 lg:px-8 py-4 flex items-center justify-between">
             <div className="flex items-center gap-3 ml-12 lg:ml-0">
               <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-magenta to-primary flex items-center justify-center shadow-lg shadow-magenta/30">
-                <Tv className="w-5 h-5 text-white" />
+                <Zap className="w-5 h-5 text-white" />
               </div>
               <div>
                 <h1 className="text-lg font-display font-bold bg-gradient-to-r from-cyan to-primary bg-clip-text text-transparent">
@@ -370,30 +347,30 @@ export default function Dashboard() {
                   <p className="text-sm text-muted-foreground">Validade da Sua Conta</p>
                   <p className="text-xl font-bold text-green-500">
                     {(() => {
-                  if (userProfile.access_expires_at === null) {
-                    return 'Acesso Vitalício';
-                  }
-                  const expiresAt = new Date(userProfile.access_expires_at);
-                  const now = new Date();
-                  const diffMs = expiresAt.getTime() - now.getTime();
-                  if (diffMs <= 0) return 'Expirado';
-                  const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                  const hours = Math.floor(diffMs % (1000 * 60 * 60 * 24) / (1000 * 60 * 60));
-                  if (days > 0) {
-                    return `${days}d ${hours}h restantes`;
-                  }
-                  return `${hours}h restantes`;
-                })()}
+                    if (userProfile.access_expires_at === null) {
+                      return 'Acesso Vitalício';
+                    }
+                    const expiresAt = new Date(userProfile.access_expires_at);
+                    const now = new Date();
+                    const diffMs = expiresAt.getTime() - now.getTime();
+                    if (diffMs <= 0) return 'Expirado';
+                    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor(diffMs % (1000 * 60 * 60 * 24) / (1000 * 60 * 60));
+                    if (days > 0) {
+                      return `${days}d ${hours}h restantes`;
+                    }
+                    return `${hours}h restantes`;
+                  })()}
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     {userProfile.access_expires_at === null ? 'Sem data de expiração' : `Expira em ${new Date(userProfile.access_expires_at).toLocaleDateString('pt-BR', {
-                  day: '2-digit',
-                  month: 'long',
-                  year: 'numeric'
-                })} às ${new Date(userProfile.access_expires_at).toLocaleTimeString('pt-BR', {
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}`}
+                    day: '2-digit',
+                    month: 'long',
+                    year: 'numeric'
+                  })} às ${new Date(userProfile.access_expires_at).toLocaleTimeString('pt-BR', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })}`}
                   </p>
                 </div>
               </div>
@@ -437,10 +414,10 @@ export default function Dashboard() {
                       </p>
                       <p className="text-xs text-orange-300/60 mt-2 flex items-center gap-1">
                         📅 {new Date(newsItem.created_at).toLocaleDateString('pt-BR', {
-                    day: '2-digit',
-                    month: 'long',
-                    year: 'numeric'
-                  })}
+                      day: '2-digit',
+                      month: 'long',
+                      year: 'numeric'
+                    })}
                       </p>
                     </div>
                   </div>
@@ -450,10 +427,10 @@ export default function Dashboard() {
 
         {/* Categories */}
         {filteredCategoryOrder.map(categoryKey => {
-        const categoryPlatforms = filteredPlatforms.filter(p => p.category === categoryKey);
-        if (categoryPlatforms.length === 0) return null;
-        const config = CATEGORY_CONFIG[categoryKey];
-        return <div key={categoryKey} className="mb-10">
+          const categoryPlatforms = filteredPlatforms.filter(p => p.category === categoryKey);
+          if (categoryPlatforms.length === 0) return null;
+          const config = CATEGORY_CONFIG[categoryKey];
+          return <div key={categoryKey} className="mb-10">
               {/* Category Header */}
               <div className="flex items-center gap-3 mb-6">
                 <div className={`w-10 h-10 rounded-lg bg-gradient-to-br ${config.color} flex items-center justify-center shadow-lg`}>
@@ -472,16 +449,16 @@ export default function Dashboard() {
               {/* Platforms Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {categoryPlatforms.map(platform => {
-              const hasPlatformAccess = platform.access_type === 'link_only' ? !!platform.website_url : !!(platform.login && platform.password);
-              const isMaintenance = platform.status === 'maintenance';
-              const isBlocked = !hasPlatformSpecificAccess(platform.id);
-              return <div key={platform.id} className={`group cursor-pointer transition-all duration-300 ${!hasPlatformAccess || isMaintenance || isBlocked ? 'opacity-60' : ''}`} onClick={() => {
-                if (isBlocked) {
-                  window.location.href = '/#pricing';
-                } else {
-                  handlePlatformClick(platform);
-                }
-              }}>
+                const hasPlatformAccess = platform.access_type === 'link_only' ? !!platform.website_url : !!(platform.login && platform.password);
+                const isMaintenance = platform.status === 'maintenance';
+                const isBlocked = !hasPlatformSpecificAccess(platform.id);
+                return <div key={platform.id} className={`group cursor-pointer transition-all duration-300 ${!hasPlatformAccess || isMaintenance || isBlocked ? 'opacity-60' : ''}`} onClick={() => {
+                  if (isBlocked) {
+                    window.location.href = '/#pricing';
+                  } else {
+                    handlePlatformClick(platform);
+                  }
+                }}>
                       {/* Card Container */}
                       <div className={`bg-card border border-border rounded-xl overflow-hidden transition-all duration-300 ${isBlocked ? 'grayscale hover:grayscale-0 hover:border-green-500/50' : 'hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10'}`}>
                         {/* Cover Image Area */}
@@ -538,10 +515,10 @@ export default function Dashboard() {
                         </div>
                       </div>
                     </div>;
-            })}
+              })}
               </div>
             </div>;
-      })}
+        })}
       </main>
       </div>
 
@@ -562,38 +539,33 @@ export default function Dashboard() {
           </DialogHeader>
           
           {platformCredentials.length > 0 ? <div className="space-y-4 mt-4">
-              {platformCredentials.map((cred, index) => (
-                <div key={index} className="space-y-3 p-4 rounded-lg bg-background/30 border border-border">
-                  {platformCredentials.length > 1 && (
-                    <div className="flex items-center justify-between mb-2">
+              {platformCredentials.map((cred, index) => <div key={index} className="space-y-3 p-4 rounded-lg bg-background/30 border border-border">
+                  {platformCredentials.length > 1 && <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-semibold text-primary uppercase tracking-wide">
                         Acesso {String(index + 1).padStart(2, '0')}
                       </span>
                       <Button size="sm" variant="outline" onClick={() => {
-                        navigator.clipboard.writeText(`Login: ${cred.login}\nSenha: ${cred.password}`);
-                        toast({
-                          title: '✅ Copiado!',
-                          description: `Acesso ${String(index + 1).padStart(2, '0')} copiado`
-                        });
-                      }}>
+                navigator.clipboard.writeText(`Login: ${cred.login}\nSenha: ${cred.password}`);
+                toast({
+                  title: '✅ Copiado!',
+                  description: `Acesso ${String(index + 1).padStart(2, '0')} copiado`
+                });
+              }}>
                         <Copy className="w-3 h-3 mr-1" />
                         Copiar
                       </Button>
-                    </div>
-                  )}
+                    </div>}
                   
-                  {platformCredentials.length === 1 && (
-                    <Button className="w-full mb-3" onClick={() => {
-                      navigator.clipboard.writeText(`Login: ${cred.login}\nSenha: ${cred.password}`);
-                      toast({
-                        title: '✅ Copiado!',
-                        description: 'Login e senha copiados para a área de transferência'
-                      });
-                    }}>
+                  {platformCredentials.length === 1 && <Button className="w-full mb-3" onClick={() => {
+              navigator.clipboard.writeText(`Login: ${cred.login}\nSenha: ${cred.password}`);
+              toast({
+                title: '✅ Copiado!',
+                description: 'Login e senha copiados para a área de transferência'
+              });
+            }}>
                       <Copy className="w-4 h-4 mr-2" />
                       Copiar Login e Senha
-                    </Button>
-                  )}
+                    </Button>}
 
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">Login</label>
@@ -613,7 +585,10 @@ export default function Dashboard() {
                       <div className="flex-1 bg-background/50 border border-border rounded-md px-3 py-2 text-foreground font-mono cursor-pointer hover:bg-background/70 transition-colors text-sm" onClick={() => copyToClipboard(cred.password, 'Senha')}>
                         {showPassword[index] ? cred.password : '••••••••'}
                       </div>
-                      <Button variant="outline" size="icon" onClick={() => setShowPassword(prev => ({ ...prev, [index]: !prev[index] }))}>
+                      <Button variant="outline" size="icon" onClick={() => setShowPassword(prev => ({
+                  ...prev,
+                  [index]: !prev[index]
+                }))}>
                         {showPassword[index] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </Button>
                       <Button variant="outline" size="icon" onClick={() => copyToClipboard(cred.password, 'Senha')}>
@@ -621,8 +596,7 @@ export default function Dashboard() {
                       </Button>
                     </div>
                   </div>
-                </div>
-              ))}
+                </div>)}
 
               {/* Website Link */}
               {selectedPlatform?.website_url && <Button variant="outline" className="w-full" onClick={() => window.open(selectedPlatform.website_url!, '_blank')}>
