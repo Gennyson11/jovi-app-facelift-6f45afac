@@ -159,13 +159,16 @@ export default function Settings() {
     setUploadingAvatar(true);
     
     const fileExt = file.name.split('.').pop();
-    const fileName = `${userProfile.user_id}-${Date.now()}.${fileExt}`;
+    const fileName = `${Date.now()}.${fileExt}`;
+    // Use user_id as folder name for RLS policy
+    const filePath = `${userProfile.user_id}/${fileName}`;
     
     const { data, error } = await supabase.storage
-      .from('streaming-covers')
-      .upload(`avatars/${fileName}`, file);
+      .from('avatars')
+      .upload(filePath, file, { upsert: true });
     
     if (error) {
+      console.error('Upload error:', error);
       toast({
         title: 'Erro',
         description: 'Falha ao fazer upload da imagem',
@@ -176,8 +179,8 @@ export default function Settings() {
     }
     
     const { data: urlData } = supabase.storage
-      .from('streaming-covers')
-      .getPublicUrl(`avatars/${fileName}`);
+      .from('avatars')
+      .getPublicUrl(filePath);
     
     // Update profile with new avatar URL
     await supabase
