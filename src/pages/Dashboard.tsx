@@ -6,7 +6,7 @@ import { usePresence } from '@/hooks/usePresence';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Tv, LogOut, Eye, EyeOff, Copy, Loader2, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Lock, Clock, Megaphone, X } from 'lucide-react';
+import { Tv, LogOut, Eye, EyeOff, Copy, Loader2, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Lock, Clock, Megaphone, X, MousePointerClick } from 'lucide-react';
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
 type PlatformCategory = 'ai_tools' | 'streamings' | 'software' | 'bonus_courses';
@@ -68,6 +68,11 @@ interface Credential {
   login: string;
   password: string;
 }
+
+interface PlatformClick {
+  platform_id: string;
+  click_count: number;
+}
 const platformIcons: Record<string, string> = {
   'Netflix': '🎬',
   'Amazon Prime Video': '📦',
@@ -86,6 +91,7 @@ export default function Dashboard() {
   const [news, setNews] = useState<News[]>([]);
   const [dismissedNews, setDismissedNews] = useState<string[]>([]);
   const [platformCredentials, setPlatformCredentials] = useState<Credential[]>([]);
+  const [platformClicks, setPlatformClicks] = useState<Record<string, number>>({});
   const {
     user,
     signOut,
@@ -125,12 +131,21 @@ export default function Dashboard() {
   const fetchData = async () => {
     setLoading(true);
 
-    // Fetch platforms and news
-    const [platformsRes, newsRes] = await Promise.all([supabase.from('streaming_platforms').select('*').order('name'), supabase.from('news').select('*').eq('is_active', true).order('created_at', {
-      ascending: false
-    })]);
+    // Fetch platforms, news, and click counts
+    const [platformsRes, newsRes, clicksRes] = await Promise.all([
+      supabase.from('streaming_platforms').select('*').order('name'), 
+      supabase.from('news').select('*').eq('is_active', true).order('created_at', { ascending: false }),
+      supabase.from('platform_clicks').select('platform_id, click_count')
+    ]);
     if (platformsRes.data) setPlatforms(platformsRes.data as Platform[]);
     if (newsRes.data) setNews(newsRes.data as News[]);
+    if (clicksRes.data) {
+      const clicksMap: Record<string, number> = {};
+      clicksRes.data.forEach((c: PlatformClick) => {
+        clicksMap[c.platform_id] = c.click_count;
+      });
+      setPlatformClicks(clicksMap);
+    }
 
     // Fetch user profile to check access
     const {
@@ -181,6 +196,39 @@ export default function Dashboard() {
     if (isAccessExpired()) return false;
     return userPlatformAccess.includes(platformId);
   };
+  // Increment click count for a platform
+  const incrementClickCount = async (platformId: string) => {
+    // First check if record exists
+    const { data: existing } = await supabase
+      .from('platform_clicks')
+      .select('click_count')
+      .eq('platform_id', platformId)
+      .maybeSingle();
+    
+    if (existing) {
+      // Update existing record
+      await supabase
+        .from('platform_clicks')
+        .update({ click_count: existing.click_count + 1 })
+        .eq('platform_id', platformId);
+      
+      setPlatformClicks(prev => ({
+        ...prev,
+        [platformId]: (prev[platformId] || 0) + 1
+      }));
+    } else {
+      // Insert new record
+      await supabase
+        .from('platform_clicks')
+        .insert({ platform_id: platformId, click_count: 1 });
+      
+      setPlatformClicks(prev => ({
+        ...prev,
+        [platformId]: 1
+      }));
+    }
+  };
+
   const handlePlatformClick = async (platform: Platform) => {
     // Check if user has access to this specific platform
     if (!hasPlatformSpecificAccess(platform.id)) {
@@ -193,6 +241,10 @@ export default function Dashboard() {
     }
     const isMaintenance = platform.status === 'maintenance';
     if (isMaintenance) return;
+
+    // Increment click count
+    incrementClickCount(platform.id);
+
     if (platform.access_type === 'link_only' && platform.website_url) {
       window.open(platform.website_url, '_blank');
     } else if (platform.access_type === 'credentials') {
@@ -445,7 +497,7 @@ export default function Dashboard() {
 
                         {/* Footer */}
                         <div className="p-4 flex items-center justify-between">
-                          <div>
+                          <div className="flex-1">
                             <h3 className="font-display font-bold text-foreground uppercase tracking-wide">
                               {platform.name}
                             </h3>
@@ -453,9 +505,18 @@ export default function Dashboard() {
                               {isBlocked ? 'Acesso bloqueado' : isMaintenance ? 'Em manutenção' : hasPlatformAccess ? platform.access_type === 'link_only' ? 'Clique para acessar' : 'Clique para ver credencial' : 'Sem acesso configurado'}
                             </p>
                           </div>
-                          {!isBlocked && hasPlatformAccess && !isMaintenance && <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                              {platform.access_type === 'link_only' ? <ExternalLink className="w-5 h-5 text-primary" /> : <Eye className="w-5 h-5 text-primary" />}
-                            </div>}
+                          <div className="flex items-center gap-2">
+                            {/* Click Counter */}
+                            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-secondary/50 border border-border">
+                              <MousePointerClick className="w-3.5 h-3.5 text-muted-foreground" />
+                              <span className="text-xs font-semibold text-foreground">
+                                {platformClicks[platform.id] || 0}
+                              </span>
+                            </div>
+                            {!isBlocked && hasPlatformAccess && !isMaintenance && <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center group-hover:bg-primary/20 transition-colors">
+                                {platform.access_type === 'link_only' ? <ExternalLink className="w-5 h-5 text-primary" /> : <Eye className="w-5 h-5 text-primary" />}
+                              </div>}
+                          </div>
                         </div>
                       </div>
                     </div>;
