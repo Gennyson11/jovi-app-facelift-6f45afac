@@ -46,7 +46,7 @@ const GENERAL_ITEMS = [
   { id: 'sorteios', label: 'Sorteios', icon: Gift, href: null, disabled: true },
   { id: 'cupom', label: 'Cupom', icon: Ticket, href: null, disabled: true },
   { id: 'suporte', label: 'Suporte', icon: Headphones, href: 'https://bit.ly/whatsapp-suportejt', external: true },
-  { id: 'configuracoes', label: 'Configurações', icon: Settings, href: null, disabled: true },
+  { id: 'configuracoes', label: 'Configurações', icon: Settings, href: '/settings', route: true },
 ];
 
 export default function DashboardSidebar({ 
@@ -57,6 +57,8 @@ export default function DashboardSidebar({
 }: DashboardSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const getInitials = (name: string | null, email: string) => {
     if (name) {
@@ -67,6 +69,10 @@ export default function DashboardSidebar({
 
   const handleItemClick = (item: typeof DASHBOARD_ITEMS[0]) => {
     if (item.disabled) return;
+    // Navigate to dashboard if not already there
+    if (location.pathname !== '/dashboard') {
+      navigate('/dashboard');
+    }
     onCategorySelect(item.category);
     setIsMobileOpen(false);
   };
@@ -75,6 +81,8 @@ export default function DashboardSidebar({
     if (item.disabled) return;
     if (item.external && item.href) {
       window.open(item.href, '_blank');
+    } else if (item.route && item.href) {
+      navigate(item.href);
     }
     setIsMobileOpen(false);
   };
@@ -139,22 +147,27 @@ export default function DashboardSidebar({
             </p>
           )}
           <nav className="space-y-1">
-            {GENERAL_ITEMS.map((item) => (
+            {GENERAL_ITEMS.map((item) => {
+              const isActive = item.route && item.href === location.pathname;
+              return (
               <button
                 key={item.id}
                 onClick={() => handleGeneralItemClick(item)}
                 disabled={item.disabled}
                 className={cn(
                   "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
-                  "text-muted-foreground hover:text-foreground hover:bg-secondary/50",
+                  isActive 
+                    ? "bg-primary text-primary-foreground" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50",
                   item.disabled && "opacity-50 cursor-not-allowed",
                   isCollapsed && "justify-center px-2"
                 )}
               >
-                <item.icon className="h-5 w-5 flex-shrink-0" />
+                <item.icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-primary-foreground")} />
                 {!isCollapsed && <span>{item.label}</span>}
               </button>
-            ))}
+              );
+            })}
           </nav>
         </div>
       </ScrollArea>
