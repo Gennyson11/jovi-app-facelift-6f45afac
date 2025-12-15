@@ -22,6 +22,7 @@ interface UserProfile {
   id: string;
   email: string;
   name: string | null;
+  avatar_url?: string | null;
 }
 
 interface DashboardSidebarProps {
@@ -185,9 +186,17 @@ export default function DashboardSidebar({
             "p-4 border-t border-border flex items-center gap-3",
             isCollapsed && "justify-center"
           )}>
-            <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0">
-              {getInitials(userProfile.name, userProfile.email)}
-            </div>
+            {userProfile.avatar_url ? (
+              <img 
+                src={userProfile.avatar_url} 
+                alt="Avatar" 
+                className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0">
+                {getInitials(userProfile.name, userProfile.email)}
+              </div>
+            )}
             {!isCollapsed && (
               <div className="flex-1 min-w-0">
                 <p className="text-sm font-medium text-foreground truncate">

@@ -57,6 +57,7 @@ interface UserProfile {
   name: string | null;
   has_access: boolean;
   access_expires_at: string | null;
+  avatar_url: string | null;
 }
 interface News {
   id: string;
