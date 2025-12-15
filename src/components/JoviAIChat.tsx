@@ -283,16 +283,11 @@ export default function JoviAIChat() {
           </div>
         </div>
         {/* Coins Display */}
-        <div className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500/30 to-yellow-500/30 rounded-xl border-2 border-amber-500/50 shadow-lg shadow-amber-500/20">
-          <div className="w-8 h-8 rounded-full bg-gradient-to-br from-amber-400 to-yellow-500 flex items-center justify-center shadow-md">
-            <Coins className="w-5 h-5 text-amber-900" />
-          </div>
-          <div className="flex flex-col">
-            <span className="text-xl font-bold text-amber-400 leading-none">
-              {coins !== null ? coins : '-'}
-            </span>
-            <span className="text-[10px] text-amber-400/80 uppercase tracking-wide">moedas</span>
-          </div>
+        <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 rounded-lg border border-amber-500/30">
+          <Coins className="w-5 h-5 text-amber-500" />
+          <span className="text-lg font-bold text-amber-500">
+            {coins !== null ? coins : '-'}
+          </span>
         </div>
       </div>
 
