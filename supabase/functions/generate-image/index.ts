@@ -155,41 +155,67 @@ serve(async (req) => {
     // If it's an image request, generate the image using Pollinations API
     const aspectRatioDimensions: Record<string, { width: number; height: number }> = {
       "1:1": { width: 1024, height: 1024 },
-      "16:9": { width: 1920, height: 1080 },
-      "9:16": { width: 1080, height: 1920 },
+      "16:9": { width: 1280, height: 720 },
+      "9:16": { width: 720, height: 1280 },
       "4:3": { width: 1024, height: 768 },
       "3:4": { width: 768, height: 1024 },
     };
 
     const dimensions = aspectRatioDimensions[aspectRatio] || { width: 1024, height: 1024 };
     const imagePrompt = parsedResponse.imagePrompt || parsedResponse.response;
-    const enhancedPrompt = `${imagePrompt}. Ultra high resolution, high quality, professional commercial image.`;
+    
+    // Truncate prompt if too long (max 500 chars to avoid URL issues)
+    const truncatedPrompt = imagePrompt.length > 500 ? imagePrompt.substring(0, 500) : imagePrompt;
 
-    console.log("Step 2: Generating image with Pollinations API:", enhancedPrompt);
+    console.log("Step 2: Generating image with Pollinations API:", truncatedPrompt);
 
-    // Build Pollinations URL with parameters
-    const encodedPrompt = encodeURIComponent(enhancedPrompt);
-    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${dimensions.width}&height=${dimensions.height}&model=flux&nologo=true&enhance=true`;
+    // Build Pollinations URL with simpler parameters
+    const encodedPrompt = encodeURIComponent(truncatedPrompt);
+    const seed = Math.floor(Math.random() * 1000000);
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${dimensions.width}&height=${dimensions.height}&seed=${seed}&model=flux`;
 
     console.log("Pollinations URL:", pollinationsUrl);
 
-    // Fetch image from Pollinations
-    const imageResponse = await fetch(pollinationsUrl, {
-      method: "GET",
-    });
+    // Fetch image from Pollinations with timeout
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 120000); // 2 min timeout
+    
+    let imageResponse;
+    try {
+      imageResponse = await fetch(pollinationsUrl, {
+        method: "GET",
+        signal: controller.signal,
+      });
+    } catch (fetchError) {
+      clearTimeout(timeoutId);
+      console.error("Fetch error:", fetchError);
+      return new Response(
+        JSON.stringify({ error: "Tempo limite excedido. Tente novamente." }),
+        { status: 504, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+    clearTimeout(timeoutId);
 
     if (!imageResponse.ok) {
-      console.error("Pollinations API error:", imageResponse.status);
+      const errorText = await imageResponse.text().catch(() => "");
+      console.error("Pollinations API error:", imageResponse.status, errorText);
       return new Response(
         JSON.stringify({ error: "Erro ao gerar imagem. Tente novamente." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    // Convert image to base64
+    // Convert image to base64 using Uint8Array directly
     const imageBuffer = await imageResponse.arrayBuffer();
-    const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
-    const imageUrl = `data:image/jpeg;base64,${base64Image}`;
+    const uint8Array = new Uint8Array(imageBuffer);
+    let binary = '';
+    const chunkSize = 8192;
+    for (let i = 0; i < uint8Array.length; i += chunkSize) {
+      const chunk = uint8Array.subarray(i, i + chunkSize);
+      binary += String.fromCharCode.apply(null, Array.from(chunk));
+    }
+    const base64Image = btoa(binary);
+    const imageUrl = `data:image/png;base64,${base64Image}`;
 
     console.log("Image generation completed with Pollinations");
 
