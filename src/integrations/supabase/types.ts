@@ -192,6 +192,33 @@ export type Database = {
         }
         Relationships: []
       }
+      user_coins: {
+        Row: {
+          coins: number
+          created_at: string
+          id: string
+          last_reset_at: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          coins?: number
+          created_at?: string
+          id?: string
+          last_reset_at?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          coins?: number
+          created_at?: string
+          id?: string
+          last_reset_at?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_platform_access: {
         Row: {
           created_at: string
@@ -254,6 +281,15 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_and_reset_coins: { Args: { p_user_id: string }; Returns: number }
+      deduct_coin: {
+        Args: { p_user_id: string }
+        Returns: {
+          message: string
+          remaining_coins: number
+          success: boolean
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
