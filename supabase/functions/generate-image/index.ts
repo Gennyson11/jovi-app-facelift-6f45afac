@@ -172,7 +172,7 @@ serve(async (req) => {
     // Build Pollinations URL with simpler parameters
     const encodedPrompt = encodeURIComponent(truncatedPrompt);
     const seed = Math.floor(Math.random() * 1000000);
-    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${dimensions.width}&height=${dimensions.height}&seed=${seed}&model=flux`;
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${dimensions.width}&height=${dimensions.height}&seed=${seed}&model=flux&nologo=true`;
 
     console.log("Pollinations URL:", pollinationsUrl);
 
