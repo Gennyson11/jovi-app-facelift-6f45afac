@@ -2,9 +2,6 @@ import { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Wrench, 
-  Sparkles, 
-  Bot, 
-  GitBranch, 
   Tv2, 
   Library, 
   Gift, 
@@ -35,9 +32,6 @@ interface DashboardSidebarProps {
 
 const DASHBOARD_ITEMS = [
   { id: 'ferramentas', label: 'Ferramentas', icon: Wrench, category: 'ai_tools' },
-  { id: 'templates', label: 'Templates de IA', icon: Sparkles, category: null, disabled: true },
-  { id: 'agentes', label: 'Agentes de IA', icon: Bot, category: null, disabled: true },
-  { id: 'workflows', label: 'Workflows', icon: GitBranch, category: null, disabled: true },
   { id: 'streamings', label: 'Streamings', icon: Tv2, category: 'streamings' },
   { id: 'biblioteca', label: 'Biblioteca', icon: Library, category: 'bonus_courses' },
 ];
@@ -68,7 +62,6 @@ export default function DashboardSidebar({
   };
 
   const handleItemClick = (item: typeof DASHBOARD_ITEMS[0]) => {
-    if (item.disabled) return;
     // Navigate to dashboard if not already there
     if (location.pathname !== '/dashboard') {
       navigate('/dashboard');
@@ -121,13 +114,11 @@ export default function DashboardSidebar({
                 <button
                   key={item.id}
                   onClick={() => handleItemClick(item)}
-                  disabled={item.disabled}
                   className={cn(
                     "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
                     isActive 
                       ? "bg-primary text-primary-foreground" 
                       : "text-muted-foreground hover:text-foreground hover:bg-secondary/50",
-                    item.disabled && "opacity-50 cursor-not-allowed",
                     isCollapsed && "justify-center px-2"
                   )}
                 >
