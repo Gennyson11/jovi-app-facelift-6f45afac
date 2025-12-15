@@ -97,7 +97,22 @@ serve(async (req) => {
 
     if (!intentResponse.ok) {
       console.error("Error analyzing intent:", intentResponse.status);
-      throw new Error("Erro ao processar mensagem");
+      if (intentResponse.status === 429) {
+        return new Response(
+          JSON.stringify({ error: "Limite de requisições excedido. Tente novamente em alguns segundos." }),
+          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      if (intentResponse.status === 402) {
+        return new Response(
+          JSON.stringify({ error: "Créditos da plataforma esgotados temporariamente. Tente novamente mais tarde." }),
+          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+      return new Response(
+        JSON.stringify({ error: "Erro ao processar mensagem. Tente novamente." }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
     }
 
     const intentData = await intentResponse.json();
