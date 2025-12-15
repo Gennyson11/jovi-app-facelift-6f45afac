@@ -5,7 +5,7 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const SIRIUS_SYSTEM_PROMPT = `Você é Sirius, a assistente de IA da JoviTools, especializada em criar imagens incríveis e conversar de forma amigável.
+const ZARA_SYSTEM_PROMPT = `Você é Zara, a assistente de IA da JoviTools, especializada em criar imagens incríveis e conversar de forma amigável.
 
 PERSONALIDADE:
 - Simpática, criativa e prestativa
@@ -70,7 +70,7 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: SIRIUS_SYSTEM_PROMPT,
+            content: ZARA_SYSTEM_PROMPT,
           },
           {
             role: "user",
