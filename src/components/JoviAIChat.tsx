@@ -2,9 +2,10 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Send, Download, Sparkles, Image as ImageIcon, User, Bot, Coins } from 'lucide-react';
+import { Loader2, Send, Download, Sparkles, Image as ImageIcon, User, Bot } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
+import CoinsDisplay from './CoinsDisplay';
 
 type AspectRatio = '1:1' | '16:9' | '9:16' | '4:3' | '3:4';
 
@@ -269,46 +270,24 @@ export default function JoviAIChat() {
     }
   };
 
-  const MAX_COINS = 20;
-  const coinPercentage = coins !== null ? (coins / MAX_COINS) * 100 : 0;
-  const isLowCoins = coins !== null && coins <= 5;
-
   return (
     <div className="flex flex-col h-[calc(100vh-200px)] max-h-[800px] bg-background rounded-xl border border-border overflow-hidden">
       {/* Header */}
-      <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-            <Sparkles className="w-5 h-5 text-white" />
-          </div>
-          <div>
-            <h2 className="font-semibold text-foreground">Zara</h2>
-            <p className="text-xs text-muted-foreground">Assistente IA da JoviTools</p>
+      <div className="flex flex-col gap-4 px-6 py-4 border-b border-border bg-card">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+              <Sparkles className="w-5 h-5 text-white" />
+            </div>
+            <div>
+              <h2 className="font-semibold text-foreground">Zara</h2>
+              <p className="text-xs text-muted-foreground">Assistente IA da JoviTools</p>
+            </div>
           </div>
         </div>
         
-        {/* Coins Display - Clean */}
-        <div className="flex items-center gap-3">
-          <div className="flex flex-col items-end gap-1">
-            <div className="flex items-center gap-2">
-              <Coins className={cn("w-4 h-4", isLowCoins ? "text-red-500" : "text-amber-500")} />
-              <span className={cn("text-lg font-bold", isLowCoins ? "text-red-500" : "text-foreground")}>
-                {coins !== null ? coins : '-'}
-              </span>
-              <span className="text-xs text-muted-foreground">/ {MAX_COINS}</span>
-            </div>
-            {/* Mini Progress Bar */}
-            <div className="w-24 h-1 bg-secondary rounded-full overflow-hidden">
-              <div 
-                className={cn(
-                  "h-full rounded-full transition-all duration-500",
-                  isLowCoins ? "bg-red-500" : "bg-amber-500"
-                )}
-                style={{ width: `${coinPercentage}%` }}
-              />
-            </div>
-          </div>
-        </div>
+        {/* Coins Display Card */}
+        <CoinsDisplay coins={coins} maxCoins={20} />
       </div>
 
       {/* Messages Container */}
