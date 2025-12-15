@@ -32,10 +32,10 @@ serve(async (req) => {
 
     console.log(`Generating video with prompt: ${prompt}, aspect ratio: ${aspectRatio}`);
 
-    // Create form data for the API request
+    // Create form data for the API request - following exact documentation format
     const formData = new FormData();
     formData.append('prompt', prompt);
-    formData.append('model', 'veo-3.1-fast');
+    formData.append('model', 'veo-2');
     formData.append('resolution', '720p');
     formData.append('aspect_ratio', aspectRatio || '16:9');
 
@@ -48,14 +48,17 @@ serve(async (req) => {
       body: formData,
     });
 
+    const responseText = await response.text();
+    console.log('GeminiGen API response status:', response.status);
+    console.log('GeminiGen API response:', responseText);
+
     if (!response.ok) {
-      const errorText = await response.text();
-      console.error('GeminiGen API error:', response.status, errorText);
+      console.error('GeminiGen API error:', response.status, responseText);
       
       // Parse error response
       let errorMessage = 'Falha ao gerar vídeo';
       try {
-        const errorData = JSON.parse(errorText);
+        const errorData = JSON.parse(responseText);
         if (errorData.detail?.error_code === 'PREMIUM_PLAN_REQUIRED') {
           errorMessage = 'Plano Premium necessário. A API GeminiGen requer um plano premium para gerar vídeos.';
         } else if (errorData.detail?.error_message) {
@@ -92,7 +95,7 @@ serve(async (req) => {
       );
     }
 
-    const data = await response.json();
+    const data = JSON.parse(responseText);
     console.log('Video generation response:', JSON.stringify(data));
 
     return new Response(
