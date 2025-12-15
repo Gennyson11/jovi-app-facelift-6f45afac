@@ -93,7 +93,7 @@ export default function Dashboard() {
   const [dismissedNews, setDismissedNews] = useState<string[]>([]);
   const [platformCredentials, setPlatformCredentials] = useState<Credential[]>([]);
   const [platformClicks, setPlatformClicks] = useState<Record<string, number>>({});
-  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const [activeCategory, setActiveCategory] = useState<string | null>('ai_tools');
   const {
     user,
     signOut,
