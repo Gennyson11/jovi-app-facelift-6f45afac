@@ -2,8 +2,9 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Send, Download, Sparkles, Image as ImageIcon, User, Bot } from 'lucide-react';
+import { Loader2, Send, Download, Sparkles, Image as ImageIcon, User, Bot, Coins } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
 
 type AspectRatio = '1:1' | '16:9' | '9:16' | '4:3' | '3:4';
 
@@ -37,9 +38,40 @@ export default function JoviAIChat() {
   const [prompt, setPrompt] = useState('');
   const [selectedRatio, setSelectedRatio] = useState<AspectRatio>('1:1');
   const [isLoading, setIsLoading] = useState(false);
+  const [coins, setCoins] = useState<number | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
   const { toast } = useToast();
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  // Fetch user and coins on mount
+  useEffect(() => {
+    const fetchUserAndCoins = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        setUserId(user.id);
+        // Fetch coins
+        const { data, error } = await supabase
+          .from('user_coins')
+          .select('coins')
+          .eq('user_id', user.id)
+          .single();
+        
+        if (data) {
+          setCoins(data.coins);
+        } else if (error && error.code === 'PGRST116') {
+          // No coins record, create one
+          const { data: newData } = await supabase
+            .from('user_coins')
+            .insert({ user_id: user.id, coins: 20 })
+            .select('coins')
+            .single();
+          if (newData) setCoins(newData.coins);
+        }
+      }
+    };
+    fetchUserAndCoins();
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -86,6 +118,7 @@ export default function JoviAIChat() {
           body: JSON.stringify({
             prompt: userMessage.content,
             aspectRatio: selectedRatio,
+            userId: userId,
           }),
         }
       );
@@ -93,7 +126,16 @@ export default function JoviAIChat() {
       const data = await response.json();
 
       if (!response.ok) {
+        // Update coins if returned in error response
+        if (data.coins !== undefined) {
+          setCoins(data.coins);
+        }
         throw new Error(data.error || 'Erro ao processar mensagem');
+      }
+
+      // Update coins from response
+      if (data.coins !== undefined) {
+        setCoins(data.coins);
       }
 
       // Handle both chat and image responses
@@ -230,13 +272,23 @@ export default function JoviAIChat() {
   return (
     <div className="flex flex-col h-[calc(100vh-200px)] max-h-[800px] bg-background rounded-xl border border-border overflow-hidden">
       {/* Header */}
-      <div className="flex items-center gap-3 px-6 py-4 border-b border-border bg-card">
-        <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
-          <Sparkles className="w-5 h-5 text-white" />
+      <div className="flex items-center justify-between px-6 py-4 border-b border-border bg-card">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-purple-500 to-pink-500 flex items-center justify-center">
+            <Sparkles className="w-5 h-5 text-white" />
+          </div>
+          <div>
+            <h2 className="font-semibold text-foreground">Zara</h2>
+            <p className="text-xs text-muted-foreground">Assistente IA da JoviTools</p>
+          </div>
         </div>
-        <div>
-          <h2 className="font-semibold text-foreground">Zara</h2>
-          <p className="text-xs text-muted-foreground">Assistente IA da JoviTools</p>
+        {/* Coins Display */}
+        <div className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-amber-500/20 to-yellow-500/20 rounded-full border border-amber-500/30">
+          <Coins className="w-4 h-4 text-amber-400" />
+          <span className="text-sm font-semibold text-amber-400">
+            {coins !== null ? coins : '-'}
+          </span>
+          <span className="text-xs text-amber-400/70">moedas</span>
         </div>
       </div>
 
