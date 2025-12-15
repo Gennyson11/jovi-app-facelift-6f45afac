@@ -13,8 +13,7 @@ import {
   Menu,
   X,
   ChevronLeft,
-  Bot,
-  Video
+  Bot
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -40,7 +39,6 @@ const DASHBOARD_ITEMS = [
   { id: 'softwares', label: 'Softwares', icon: Monitor, category: 'software' },
   { id: 'biblioteca', label: 'Bônus', icon: Library, category: 'bonus_courses' },
   { id: 'jovi_ia', label: 'Jovi.ia', icon: Bot, category: 'jovi_ia' },
-  { id: 'veo3', label: 'Veo3', icon: Video, category: 'veo3' },
 ];
 
 const GENERAL_ITEMS = [
