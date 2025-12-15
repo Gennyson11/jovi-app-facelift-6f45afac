@@ -28,18 +28,10 @@ COMO IDENTIFICAR A INTENÇÃO:
 - Se for descrição de algo visual para criar → GERAR IMAGEM
 - Se pedir explicitamente para criar/gerar/fazer uma imagem → GERAR IMAGEM
 
-RESPONDA SEMPRE EM JSON:
-{
-  "intent": "chat" ou "image",
-  "response": "sua resposta em texto",
-  "imagePrompt": "prompt otimizado para geração (apenas se intent=image)"
-}
+RESPONDA SEMPRE EM JSON válido (sem markdown):
+{"intent": "chat" ou "image", "response": "sua resposta em texto", "imagePrompt": "prompt otimizado em inglês para geração (apenas se intent=image)"}
 
-Quando for gerar imagem, crie um prompt em inglês, profissional, detalhado e otimizado para IA, seguindo estas diretrizes:
-- Estética limpa, moderna e comercial
-- Composição equilibrada e iluminação adequada
-- Alta resolução e nitidez
-- Defina estilo visual, paleta de cores, iluminação, enquadramento e emoção`;
+Quando for gerar imagem, crie um prompt em inglês, profissional, detalhado e otimizado para IA.`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -56,11 +48,6 @@ serve(async (req) => {
       );
     }
 
-    const LOVABLE_API_KEY = Deno.env.get("LOVABLE_API_KEY");
-    if (!LOVABLE_API_KEY) {
-      throw new Error("LOVABLE_API_KEY não está configurada");
-    }
-
     // Initialize Supabase client with service role for coin management
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
@@ -71,53 +58,26 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    console.log("Step 1: Analyzing intent with Jovizeira...");
+    console.log("Step 1: Analyzing intent with Pollinations Text API...");
 
-    // Step 1: Analyze intent and get response
-    const intentResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
-        messages: [
-          {
-            role: "system",
-            content: ZARA_SYSTEM_PROMPT,
-          },
-          {
-            role: "user",
-            content: prompt,
-          },
-        ],
-      }),
+    // Step 1: Analyze intent using Pollinations Text API
+    const systemPromptEncoded = encodeURIComponent(ZARA_SYSTEM_PROMPT);
+    const userPromptEncoded = encodeURIComponent(prompt);
+    const intentUrl = `https://text.pollinations.ai/${userPromptEncoded}?model=openai&json=true&system=${systemPromptEncoded}`;
+
+    const intentResponse = await fetch(intentUrl, {
+      method: "GET",
     });
 
     if (!intentResponse.ok) {
       console.error("Error analyzing intent:", intentResponse.status);
-      if (intentResponse.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Limite de requisições excedido. Tente novamente em alguns segundos." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (intentResponse.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Créditos da plataforma esgotados temporariamente. Tente novamente mais tarde." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
       return new Response(
         JSON.stringify({ error: "Erro ao processar mensagem. Tente novamente." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const intentData = await intentResponse.json();
-    const rawResponse = intentData.choices?.[0]?.message?.content || "";
-    
+    const rawResponse = await intentResponse.text();
     console.log("Raw AI response:", rawResponse);
 
     // Parse JSON response
