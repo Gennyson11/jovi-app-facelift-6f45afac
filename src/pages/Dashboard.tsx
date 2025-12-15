@@ -27,7 +27,7 @@ const CATEGORY_CONFIG: Record<PlatformCategory, {
     color: 'from-red-500 to-orange-500'
   },
   'software': {
-    label: 'SOFTWARES',
+    label: 'Softwares',
     icon: '💻',
     color: 'from-blue-500 to-cyan-500'
   },
