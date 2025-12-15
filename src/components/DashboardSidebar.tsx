@@ -12,7 +12,8 @@ import {
   LogOut,
   Menu,
   X,
-  ChevronLeft
+  ChevronLeft,
+  Bot
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -41,6 +42,7 @@ const DASHBOARD_ITEMS = [
 
 const GENERAL_ITEMS = [
   { id: 'sorteios', label: 'Sorteios', icon: Gift, category: 'sorteios', disabled: false },
+  { id: 'jovi_ia', label: 'Jovi.ia', icon: Bot, category: 'jovi_ia', disabled: false },
   { id: 'suporte', label: 'Suporte', icon: Headphones, href: 'https://bit.ly/whatsapp-suportejt', external: true },
   { id: 'configuracoes', label: 'Configurações', icon: Settings, href: '/settings', route: true },
 ];
