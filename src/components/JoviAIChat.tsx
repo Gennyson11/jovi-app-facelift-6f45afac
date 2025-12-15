@@ -51,23 +51,22 @@ export default function JoviAIChat() {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         setUserId(user.id);
-        // Fetch coins
-        const { data, error } = await supabase
-          .from('user_coins')
-          .select('coins')
-          .eq('user_id', user.id)
-          .single();
+        // Use the check_and_reset_coins function which handles initialization for existing users
+        const { data: coinsData, error } = await supabase.rpc('check_and_reset_coins', {
+          p_user_id: user.id
+        });
         
-        if (data) {
-          setCoins(data.coins);
-        } else if (error && error.code === 'PGRST116') {
-          // No coins record, create one
-          const { data: newData } = await supabase
+        if (!error && coinsData !== null) {
+          setCoins(coinsData);
+        } else {
+          console.error('Error fetching coins:', error);
+          // Fallback: try direct query
+          const { data } = await supabase
             .from('user_coins')
-            .insert({ user_id: user.id, coins: 20 })
             .select('coins')
+            .eq('user_id', user.id)
             .single();
-          if (newData) setCoins(newData.coins);
+          if (data) setCoins(data.coins);
         }
       }
     };
