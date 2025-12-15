@@ -20,7 +20,7 @@ type PlatformCategory = 'ai_tools' | 'streamings' | 'software' | 'bonus_courses'
 const CATEGORY_LABELS: Record<PlatformCategory, string> = {
   'ai_tools': 'Ferramentas IAs & Variadas',
   'streamings': 'Streamings',
-  'software': 'Software',
+  'software': 'Softwares',
   'bonus_courses': 'Bônus: Cursos'
 };
 interface Platform {
