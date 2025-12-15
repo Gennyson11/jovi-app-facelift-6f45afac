@@ -1,1 +1,13 @@
 project_id = "xuwnkzwfsprhmuxynlap"
+
+[functions.generate-image]
+verify_jwt = false
+
+[functions.setup-users]
+verify_jwt = false
+
+[functions.generate-video]
+verify_jwt = false
+
+[functions.check-video-status]
+verify_jwt = false
