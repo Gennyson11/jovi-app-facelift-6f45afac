@@ -38,11 +38,11 @@ const DASHBOARD_ITEMS = [
   { id: 'streamings', label: 'Streamings', icon: Clapperboard, category: 'streamings' },
   { id: 'softwares', label: 'Softwares', icon: Monitor, category: 'software' },
   { id: 'biblioteca', label: 'Bônus', icon: Library, category: 'bonus_courses' },
+  { id: 'jovi_ia', label: 'Jovi.ia', icon: Bot, category: 'jovi_ia' },
 ];
 
 const GENERAL_ITEMS = [
   { id: 'sorteios', label: 'Sorteios', icon: Gift, category: 'sorteios', disabled: false },
-  { id: 'jovi_ia', label: 'Jovi.ia', icon: Bot, category: 'jovi_ia', disabled: false },
   { id: 'suporte', label: 'Suporte', icon: Headphones, href: 'https://bit.ly/whatsapp-suportejt', external: true },
   { id: 'configuracoes', label: 'Configurações', icon: Settings, href: '/settings', route: true },
 ];
