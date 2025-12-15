@@ -5,38 +5,36 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const JOVITOOLS_SYSTEM_PROMPT = `You are Jovizeira, an expert AI agent specialized in generating highly visual, commercial, and professional images focused on quality, clarity, and market appeal.
+const JOVIZEIRA_SYSTEM_PROMPT = `Você é Jovizeira, a assistente de IA da JoviTools, especializada em criar imagens incríveis e conversar de forma amigável.
 
-Your role is to create detailed, objective, and optimized prompts for AI image generation, following these guidelines:
+PERSONALIDADE:
+- Simpática, criativa e prestativa
+- Fala português brasileiro de forma natural e descontraída
+- Usa emojis ocasionalmente para ser mais expressiva
+- É entusiasmada sobre criação de imagens e arte digital
 
-Main Guidelines:
-- Produce images with clean, modern, and commercial aesthetics
-- Prioritize balanced composition, realistic or stylized lighting according to the theme
-- Ensure high resolution, sharpness, and absence of artifacts
-- Avoid illegible text, registered trademarks, or protected elements
-- Adapt the style according to the objective (realistic, illustration, vector, cartoon, 3D, motion, abstract, paper cut, etc.)
+CAPACIDADES:
+1. CONVERSA: Responder saudações, perguntas e manter conversas amigáveis
+2. CRIAÇÃO DE IMAGENS: Quando o usuário descreve uma imagem que quer criar
 
-Always clearly define:
-- Visual style
-- Color palette
-- Type of lighting
-- Framing and perspective
-- Emotion or message conveyed
-- Commercial context (advertising, technology, education, business, seasonal, social media, stock images)
+COMO IDENTIFICAR A INTENÇÃO:
+- Se for saudação (oi, olá, hey, bom dia, etc.) → CONVERSAR
+- Se for pergunta sobre você ou suas capacidades → CONVERSAR  
+- Se for descrição de algo visual para criar → GERAR IMAGEM
+- Se pedir explicitamente para criar/gerar/fazer uma imagem → GERAR IMAGEM
 
-When applicable, include:
-- Clean or contextual background
-- Negative space for advertising use
-- Composition designed for Adobe Stock and digital media
+RESPONDA SEMPRE EM JSON:
+{
+  "intent": "chat" ou "image",
+  "response": "sua resposta em texto",
+  "imagePrompt": "prompt otimizado para geração (apenas se intent=image)"
+}
 
-Output format:
-- Clear, well-structured prompts ready for use
-- Written in English with technical and descriptive language
-- Always focused on generating unique, sellable, and professional images
-
-Your ultimate goal is to maximize acceptance in image banks and visual impact for brands, always representing the Jovizeira identity as synonymous with quality, innovation, and efficiency.
-
-Based on the user's description, create an enhanced, detailed image generation prompt. Only output the enhanced prompt, nothing else.`;
+Quando for gerar imagem, crie um prompt em inglês, profissional, detalhado e otimizado para IA, seguindo estas diretrizes:
+- Estética limpa, moderna e comercial
+- Composição equilibrada e iluminação adequada
+- Alta resolução e nitidez
+- Defina estilo visual, paleta de cores, iluminação, enquadramento e emoção`;
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -58,21 +56,10 @@ serve(async (req) => {
       throw new Error("LOVABLE_API_KEY não está configurada");
     }
 
-    // Aspect ratio descriptions for context
-    const aspectRatioDescriptions: Record<string, string> = {
-      "1:1": "square format (1:1 aspect ratio)",
-      "16:9": "widescreen landscape format (16:9 aspect ratio)",
-      "9:16": "vertical portrait format (9:16 aspect ratio, ideal for mobile/stories)",
-      "4:3": "standard landscape format (4:3 aspect ratio)",
-      "3:4": "standard portrait format (3:4 aspect ratio)",
-    };
+    console.log("Step 1: Analyzing intent with Jovizeira...");
 
-    const aspectDescription = aspectRatioDescriptions[aspectRatio] || "square format";
-
-    console.log("Step 1: Enhancing prompt with JoviTools agent...");
-
-    // Step 1: Use text model to enhance the prompt with JoviTools expertise
-    const enhanceResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
+    // Step 1: Analyze intent and get response
+    const intentResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${LOVABLE_API_KEY}`,
@@ -83,28 +70,71 @@ serve(async (req) => {
         messages: [
           {
             role: "system",
-            content: JOVITOOLS_SYSTEM_PROMPT,
+            content: JOVIZEIRA_SYSTEM_PROMPT,
           },
           {
             role: "user",
-            content: `Create an enhanced image generation prompt for: "${prompt}". The image should be in ${aspectDescription}. Make it professional, detailed, and optimized for commercial use.`,
+            content: prompt,
           },
         ],
       }),
     });
 
-    if (!enhanceResponse.ok) {
-      console.error("Error enhancing prompt:", enhanceResponse.status);
-      throw new Error("Erro ao processar prompt");
+    if (!intentResponse.ok) {
+      console.error("Error analyzing intent:", intentResponse.status);
+      throw new Error("Erro ao processar mensagem");
     }
 
-    const enhanceData = await enhanceResponse.json();
-    const enhancedPrompt = enhanceData.choices?.[0]?.message?.content || prompt;
+    const intentData = await intentResponse.json();
+    const rawResponse = intentData.choices?.[0]?.message?.content || "";
+    
+    console.log("Raw AI response:", rawResponse);
 
-    console.log("Enhanced prompt:", enhancedPrompt);
-    console.log("Step 2: Generating image...");
+    // Parse JSON response
+    let parsedResponse;
+    try {
+      // Extract JSON from response (handle markdown code blocks)
+      const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        parsedResponse = JSON.parse(jsonMatch[0]);
+      } else {
+        throw new Error("No JSON found");
+      }
+    } catch (parseError) {
+      console.log("Failed to parse JSON, treating as chat:", parseError);
+      parsedResponse = {
+        intent: "chat",
+        response: rawResponse,
+      };
+    }
 
-    // Step 2: Generate image with enhanced prompt
+    console.log("Parsed response:", parsedResponse);
+
+    // If it's just a chat message, return the text response
+    if (parsedResponse.intent === "chat") {
+      return new Response(
+        JSON.stringify({ 
+          type: "chat",
+          message: parsedResponse.response,
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // If it's an image request, generate the image
+    const aspectRatioDescriptions: Record<string, string> = {
+      "1:1": "square format (1:1 aspect ratio)",
+      "16:9": "widescreen landscape format (16:9 aspect ratio)",
+      "9:16": "vertical portrait format (9:16 aspect ratio)",
+      "4:3": "standard landscape format (4:3 aspect ratio)",
+      "3:4": "standard portrait format (3:4 aspect ratio)",
+    };
+
+    const aspectDescription = aspectRatioDescriptions[aspectRatio] || "square format";
+    const enhancedPrompt = `${parsedResponse.imagePrompt || parsedResponse.response}. Generate in ${aspectDescription}. Ultra high resolution, high quality, professional commercial image.`;
+
+    console.log("Step 2: Generating image with prompt:", enhancedPrompt);
+
     const imageResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -148,7 +178,6 @@ serve(async (req) => {
     console.log("Image generation completed");
 
     const imageUrl = imageData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-    const textContent = imageData.choices?.[0]?.message?.content || "";
 
     if (!imageUrl) {
       return new Response(
@@ -159,9 +188,10 @@ serve(async (req) => {
 
     return new Response(
       JSON.stringify({ 
+        type: "image",
+        message: parsedResponse.response,
         imageUrl, 
-        message: textContent,
-        enhancedPrompt 
+        enhancedPrompt: parsedResponse.imagePrompt || enhancedPrompt,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );

@@ -93,16 +93,17 @@ export default function JoviAIChat() {
       const data = await response.json();
 
       if (!response.ok) {
-        throw new Error(data.error || 'Erro ao gerar imagem');
+        throw new Error(data.error || 'Erro ao processar mensagem');
       }
 
+      // Handle both chat and image responses
       const assistantMessage: Message = {
         id: loadingMessage.id,
         role: 'assistant',
-        content: 'Imagem gerada com sucesso! ✨',
-        imageUrl: data.imageUrl,
-        aspectRatio: selectedRatio,
-        enhancedPrompt: data.enhancedPrompt,
+        content: data.message || (data.type === 'image' ? 'Aqui está sua imagem! ✨' : 'Olá!'),
+        imageUrl: data.type === 'image' ? data.imageUrl : undefined,
+        aspectRatio: data.type === 'image' ? selectedRatio : undefined,
+        enhancedPrompt: data.type === 'image' ? data.enhancedPrompt : undefined,
         timestamp: new Date(),
       };
 
@@ -115,7 +116,7 @@ export default function JoviAIChat() {
       setMessages((prev) => prev.filter((msg) => msg.id !== loadingMessage.id));
       
       toast({
-        title: "Erro ao gerar imagem",
+        title: "Erro",
         description: error instanceof Error ? error.message : "Tente novamente mais tarde.",
         variant: "destructive",
       });
