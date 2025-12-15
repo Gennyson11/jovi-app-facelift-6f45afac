@@ -175,22 +175,10 @@ export default function DashboardSidebar({
 
       {/* Footer */}
       <div className="mt-auto border-t border-border">
-        {/* Logout */}
-        <button
-          onClick={onLogout}
-          className={cn(
-            "w-full flex items-center gap-3 px-6 py-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all",
-            isCollapsed && "justify-center px-2"
-          )}
-        >
-          <LogOut className="h-5 w-5 flex-shrink-0" />
-          {!isCollapsed && <span>Sair</span>}
-        </button>
-
         {/* User Profile */}
         {userProfile && (
           <div className={cn(
-            "p-4 border-t border-border flex items-center gap-3",
+            "p-4 flex items-center gap-3",
             isCollapsed && "justify-center"
           )}>
             {userProfile.avatar_url ? (
@@ -216,6 +204,18 @@ export default function DashboardSidebar({
             )}
           </div>
         )}
+
+        {/* Logout */}
+        <button
+          onClick={onLogout}
+          className={cn(
+            "w-full flex items-center gap-3 px-6 py-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all border-t border-border",
+            isCollapsed && "justify-center px-2"
+          )}
+        >
+          <LogOut className="h-5 w-5 flex-shrink-0" />
+          {!isCollapsed && <span>Sair</span>}
+        </button>
       </div>
     </div>
   );
