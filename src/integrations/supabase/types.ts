@@ -76,6 +76,7 @@ export type Database = {
       profiles: {
         Row: {
           access_expires_at: string | null
+          avatar_url: string | null
           created_at: string
           email: string
           has_access: boolean
@@ -83,9 +84,11 @@ export type Database = {
           name: string | null
           updated_at: string
           user_id: string
+          whatsapp: string | null
         }
         Insert: {
           access_expires_at?: string | null
+          avatar_url?: string | null
           created_at?: string
           email: string
           has_access?: boolean
@@ -93,9 +96,11 @@ export type Database = {
           name?: string | null
           updated_at?: string
           user_id: string
+          whatsapp?: string | null
         }
         Update: {
           access_expires_at?: string | null
+          avatar_url?: string | null
           created_at?: string
           email?: string
           has_access?: boolean
@@ -103,6 +108,7 @@ export type Database = {
           name?: string | null
           updated_at?: string
           user_id?: string
+          whatsapp?: string | null
         }
         Relationships: []
       }
