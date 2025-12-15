@@ -192,77 +192,53 @@ serve(async (req) => {
 
     console.log("Coin deducted. Remaining coins:", coinData.remaining_coins);
 
-    // If it's an image request, generate the image
-    const aspectRatioDescriptions: Record<string, string> = {
-      "1:1": "square format (1:1 aspect ratio)",
-      "16:9": "widescreen landscape format (16:9 aspect ratio)",
-      "9:16": "vertical portrait format (9:16 aspect ratio)",
-      "4:3": "standard landscape format (4:3 aspect ratio)",
-      "3:4": "standard portrait format (3:4 aspect ratio)",
+    // If it's an image request, generate the image using Pollinations API
+    const aspectRatioDimensions: Record<string, { width: number; height: number }> = {
+      "1:1": { width: 1024, height: 1024 },
+      "16:9": { width: 1920, height: 1080 },
+      "9:16": { width: 1080, height: 1920 },
+      "4:3": { width: 1024, height: 768 },
+      "3:4": { width: 768, height: 1024 },
     };
 
-    const aspectDescription = aspectRatioDescriptions[aspectRatio] || "square format";
-    const enhancedPrompt = `${parsedResponse.imagePrompt || parsedResponse.response}. Generate in ${aspectDescription}. Ultra high resolution, high quality, professional commercial image.`;
+    const dimensions = aspectRatioDimensions[aspectRatio] || { width: 1024, height: 1024 };
+    const imagePrompt = parsedResponse.imagePrompt || parsedResponse.response;
+    const enhancedPrompt = `${imagePrompt}. Ultra high resolution, high quality, professional commercial image.`;
 
-    console.log("Step 2: Generating image with prompt:", enhancedPrompt);
+    console.log("Step 2: Generating image with Pollinations API:", enhancedPrompt);
 
-    const imageResponse = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${LOVABLE_API_KEY}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        model: "google/gemini-2.5-flash-image-preview",
-        messages: [
-          {
-            role: "user",
-            content: enhancedPrompt,
-          },
-        ],
-        modalities: ["image", "text"],
-      }),
+    // Build Pollinations URL with parameters
+    const encodedPrompt = encodeURIComponent(enhancedPrompt);
+    const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${dimensions.width}&height=${dimensions.height}&model=flux&nologo=true&enhance=true`;
+
+    console.log("Pollinations URL:", pollinationsUrl);
+
+    // Fetch image from Pollinations
+    const imageResponse = await fetch(pollinationsUrl, {
+      method: "GET",
     });
 
     if (!imageResponse.ok) {
-      if (imageResponse.status === 429) {
-        return new Response(
-          JSON.stringify({ error: "Limite de requisições excedido. Tente novamente mais tarde." }),
-          { status: 429, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      if (imageResponse.status === 402) {
-        return new Response(
-          JSON.stringify({ error: "Créditos insuficientes. Adicione créditos à sua conta." }),
-          { status: 402, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-        );
-      }
-      const errorText = await imageResponse.text();
-      console.error("AI gateway error:", imageResponse.status, errorText);
+      console.error("Pollinations API error:", imageResponse.status);
       return new Response(
-        JSON.stringify({ error: "Erro ao gerar imagem" }),
+        JSON.stringify({ error: "Erro ao gerar imagem. Tente novamente." }),
         { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    const imageData = await imageResponse.json();
-    console.log("Image generation completed");
+    // Convert image to base64
+    const imageBuffer = await imageResponse.arrayBuffer();
+    const base64Image = btoa(String.fromCharCode(...new Uint8Array(imageBuffer)));
+    const imageUrl = `data:image/jpeg;base64,${base64Image}`;
 
-    const imageUrl = imageData.choices?.[0]?.message?.images?.[0]?.image_url?.url;
-
-    if (!imageUrl) {
-      return new Response(
-        JSON.stringify({ error: "Não foi possível gerar a imagem. Tente novamente." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
+    console.log("Image generation completed with Pollinations");
 
     return new Response(
       JSON.stringify({ 
         type: "image",
         message: parsedResponse.response,
         imageUrl, 
-        enhancedPrompt: parsedResponse.imagePrompt || enhancedPrompt,
+        enhancedPrompt: imagePrompt,
         coins: coinData.remaining_coins,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
