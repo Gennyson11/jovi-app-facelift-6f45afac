@@ -27,6 +27,7 @@ interface Message {
   content: string;
   imageUrl?: string;
   aspectRatio?: AspectRatio;
+  enhancedPrompt?: string;
   isLoading?: boolean;
   timestamp: Date;
 }
@@ -98,9 +99,10 @@ export default function JoviAIChat() {
       const assistantMessage: Message = {
         id: loadingMessage.id,
         role: 'assistant',
-        content: 'Aqui está sua imagem gerada:',
+        content: 'Imagem gerada com sucesso! ✨',
         imageUrl: data.imageUrl,
         aspectRatio: selectedRatio,
+        enhancedPrompt: data.enhancedPrompt,
         timestamp: new Date(),
       };
 
@@ -260,22 +262,35 @@ export default function JoviAIChat() {
 
                   {/* Generated Image */}
                   {message.imageUrl && (
-                    <div className={cn("relative group rounded-xl overflow-hidden", getAspectRatioClass(message.aspectRatio))}>
-                      <img
-                        src={message.imageUrl}
-                        alt="Imagem gerada"
-                        className="w-full h-full object-cover"
-                      />
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                        <Button
-                          variant="secondary"
-                          size="sm"
-                          onClick={() => handleDownload(message.imageUrl!, message.content)}
-                        >
-                          <Download className="w-4 h-4 mr-2" />
-                          Baixar
-                        </Button>
+                    <div className="space-y-2">
+                      <div className={cn("relative group rounded-xl overflow-hidden", getAspectRatioClass(message.aspectRatio))}>
+                        <img
+                          src={message.imageUrl}
+                          alt="Imagem gerada"
+                          className="w-full h-full object-cover"
+                        />
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Button
+                            variant="secondary"
+                            size="sm"
+                            onClick={() => handleDownload(message.imageUrl!, message.content)}
+                          >
+                            <Download className="w-4 h-4 mr-2" />
+                            Baixar
+                          </Button>
+                        </div>
                       </div>
+                      {/* Enhanced Prompt Display */}
+                      {message.enhancedPrompt && (
+                        <details className="text-xs">
+                          <summary className="cursor-pointer text-muted-foreground hover:text-foreground transition-colors">
+                            Ver prompt otimizado
+                          </summary>
+                          <div className="mt-2 p-3 bg-secondary/50 rounded-lg text-muted-foreground whitespace-pre-wrap max-h-[150px] overflow-y-auto">
+                            {message.enhancedPrompt}
+                          </div>
+                        </details>
+                      )}
                     </div>
                   )}
                 </div>
