@@ -132,18 +132,81 @@ export default function JoviAIChat() {
     }
   };
 
-  const handleDownload = async (imageUrl: string, prompt: string) => {
+  const handleDownload = async (imageUrl: string, prompt: string, aspectRatio?: AspectRatio) => {
     try {
-      const response = await fetch(imageUrl);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `jovi-ia-${prompt.slice(0, 30).replace(/\s+/g, '-')}.png`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
-      window.URL.revokeObjectURL(url);
+      // Create an image element to load the original image
+      const img = new Image();
+      img.crossOrigin = 'anonymous';
+      
+      await new Promise<void>((resolve, reject) => {
+        img.onload = () => resolve();
+        img.onerror = () => reject(new Error('Failed to load image'));
+        img.src = imageUrl;
+      });
+
+      // Get target dimensions based on aspect ratio
+      const getDimensions = (ratio?: AspectRatio): { width: number; height: number } => {
+        const baseSize = Math.max(img.naturalWidth, img.naturalHeight, 1024);
+        switch (ratio) {
+          case '16:9':
+            return { width: baseSize, height: Math.round(baseSize * 9 / 16) };
+          case '9:16':
+            return { width: Math.round(baseSize * 9 / 16), height: baseSize };
+          case '4:3':
+            return { width: baseSize, height: Math.round(baseSize * 3 / 4) };
+          case '3:4':
+            return { width: Math.round(baseSize * 3 / 4), height: baseSize };
+          default: // 1:1
+            return { width: baseSize, height: baseSize };
+        }
+      };
+
+      const { width, height } = getDimensions(aspectRatio);
+
+      // Create canvas with the correct aspect ratio dimensions
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      
+      if (!ctx) throw new Error('Could not get canvas context');
+
+      // Draw image maintaining aspect ratio (cover)
+      const imgRatio = img.naturalWidth / img.naturalHeight;
+      const canvasRatio = width / height;
+      
+      let drawWidth = width;
+      let drawHeight = height;
+      let offsetX = 0;
+      let offsetY = 0;
+
+      if (imgRatio > canvasRatio) {
+        // Image is wider - fit height, crop width
+        drawWidth = height * imgRatio;
+        offsetX = (width - drawWidth) / 2;
+      } else {
+        // Image is taller - fit width, crop height
+        drawHeight = width / imgRatio;
+        offsetY = (height - drawHeight) / 2;
+      }
+
+      ctx.drawImage(img, offsetX, offsetY, drawWidth, drawHeight);
+
+      // Convert to blob and download
+      canvas.toBlob((blob) => {
+        if (!blob) {
+          window.open(imageUrl, '_blank');
+          return;
+        }
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `zara-${prompt.slice(0, 30).replace(/\s+/g, '-')}.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      }, 'image/png');
     } catch {
       window.open(imageUrl, '_blank');
     }
@@ -274,7 +337,7 @@ export default function JoviAIChat() {
                           <Button
                             variant="secondary"
                             size="sm"
-                            onClick={() => handleDownload(message.imageUrl!, message.content)}
+                            onClick={() => handleDownload(message.imageUrl!, message.content, message.aspectRatio)}
                           >
                             <Download className="w-4 h-4 mr-2" />
                             Baixar
