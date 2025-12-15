@@ -40,8 +40,7 @@ const DASHBOARD_ITEMS = [
 ];
 
 const GENERAL_ITEMS = [
-  { id: 'sorteios', label: 'Sorteios', icon: Gift, href: null, disabled: true },
-  { id: 'cupom', label: 'Cupom', icon: Ticket, href: null, disabled: true },
+  { id: 'sorteios', label: 'Sorteios', icon: Gift, category: 'sorteios', disabled: false },
   { id: 'suporte', label: 'Suporte', icon: Headphones, href: 'https://bit.ly/whatsapp-suportejt', external: true },
   { id: 'configuracoes', label: 'Configurações', icon: Settings, href: '/settings', route: true },
 ];
@@ -75,7 +74,13 @@ export default function DashboardSidebar({
 
   const handleGeneralItemClick = (item: typeof GENERAL_ITEMS[0]) => {
     if (item.disabled) return;
-    if (item.external && item.href) {
+    if (item.category) {
+      // Navigate to dashboard if not already there
+      if (location.pathname !== '/dashboard') {
+        navigate('/dashboard');
+      }
+      onCategorySelect(item.category);
+    } else if (item.external && item.href) {
       window.open(item.href, '_blank');
     } else if (item.route && item.href) {
       navigate(item.href);
@@ -142,7 +147,7 @@ export default function DashboardSidebar({
           )}
           <nav className="space-y-1">
             {GENERAL_ITEMS.map((item) => {
-              const isActive = item.route && item.href === location.pathname;
+              const isActive = (item.category && activeCategory === item.category) || (item.route && item.href === location.pathname);
               return (
               <button
                 key={item.id}
