@@ -35,7 +35,7 @@ const DASHBOARD_ITEMS = [
   { id: 'ferramentas', label: 'Ferramentas', icon: Wrench, category: 'ai_tools' },
   { id: 'streamings', label: 'Streamings', icon: Clapperboard, category: 'streamings' },
   { id: 'softwares', label: 'Softwares', icon: Monitor, category: 'software' },
-  { id: 'biblioteca', label: 'Biblioteca', icon: Library, category: 'bonus_courses' },
+  { id: 'biblioteca', label: 'Bônus', icon: Library, category: 'bonus_courses' },
 ];
 
 const GENERAL_ITEMS = [
