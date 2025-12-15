@@ -2,7 +2,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Send, Download, Sparkles, Image as ImageIcon, User, Bot, Coins } from 'lucide-react';
+import { Loader2, Send, Download, Sparkles, Image as ImageIcon, User, Bot, Coins, AlertTriangle, TrendingDown } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -269,6 +269,22 @@ export default function JoviAIChat() {
     }
   };
 
+  const MAX_COINS = 20;
+  const coinPercentage = coins !== null ? (coins / MAX_COINS) * 100 : 0;
+  const isLowCoins = coins !== null && coins <= 5;
+  const isCriticalCoins = coins !== null && coins <= 2;
+  
+  const getStatus = () => {
+    if (coins === null) return { text: '-', color: 'text-muted-foreground' };
+    if (coins === 0) return { text: 'Esgotado', color: 'text-red-500' };
+    if (coins <= 2) return { text: 'Crítico', color: 'text-red-500' };
+    if (coins <= 5) return { text: 'Baixo', color: 'text-amber-500' };
+    if (coins <= 10) return { text: 'Moderado', color: 'text-yellow-500' };
+    return { text: 'Bom', color: 'text-emerald-500' };
+  };
+
+  const status = getStatus();
+
   return (
     <div className="flex flex-col h-[calc(100vh-200px)] max-h-[800px] bg-background rounded-xl border border-border overflow-hidden">
       {/* Header */}
@@ -282,12 +298,94 @@ export default function JoviAIChat() {
             <p className="text-xs text-muted-foreground">Assistente IA da JoviTools</p>
           </div>
         </div>
-        {/* Coins Display */}
-        <div className="flex items-center gap-2 px-4 py-2 bg-amber-500/10 rounded-lg border border-amber-500/30">
-          <Coins className="w-5 h-5 text-amber-500" />
-          <span className="text-lg font-bold text-amber-500">
-            {coins !== null ? coins : '-'}
-          </span>
+        
+        {/* Coins Display Card */}
+        <div className={cn(
+          "flex flex-col gap-2 px-4 py-3 rounded-xl border min-w-[200px]",
+          isCriticalCoins 
+            ? "bg-red-500/10 border-red-500/30" 
+            : isLowCoins 
+              ? "bg-amber-500/10 border-amber-500/30"
+              : "bg-card border-border"
+        )}>
+          <div className="flex items-center justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <div className={cn(
+                "w-8 h-8 rounded-lg flex items-center justify-center",
+                isCriticalCoins 
+                  ? "bg-red-500/20" 
+                  : isLowCoins 
+                    ? "bg-amber-500/20"
+                    : "bg-primary/20"
+              )}>
+                <Coins className={cn(
+                  "w-4 h-4",
+                  isCriticalCoins 
+                    ? "text-red-500" 
+                    : isLowCoins 
+                      ? "text-amber-500"
+                      : "text-primary"
+                )} />
+              </div>
+              <div>
+                <p className="text-[10px] text-muted-foreground uppercase tracking-wide">Moedas</p>
+                <p className={cn(
+                  "text-xl font-bold leading-none",
+                  isCriticalCoins 
+                    ? "text-red-500" 
+                    : isLowCoins 
+                      ? "text-amber-500"
+                      : "text-foreground"
+                )}>
+                  {coins !== null ? coins : '-'}
+                </p>
+              </div>
+            </div>
+            
+            {isLowCoins && (
+              <div className={cn(
+                "flex items-center gap-1 px-2 py-1 rounded-md text-[10px] font-medium",
+                isCriticalCoins 
+                  ? "bg-red-500/20 text-red-500"
+                  : "bg-amber-500/20 text-amber-500"
+              )}>
+                <AlertTriangle className="w-3 h-3" />
+                {isCriticalCoins ? 'Crítico' : 'Baixo'}
+              </div>
+            )}
+          </div>
+          
+          {/* Progress Bar */}
+          <div className="space-y-1">
+            <div className="flex justify-between text-[10px] text-muted-foreground">
+              <span>Progresso</span>
+              <span>{Math.round(coinPercentage)}%</span>
+            </div>
+            <div className="h-1.5 bg-secondary rounded-full overflow-hidden">
+              <div 
+                className={cn(
+                  "h-full rounded-full transition-all duration-500",
+                  isCriticalCoins 
+                    ? "bg-red-500" 
+                    : isLowCoins 
+                      ? "bg-amber-500"
+                      : coinPercentage > 50 
+                        ? "bg-emerald-500"
+                        : "bg-yellow-500"
+                )}
+                style={{ width: `${coinPercentage}%` }}
+              />
+            </div>
+          </div>
+          
+          {/* Status */}
+          <div className="flex items-center justify-between text-[10px]">
+            <span className="text-muted-foreground flex items-center gap-1">
+              <TrendingDown className="w-3 h-3" />
+              Status
+            </span>
+            <span className={cn("font-medium", status.color)}>{status.text}</span>
+          </div>
         </div>
       </div>
 
