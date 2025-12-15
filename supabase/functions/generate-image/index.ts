@@ -6,32 +6,85 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const ZARA_SYSTEM_PROMPT = `Você é Zara, a assistente de IA da JoviTools, especializada em criar imagens incríveis e conversar de forma amigável.
+// Simple intent detection based on keywords
+function detectIntent(prompt: string): { intent: 'chat' | 'image', response: string } {
+  const lowerPrompt = prompt.toLowerCase().trim();
+  
+  // Chat keywords (greetings, questions about the bot)
+  const chatPatterns = [
+    /^(oi|olá|ola|hey|hi|hello|e aí|eai|opa|salve|bom dia|boa tarde|boa noite)/,
+    /^(quem é você|quem e voce|o que você faz|o que voce faz|como você funciona|como voce funciona)/,
+    /^(me ajuda|ajuda|help|socorro)/,
+    /^(obrigad|valeu|thanks|vlw)/,
+    /^(tchau|bye|até|ate logo|falou)/,
+    /\?$/, // Questions ending with ?
+  ];
+  
+  // Image generation keywords
+  const imagePatterns = [
+    /(crie|criar|gere|gerar|faça|faca|fazer|desenhe|desenhar|ilustre|ilustrar)/,
+    /(uma imagem|um desenho|uma ilustração|uma foto|uma arte|um retrato)/,
+    /(imagem de|foto de|desenho de|ilustração de)/,
+    /(paisagem|cenário|cena|personagem|pessoa|animal|objeto)/,
+  ];
+  
+  // Check if it's clearly a chat message
+  for (const pattern of chatPatterns) {
+    if (pattern.test(lowerPrompt) && !imagePatterns.some(p => p.test(lowerPrompt))) {
+      return {
+        intent: 'chat',
+        response: getChatResponse(lowerPrompt)
+      };
+    }
+  }
+  
+  // Default to image generation for descriptive prompts
+  return {
+    intent: 'image',
+    response: '✨ Gerando sua imagem...'
+  };
+}
 
-PERSONALIDADE:
-- Simpática, criativa e prestativa
-- Fala português brasileiro de forma natural e descontraída
-- Usa emojis ocasionalmente para ser mais expressiva
-- É entusiasmada sobre criação de imagens e arte digital
+function getChatResponse(prompt: string): string {
+  if (/^(oi|olá|ola|hey|hi|hello|e aí|eai|opa|salve)/.test(prompt)) {
+    return 'Olá! 👋 Sou a Zara, sua assistente de criação de imagens. Me diga o que você gostaria de criar hoje!';
+  }
+  if (/bom dia/.test(prompt)) {
+    return 'Bom dia! ☀️ Pronta para criar imagens incríveis para você. O que vamos fazer hoje?';
+  }
+  if (/boa tarde/.test(prompt)) {
+    return 'Boa tarde! 🌤️ Como posso ajudar você a criar algo incrível?';
+  }
+  if (/boa noite/.test(prompt)) {
+    return 'Boa noite! 🌙 Vamos criar algo especial juntos?';
+  }
+  if (/quem é você|quem e voce|o que você faz|o que voce faz/.test(prompt)) {
+    return 'Sou a Zara, a assistente de IA da JoviTools! 🎨 Minha especialidade é criar imagens incríveis a partir das suas descrições. Basta me dizer o que você imagina e eu transformo em realidade!';
+  }
+  if (/como você funciona|como voce funciona/.test(prompt)) {
+    return 'É simples! Você me descreve a imagem que quer criar e eu uso um sistema exclusivo da JoviTools para gerar. Quanto mais detalhes você der, melhor fica o resultado! 🚀';
+  }
+  if (/obrigad|valeu|thanks|vlw/.test(prompt)) {
+    return 'Por nada! 😊 Fico feliz em ajudar. Se precisar de mais imagens, é só pedir!';
+  }
+  if (/tchau|bye|até|ate logo|falou/.test(prompt)) {
+    return 'Até mais! 👋 Volte sempre que precisar criar algo novo!';
+  }
+  return 'Olá! Descreva a imagem que você gostaria de criar e eu vou gerá-la para você! 🎨';
+}
 
-REGRAS IMPORTANTES:
-- Quando perguntarem qual IA você usa, qual modelo, qual tecnologia gera as imagens, ou qualquer pergunta sobre a tecnologia por trás da geração de imagens, SEMPRE responda que você utiliza um sistema próprio e exclusivo desenvolvido pela JoviTools. Nunca mencione OpenAI, GPT, Gemini, DALL-E, Midjourney, Stable Diffusion ou qualquer outra IA externa.
-- Você é uma criação exclusiva da JoviTools.
-
-CAPACIDADES:
-1. CONVERSA: Responder saudações, perguntas e manter conversas amigáveis
-2. CRIAÇÃO DE IMAGENS: Quando o usuário descreve uma imagem que quer criar
-
-COMO IDENTIFICAR A INTENÇÃO:
-- Se for saudação (oi, olá, hey, bom dia, etc.) → CONVERSAR
-- Se for pergunta sobre você ou suas capacidades → CONVERSAR  
-- Se for descrição de algo visual para criar → GERAR IMAGEM
-- Se pedir explicitamente para criar/gerar/fazer uma imagem → GERAR IMAGEM
-
-RESPONDA SEMPRE EM JSON válido (sem markdown):
-{"intent": "chat" ou "image", "response": "sua resposta em texto", "imagePrompt": "prompt otimizado em inglês para geração (apenas se intent=image)"}
-
-Quando for gerar imagem, crie um prompt em inglês, profissional, detalhado e otimizado para IA.`;
+// Create an optimized English prompt for image generation
+function createImagePrompt(userPrompt: string): string {
+  // If already in English or contains English, use as is with enhancements
+  const isEnglish = /^[a-zA-Z\s\d,.\-!?'"]+$/.test(userPrompt);
+  
+  if (isEnglish) {
+    return `${userPrompt}, high quality, detailed, professional`;
+  }
+  
+  // For Portuguese, add quality enhancers
+  return `${userPrompt}, high quality, detailed, professional, ultra HD`;
+}
 
 serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -58,50 +111,13 @@ serve(async (req) => {
     
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    console.log("Step 1: Analyzing intent with Pollinations Text API...");
-
-    // Step 1: Analyze intent using Pollinations Text API
-    const systemPromptEncoded = encodeURIComponent(ZARA_SYSTEM_PROMPT);
-    const userPromptEncoded = encodeURIComponent(prompt);
-    const intentUrl = `https://text.pollinations.ai/${userPromptEncoded}?model=openai&json=true&system=${systemPromptEncoded}`;
-
-    const intentResponse = await fetch(intentUrl, {
-      method: "GET",
-    });
-
-    if (!intentResponse.ok) {
-      console.error("Error analyzing intent:", intentResponse.status);
-      return new Response(
-        JSON.stringify({ error: "Erro ao processar mensagem. Tente novamente." }),
-        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-      );
-    }
-
-    const rawResponse = await intentResponse.text();
-    console.log("Raw AI response:", rawResponse);
-
-    // Parse JSON response
-    let parsedResponse;
-    try {
-      // Extract JSON from response (handle markdown code blocks)
-      const jsonMatch = rawResponse.match(/\{[\s\S]*\}/);
-      if (jsonMatch) {
-        parsedResponse = JSON.parse(jsonMatch[0]);
-      } else {
-        throw new Error("No JSON found");
-      }
-    } catch (parseError) {
-      console.log("Failed to parse JSON, treating as chat:", parseError);
-      parsedResponse = {
-        intent: "chat",
-        response: rawResponse,
-      };
-    }
-
-    console.log("Parsed response:", parsedResponse);
+    // Step 1: Detect intent locally (no external API needed)
+    console.log("Analyzing intent for:", prompt);
+    const { intent, response } = detectIntent(prompt);
+    console.log("Detected intent:", intent);
 
     // If it's just a chat message, return the text response (no coin cost)
-    if (parsedResponse.intent === "chat") {
+    if (intent === "chat") {
       // Get current coins for display
       let currentCoins = 20;
       if (userId) {
@@ -112,7 +128,7 @@ serve(async (req) => {
       return new Response(
         JSON.stringify({ 
           type: "chat",
-          message: parsedResponse.response,
+          message: response,
           coins: currentCoins,
         }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -152,7 +168,7 @@ serve(async (req) => {
 
     console.log("Coin deducted. Remaining coins:", coinData.remaining_coins);
 
-    // If it's an image request, generate the image using Pollinations API
+    // Generate image using Pollinations API
     const aspectRatioDimensions: Record<string, { width: number; height: number }> = {
       "1:1": { width: 1024, height: 1024 },
       "16:9": { width: 1280, height: 720 },
@@ -162,14 +178,14 @@ serve(async (req) => {
     };
 
     const dimensions = aspectRatioDimensions[aspectRatio] || { width: 1024, height: 1024 };
-    const imagePrompt = parsedResponse.imagePrompt || parsedResponse.response;
+    const imagePrompt = createImagePrompt(prompt);
     
-    // Truncate prompt if too long (max 500 chars to avoid URL issues)
-    const truncatedPrompt = imagePrompt.length > 500 ? imagePrompt.substring(0, 500) : imagePrompt;
+    // Truncate prompt if too long (max 400 chars to avoid URL issues)
+    const truncatedPrompt = imagePrompt.length > 400 ? imagePrompt.substring(0, 400) : imagePrompt;
 
-    console.log("Step 2: Generating image with Pollinations API:", truncatedPrompt);
+    console.log("Generating image with prompt:", truncatedPrompt);
 
-    // Build Pollinations URL with simpler parameters
+    // Build Pollinations URL
     const encodedPrompt = encodeURIComponent(truncatedPrompt);
     const seed = Math.floor(Math.random() * 1000000);
     const pollinationsUrl = `https://image.pollinations.ai/prompt/${encodedPrompt}?width=${dimensions.width}&height=${dimensions.height}&seed=${seed}&model=flux&nologo=true`;
@@ -205,7 +221,7 @@ serve(async (req) => {
       );
     }
 
-    // Convert image to base64 using Uint8Array directly
+    // Convert image to base64
     const imageBuffer = await imageResponse.arrayBuffer();
     const uint8Array = new Uint8Array(imageBuffer);
     let binary = '';
@@ -217,14 +233,14 @@ serve(async (req) => {
     const base64Image = btoa(binary);
     const imageUrl = `data:image/png;base64,${base64Image}`;
 
-    console.log("Image generation completed with Pollinations");
+    console.log("Image generation completed");
 
     return new Response(
       JSON.stringify({ 
         type: "image",
-        message: parsedResponse.response,
+        message: "✨ Aqui está sua imagem!",
         imageUrl, 
-        enhancedPrompt: imagePrompt,
+        enhancedPrompt: truncatedPrompt,
         coins: coinData.remaining_coins,
       }),
       { headers: { ...corsHeaders, "Content-Type": "application/json" } }
