@@ -35,7 +35,7 @@ serve(async (req) => {
     // Create form data for the API request
     const formData = new FormData();
     formData.append('prompt', prompt);
-    formData.append('model', 'veo-2');
+    formData.append('model', 'veo-3.1-fast');
     formData.append('resolution', '720p');
     formData.append('aspect_ratio', aspectRatio || '16:9');
 
