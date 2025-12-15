@@ -22,7 +22,7 @@ const CATEGORY_CONFIG: Record<PlatformCategory, {
     color: 'from-purple-500 to-pink-500'
   },
   'streamings': {
-    label: 'STREAMINGS',
+    label: 'Streamings',
     icon: '📺',
     color: 'from-red-500 to-orange-500'
   },
