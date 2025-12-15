@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import JoviAIChat from '@/components/JoviAIChat';
+import { Veo3Chat } from '@/components/Veo3Chat';
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
 type PlatformCategory = 'ai_tools' | 'streamings' | 'software' | 'bonus_courses';
@@ -521,8 +522,11 @@ export default function Dashboard() {
         {/* Jovi.ia Section */}
         {activeCategory === 'jovi_ia' && <JoviAIChat />}
 
+        {/* Veo3 Section */}
+        {activeCategory === 'veo3' && <Veo3Chat />}
+
         {/* Categories */}
-        {activeCategory !== 'sorteios' && filteredCategoryOrder.map(categoryKey => {
+        {activeCategory !== 'sorteios' && activeCategory !== 'jovi_ia' && activeCategory !== 'veo3' && filteredCategoryOrder.map(categoryKey => {
           const categoryPlatforms = filteredPlatforms.filter(p => p.category === categoryKey);
           if (categoryPlatforms.length === 0) return null;
           const config = CATEGORY_CONFIG[categoryKey];
