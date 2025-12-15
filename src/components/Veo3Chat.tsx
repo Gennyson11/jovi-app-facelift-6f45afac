@@ -14,8 +14,7 @@ interface AspectRatioOption {
 }
 
 const ASPECT_RATIOS: AspectRatioOption[] = [
-  { value: '16:9', label: 'Paisagem', icon: '🖥️' },
-  { value: '9:16', label: 'Retrato', icon: '📱' },
+  { value: '16:9', label: 'Paisagem (16:9)', icon: '🖥️' },
 ];
 
 interface Message {
