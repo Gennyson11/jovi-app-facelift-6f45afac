@@ -10,6 +10,7 @@ import { LogOut, Eye, EyeOff, Copy, Loader2, CheckCircle, AlertTriangle, Externa
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import DashboardSidebar from '@/components/DashboardSidebar';
+import JoviAIChat from '@/components/JoviAIChat';
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
 type PlatformCategory = 'ai_tools' | 'streamings' | 'software' | 'bonus_courses';
@@ -516,6 +517,9 @@ export default function Dashboard() {
             </div>
           </div>
         )}
+
+        {/* Jovi.ia Section */}
+        {activeCategory === 'jovi_ia' && <JoviAIChat />}
 
         {/* Categories */}
         {activeCategory !== 'sorteios' && filteredCategoryOrder.map(categoryKey => {
