@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Users, UserCheck, UserX, Settings, CheckSquare, Clock, Calendar, Infinity, PlusCircle, MinusCircle, Megaphone, ToggleLeft, ToggleRight, Wifi, WifiOff } from 'lucide-react';
+import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Users, UserCheck, UserX, Settings, CheckSquare, Clock, Calendar, Infinity, PlusCircle, MinusCircle, Megaphone, ToggleLeft, ToggleRight, Wifi, WifiOff, MousePointerClick } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
@@ -92,6 +92,7 @@ export default function Admin() {
   const [users, setUsers] = useState<UserProfile[]>([]);
   const [userPlatformAccess, setUserPlatformAccess] = useState<UserPlatformAccess[]>([]);
   const [news, setNews] = useState<News[]>([]);
+  const [platformClicks, setPlatformClicks] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
 
@@ -172,15 +173,24 @@ export default function Admin() {
   }, [user?.id, isAdmin]);
   const fetchData = async () => {
     setLoading(true);
-    const [platformsRes, usersRes, accessRes, newsRes] = await Promise.all([supabase.from('streaming_platforms').select('*').order('name'), supabase.from('profiles').select('*').order('created_at', {
-      ascending: false
-    }), supabase.from('user_platform_access').select('*'), supabase.from('news').select('*').order('created_at', {
-      ascending: false
-    })]);
+    const [platformsRes, usersRes, accessRes, newsRes, clicksRes] = await Promise.all([
+      supabase.from('streaming_platforms').select('*').order('name'), 
+      supabase.from('profiles').select('*').order('created_at', { ascending: false }), 
+      supabase.from('user_platform_access').select('*'), 
+      supabase.from('news').select('*').order('created_at', { ascending: false }),
+      supabase.from('platform_clicks').select('platform_id, click_count')
+    ]);
     if (platformsRes.data) setPlatforms(platformsRes.data as Platform[]);
     if (usersRes.data) setUsers(usersRes.data as UserProfile[]);
     if (accessRes.data) setUserPlatformAccess(accessRes.data as UserPlatformAccess[]);
     if (newsRes.data) setNews(newsRes.data as News[]);
+    if (clicksRes.data) {
+      const clicksMap: Record<string, number> = {};
+      clicksRes.data.forEach((c: { platform_id: string; click_count: number }) => {
+        clicksMap[c.platform_id] = c.click_count;
+      });
+      setPlatformClicks(clicksMap);
+    }
     setLoading(false);
   };
   const handleLogout = async () => {
@@ -870,6 +880,7 @@ export default function Admin() {
                         <TableHead>Categoria</TableHead>
                         <TableHead>Tipo</TableHead>
                         <TableHead>Status</TableHead>
+                        <TableHead>Cliques</TableHead>
                         <TableHead className="text-right">Ações</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -917,6 +928,14 @@ export default function Admin() {
                               {platform.status === 'online' ? 'Online' : 'Manutenção'}
                             </span>
                           </TableCell>
+                          <TableCell>
+                            <div className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg bg-secondary/50 border border-border w-fit">
+                              <MousePointerClick className="w-3.5 h-3.5 text-primary" />
+                              <span className="text-sm font-semibold text-foreground">
+                                {platformClicks[platform.id] || 0}
+                              </span>
+                            </div>
+                          </TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
                               <Button variant="ghost" size="icon" onClick={() => openPlatformDialog(platform)}>
@@ -929,7 +948,7 @@ export default function Admin() {
                           </TableCell>
                         </TableRow>)}
                       {platforms.length === 0 && <TableRow>
-                          <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                          <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
                             Nenhuma plataforma cadastrada
                           </TableCell>
                         </TableRow>}

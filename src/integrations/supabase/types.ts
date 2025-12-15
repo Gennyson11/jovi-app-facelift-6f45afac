@@ -41,6 +41,38 @@ export type Database = {
         }
         Relationships: []
       }
+      platform_clicks: {
+        Row: {
+          click_count: number
+          created_at: string
+          id: string
+          platform_id: string
+          updated_at: string
+        }
+        Insert: {
+          click_count?: number
+          created_at?: string
+          id?: string
+          platform_id: string
+          updated_at?: string
+        }
+        Update: {
+          click_count?: number
+          created_at?: string
+          id?: string
+          platform_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "platform_clicks_platform_id_fkey"
+            columns: ["platform_id"]
+            isOneToOne: true
+            referencedRelation: "streaming_platforms"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           access_expires_at: string | null
