@@ -17,7 +17,7 @@ const CATEGORY_CONFIG: Record<PlatformCategory, {
   color: string;
 }> = {
   'ai_tools': {
-    label: 'FERRAMENTAS IAs & VARIADAS',
+    label: 'Ferramentas',
     icon: '🤖',
     color: 'from-purple-500 to-pink-500'
   },
