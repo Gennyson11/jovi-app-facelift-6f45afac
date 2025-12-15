@@ -52,22 +52,42 @@ serve(async (req) => {
       const errorText = await response.text();
       console.error('GeminiGen API error:', response.status, errorText);
       
+      // Parse error response
+      let errorMessage = 'Falha ao gerar vídeo';
+      try {
+        const errorData = JSON.parse(errorText);
+        if (errorData.detail?.error_code === 'PREMIUM_PLAN_REQUIRED') {
+          errorMessage = 'Plano Premium necessário. A API GeminiGen requer um plano premium para gerar vídeos.';
+        } else if (errorData.detail?.error_message) {
+          errorMessage = errorData.detail.error_message;
+        }
+      } catch {
+        // Keep default error message
+      }
+      
       if (response.status === 429) {
         return new Response(
-          JSON.stringify({ error: 'Rate limit exceeded. Please try again later.' }),
+          JSON.stringify({ error: 'Limite de requisições excedido. Tente novamente mais tarde.' }),
           { status: 429, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
       
       if (response.status === 402) {
         return new Response(
-          JSON.stringify({ error: 'Insufficient credits. Please add credits to continue.' }),
+          JSON.stringify({ error: 'Créditos insuficientes. Adicione créditos para continuar.' }),
           { status: 402, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+        );
+      }
+      
+      if (response.status === 403) {
+        return new Response(
+          JSON.stringify({ error: errorMessage }),
+          { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       }
 
       return new Response(
-        JSON.stringify({ error: 'Failed to generate video' }),
+        JSON.stringify({ error: errorMessage }),
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
