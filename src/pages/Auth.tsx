@@ -48,7 +48,7 @@ export default function Auth() {
           replace: true
         });
       } else {
-        navigate('/assinatura', {
+        navigate('/dashboard', {
           replace: true
         });
       }
