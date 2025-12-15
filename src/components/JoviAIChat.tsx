@@ -278,7 +278,12 @@ export default function JoviAIChat() {
             <Sparkles className="w-5 h-5 text-white" />
           </div>
           <div>
-            <h2 className="font-semibold text-foreground">Zara</h2>
+            <div className="flex items-center gap-2">
+              <h2 className="font-semibold text-foreground">Zara</h2>
+              <span className="px-2 py-0.5 text-[10px] font-medium bg-amber-500/20 text-amber-400 rounded-full border border-amber-500/30">
+                BETA
+              </span>
+            </div>
             <p className="text-xs text-muted-foreground">Assistente IA da JoviTools</p>
           </div>
         </div>
