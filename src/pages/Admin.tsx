@@ -1274,83 +1274,15 @@ export default function Admin() {
                 <p className="text-muted-foreground mt-1">Gerencie os sócios e parceiros do sistema.</p>
               </div>
 
-              {/* Coupon Redemption Card */}
-              <Card className="border-border max-w-2xl mx-auto">
+              {/* Placeholder for future partners management */}
+              <Card className="border-border">
                 <CardContent className="pt-8 pb-8">
-                  <div className="flex flex-col items-center text-center space-y-6">
-                    <div className="w-16 h-16 rounded-full bg-muted flex items-center justify-center">
-                      <QrCode className="w-8 h-8 text-muted-foreground" />
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-semibold text-foreground">Digite seu código</h3>
-                      <p className="text-muted-foreground text-sm mt-1">Insira o código recebido para ativar</p>
-                    </div>
-                    <div className="flex w-full max-w-md gap-3">
-                      <Input
-                        placeholder="DIGITE-SEU-CÓDIGO"
-                        className="flex-1 bg-background/50 border-border text-center uppercase tracking-widest"
-                      />
-                      <Button className="px-6">
-                        Resgatar
-                      </Button>
-                    </div>
+                  <div className="flex flex-col items-center text-center space-y-4">
+                    <Users className="w-12 h-12 text-muted-foreground" />
+                    <p className="text-muted-foreground">Funcionalidade de sócios em desenvolvimento.</p>
                   </div>
                 </CardContent>
               </Card>
-
-              {/* How to use section */}
-              <div className="max-w-3xl mx-auto">
-                <h3 className="text-xl font-semibold text-foreground mb-4">Como usar seu cupom</h3>
-                <Card className="border-border">
-                  <CardContent className="pt-6 pb-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Step 1 */}
-                      <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                          <span className="text-sm font-bold text-muted-foreground">1</span>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-foreground">Obtenha seu código</h4>
-                          <p className="text-sm text-muted-foreground">Receba através de promoções ou compras</p>
-                        </div>
-                      </div>
-
-                      {/* Step 2 */}
-                      <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                          <span className="text-sm font-bold text-muted-foreground">2</span>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-foreground">Digite o código</h4>
-                          <p className="text-sm text-muted-foreground">Insira exatamente como recebeu</p>
-                        </div>
-                      </div>
-
-                      {/* Step 3 */}
-                      <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                          <span className="text-sm font-bold text-muted-foreground">3</span>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-foreground">Ative os benefícios</h4>
-                          <p className="text-sm text-muted-foreground">Escolha seus itens ou ative automaticamente</p>
-                        </div>
-                      </div>
-
-                      {/* Step 4 */}
-                      <div className="flex items-start gap-4">
-                        <div className="w-10 h-10 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                          <span className="text-sm font-bold text-muted-foreground">4</span>
-                        </div>
-                        <div>
-                          <h4 className="font-semibold text-foreground">Aproveite!</h4>
-                          <p className="text-sm text-muted-foreground">Acesse através do menu</p>
-                        </div>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              </div>
             </div>
           </TabsContent>
         </Tabs>
