@@ -13,7 +13,8 @@ import {
   Menu,
   X,
   ChevronLeft,
-  Bot
+  Bot,
+  Handshake
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -31,6 +32,7 @@ interface DashboardSidebarProps {
   onLogout: () => void;
   activeCategory: string | null;
   onCategorySelect: (category: string | null) => void;
+  isSocio?: boolean;
 }
 
 const DASHBOARD_ITEMS = [
@@ -47,11 +49,14 @@ const GENERAL_ITEMS = [
   { id: 'configuracoes', label: 'Configurações', icon: Settings, href: '/settings', route: true },
 ];
 
+const SOCIO_ITEM = { id: 'socios', label: 'Painel Sócio', icon: Handshake, href: '/socios', route: true };
+
 export default function DashboardSidebar({ 
   userProfile, 
   onLogout, 
   activeCategory, 
-  onCategorySelect 
+  onCategorySelect,
+  isSocio = false
 }: DashboardSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -169,6 +174,26 @@ export default function DashboardSidebar({
               </button>
               );
             })}
+            
+            {/* Socio Panel Link - Only visible for socios */}
+            {isSocio && (
+              <button
+                onClick={() => {
+                  navigate(SOCIO_ITEM.href);
+                  setIsMobileOpen(false);
+                }}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all mt-2",
+                  location.pathname === SOCIO_ITEM.href
+                    ? "bg-gradient-to-r from-amber-500 to-orange-600 text-white" 
+                    : "text-amber-500 hover:text-amber-400 hover:bg-amber-500/10 border border-amber-500/30",
+                  isCollapsed && "justify-center px-2"
+                )}
+              >
+                <SOCIO_ITEM.icon className="h-5 w-5 flex-shrink-0" />
+                {!isCollapsed && <span>{SOCIO_ITEM.label}</span>}
+              </button>
+            )}
           </nav>
         </div>
       </ScrollArea>
