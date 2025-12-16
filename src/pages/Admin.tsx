@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Users, UserCheck, UserX, Settings, CheckSquare, Clock, Calendar, Infinity, PlusCircle, MinusCircle, Megaphone, ToggleLeft, ToggleRight, Wifi, WifiOff, MousePointerClick, Gift, QrCode } from 'lucide-react';
+import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Users, UserCheck, UserX, Settings, CheckSquare, Clock, Calendar, Infinity, PlusCircle, MinusCircle, Megaphone, ToggleLeft, ToggleRight, Wifi, WifiOff, MousePointerClick, Gift, QrCode, Handshake } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
@@ -120,6 +120,7 @@ export default function Admin() {
   const [selectedDuration, setSelectedDuration] = useState<number | null>(30);
   const [customDays, setCustomDays] = useState<string>('');
   const [savingPermissions, setSavingPermissions] = useState(false);
+  const [userIsSocio, setUserIsSocio] = useState(false);
 
   // News Dialog
   const [newsDialogOpen, setNewsDialogOpen] = useState(false);
@@ -260,7 +261,7 @@ export default function Admin() {
   };
 
   // Open permissions dialog
-  const openPermissionsDialog = (userProfile: UserProfile) => {
+  const openPermissionsDialog = async (userProfile: UserProfile) => {
     setSelectedUser(userProfile);
     const userAccess = userPlatformAccess.filter(a => a.user_id === userProfile.id).map(a => a.platform_id);
     setSelectedPlatforms(userAccess);
@@ -275,6 +276,16 @@ export default function Admin() {
       setSelectedDuration(daysRemaining);
     }
     setCustomDays('');
+    
+    // Check if user has socio role
+    const { data: roleData } = await supabase
+      .from('user_roles')
+      .select('role')
+      .eq('user_id', userProfile.user_id)
+      .eq('role', 'socio')
+      .maybeSingle();
+    setUserIsSocio(!!roleData);
+    
     setPermissionsDialogOpen(true);
   };
 
@@ -342,10 +353,32 @@ export default function Admin() {
         has_access: hasAnyAccess,
         access_expires_at: hasAnyAccess ? accessExpiresAt : null
       }).eq('id', selectedUser.id);
+      
+      // Handle socio role
+      const { data: existingSocioRole } = await supabase
+        .from('user_roles')
+        .select('id')
+        .eq('user_id', selectedUser.user_id)
+        .eq('role', 'socio')
+        .maybeSingle();
+      
+      if (userIsSocio && !existingSocioRole) {
+        // Add socio role
+        await supabase.from('user_roles').insert({
+          user_id: selectedUser.user_id,
+          role: 'socio'
+        });
+      } else if (!userIsSocio && existingSocioRole) {
+        // Remove socio role
+        await supabase.from('user_roles').delete()
+          .eq('user_id', selectedUser.user_id)
+          .eq('role', 'socio');
+      }
+      
       const durationLabel = daysToAdd === null ? 'Vitalício' : `${daysToAdd} dias`;
       toast({
         title: 'Sucesso',
-        description: `Permissões atualizadas (${durationLabel})`
+        description: `Permissões atualizadas (${durationLabel})${userIsSocio ? ' - Sócio' : ''}`
       });
       setPermissionsDialogOpen(false);
       fetchData();
@@ -1597,6 +1630,28 @@ export default function Admin() {
                 }
               }} min="1" max="9999" className="bg-background/50 border-border" />
                 <span className="text-sm text-muted-foreground whitespace-nowrap">dias</span>
+              </div>
+            </div>
+
+            {/* Socio Role Toggle */}
+            <div className="border border-border rounded-lg p-4 bg-gradient-to-r from-amber-500/5 to-orange-500/5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-amber-500/20 flex items-center justify-center">
+                    <Handshake className="w-5 h-5 text-amber-500" />
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium cursor-pointer">Sócio</Label>
+                    <p className="text-xs text-muted-foreground">Marcar este usuário como sócio/parceiro</p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setUserIsSocio(!userIsSocio)}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${userIsSocio ? 'bg-amber-500' : 'bg-muted'}`}
+                >
+                  <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${userIsSocio ? 'translate-x-5' : 'translate-x-0'}`} />
+                </button>
               </div>
             </div>
 
