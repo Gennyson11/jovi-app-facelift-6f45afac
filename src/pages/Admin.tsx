@@ -113,6 +113,7 @@ export default function Admin() {
   const [socios, setSocios] = useState<SocioUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
+  const [userSearchQuery, setUserSearchQuery] = useState('');
 
   // Platform Dialog
   const [platformDialogOpen, setPlatformDialogOpen] = useState(false);
@@ -1087,8 +1088,17 @@ export default function Admin() {
             </div>
 
             <Card className="border-border">
-              <CardHeader>
+              <CardHeader className="flex flex-row items-center justify-between gap-4">
                 <CardTitle className="text-foreground">Gerenciar Usuários</CardTitle>
+                <div className="relative w-64">
+                  <Input
+                    placeholder="Pesquisar por nome ou email..."
+                    value={userSearchQuery}
+                    onChange={(e) => setUserSearchQuery(e.target.value)}
+                    className="bg-background/50 border-border pl-9"
+                  />
+                  <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
@@ -1105,7 +1115,16 @@ export default function Admin() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {users.map(userProfile => <TableRow key={userProfile.id}>
+                      {users
+                        .filter(u => {
+                          if (!userSearchQuery.trim()) return true;
+                          const query = userSearchQuery.toLowerCase();
+                          return (
+                            (u.name?.toLowerCase().includes(query)) ||
+                            (u.email?.toLowerCase().includes(query))
+                          );
+                        })
+                        .map(userProfile => <TableRow key={userProfile.id}>
                           <TableCell className="font-medium">
                             {userProfile.name || '-'}
                           </TableCell>
