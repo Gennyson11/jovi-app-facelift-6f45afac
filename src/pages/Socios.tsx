@@ -147,35 +147,26 @@ export default function Socios() {
     setSavingClient(true);
 
     try {
-      // Create user via edge function
+      // Calculate expiration date
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + selectedPlan);
+
+      // Create user via edge function with all data (bypasses RLS using service role)
       const { data: functionData, error: functionError } = await supabase.functions.invoke('setup-users', {
         body: {
           action: 'create_user',
           email: clientEmail,
           password: clientPassword,
-          role: 'user'
+          role: 'user',
+          partner_id: user?.id,
+          name: clientName,
+          has_access: true,
+          access_expires_at: expirationDate.toISOString()
         }
       });
 
       if (functionError) throw functionError;
       if (!functionData?.userId) throw new Error('Falha ao criar usuário');
-
-      // Calculate expiration date
-      const expirationDate = new Date();
-      expirationDate.setDate(expirationDate.getDate() + selectedPlan);
-
-      // Update profile with partner_id, name, and access
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({
-          name: clientName,
-          partner_id: user?.id,
-          has_access: true,
-          access_expires_at: expirationDate.toISOString()
-        })
-        .eq('user_id', functionData.userId);
-
-      if (updateError) throw updateError;
 
       toast({
         title: 'Sucesso',
