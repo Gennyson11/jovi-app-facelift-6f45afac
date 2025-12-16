@@ -58,11 +58,21 @@ interface News {
   updated_at: string;
 }
 
+interface SocioClient {
+  id: string;
+  email: string;
+  name: string | null;
+  has_access: boolean;
+  created_at: string;
+  access_expires_at: string | null;
+}
+
 interface SocioUser {
   user_id: string;
   email: string;
   name: string | null;
   created_at: string;
+  clients: SocioClient[];
 }
 
 // Access duration options
@@ -202,15 +212,27 @@ export default function Admin() {
       setPlatformClicks(clicksMap);
     }
     
-    // Map socios with profile data
+    // Map socios with profile data and their clients
     if (sociosRes.data && usersRes.data) {
       const sociosList: SocioUser[] = sociosRes.data.map(socio => {
         const profile = usersRes.data.find(u => u.user_id === socio.user_id);
+        // Find clients registered by this socio (partner_id = socio's user_id)
+        const clients = usersRes.data
+          .filter(u => u.partner_id === socio.user_id)
+          .map(client => ({
+            id: client.id,
+            email: client.email,
+            name: client.name,
+            has_access: client.has_access,
+            created_at: client.created_at,
+            access_expires_at: client.access_expires_at
+          }));
         return {
           user_id: socio.user_id,
           email: profile?.email || 'Email não encontrado',
           name: profile?.name || null,
-          created_at: socio.created_at
+          created_at: socio.created_at,
+          clients
         };
       });
       setSocios(sociosList);
@@ -1328,7 +1350,7 @@ export default function Admin() {
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
                   <CardTitle className="text-foreground">Sócios Cadastrados</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">Usuários com cargo de sócio no sistema</p>
+                  <p className="text-sm text-muted-foreground mt-1">Usuários com cargo de sócio e seus clientes cadastrados</p>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary">
                   <Handshake className="w-4 h-4" />
@@ -1336,39 +1358,91 @@ export default function Admin() {
                 </div>
               </CardHeader>
               <CardContent>
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Nome</TableHead>
-                        <TableHead>Email</TableHead>
-                        <TableHead>Cadastrado como sócio em</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {socios.map(socio => (
-                        <TableRow key={socio.user_id}>
-                          <TableCell className="font-medium">
-                            {socio.name || '-'}
-                          </TableCell>
-                          <TableCell className="text-muted-foreground">
-                            {socio.email}
-                          </TableCell>
-                          <TableCell className="text-sm text-muted-foreground">
-                            {new Date(socio.created_at).toLocaleDateString('pt-BR')}
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      {socios.length === 0 && (
-                        <TableRow>
-                          <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
-                            Nenhum sócio cadastrado
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
+                {socios.length === 0 ? (
+                  <div className="text-center text-muted-foreground py-8">
+                    Nenhum sócio cadastrado
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {socios.map(socio => (
+                      <div key={socio.user_id} className="border border-border rounded-lg overflow-hidden">
+                        {/* Socio Header */}
+                        <div className="bg-secondary/30 px-4 py-3 flex items-center justify-between">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
+                              <Handshake className="w-5 h-5 text-primary" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-foreground">{socio.name || 'Sem nome'}</p>
+                              <p className="text-sm text-muted-foreground">{socio.email}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <p className="text-xs text-muted-foreground">Sócio desde</p>
+                              <p className="text-sm font-medium text-foreground">
+                                {new Date(socio.created_at).toLocaleDateString('pt-BR')}
+                              </p>
+                            </div>
+                            <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary/10 text-primary">
+                              <Users className="w-4 h-4" />
+                              <span className="font-semibold">{socio.clients.length}</span>
+                              <span className="text-xs">clientes</span>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        {/* Clients Table */}
+                        {socio.clients.length > 0 ? (
+                          <div className="overflow-x-auto">
+                            <Table>
+                              <TableHeader>
+                                <TableRow>
+                                  <TableHead>Nome</TableHead>
+                                  <TableHead>Email</TableHead>
+                                  <TableHead>Cadastrado em</TableHead>
+                                  <TableHead>Status</TableHead>
+                                </TableRow>
+                              </TableHeader>
+                              <TableBody>
+                                {socio.clients.map(client => (
+                                  <TableRow key={client.id}>
+                                    <TableCell className="font-medium">
+                                      {client.name || '-'}
+                                    </TableCell>
+                                    <TableCell className="text-muted-foreground">
+                                      {client.email}
+                                    </TableCell>
+                                    <TableCell className="text-sm text-muted-foreground">
+                                      {new Date(client.created_at).toLocaleDateString('pt-BR')}
+                                    </TableCell>
+                                    <TableCell>
+                                      {client.has_access ? (
+                                        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-500">
+                                          <UserCheck className="w-3 h-3" />
+                                          Ativo
+                                        </span>
+                                      ) : (
+                                        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-500">
+                                          <UserX className="w-3 h-3" />
+                                          Bloqueado
+                                        </span>
+                                      )}
+                                    </TableCell>
+                                  </TableRow>
+                                ))}
+                              </TableBody>
+                            </Table>
+                          </div>
+                        ) : (
+                          <div className="text-center text-muted-foreground py-6 text-sm">
+                            Nenhum cliente cadastrado por este sócio
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
               </CardContent>
             </Card>
           </TabsContent>
