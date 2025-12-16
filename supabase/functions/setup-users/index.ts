@@ -91,6 +91,47 @@ serve(async (req) => {
         }
       }
 
+      // Grant access to all platforms if has_access is true
+      if (userId && has_access) {
+        // Get the profile id for this user
+        const { data: profileData } = await supabaseAdmin
+          .from("profiles")
+          .select("id")
+          .eq("user_id", userId)
+          .single();
+
+        if (profileData) {
+          // Get all platforms
+          const { data: platforms } = await supabaseAdmin
+            .from("streaming_platforms")
+            .select("id");
+
+          if (platforms && platforms.length > 0) {
+            // Delete existing platform access to avoid duplicates
+            await supabaseAdmin
+              .from("user_platform_access")
+              .delete()
+              .eq("user_id", profileData.id);
+
+            // Insert access to all platforms
+            const accessEntries = platforms.map((platform) => ({
+              user_id: profileData.id,
+              platform_id: platform.id,
+            }));
+
+            const { error: accessError } = await supabaseAdmin
+              .from("user_platform_access")
+              .insert(accessEntries);
+
+            if (accessError) {
+              console.error("Error granting platform access:", accessError);
+            } else {
+              console.log(`Granted access to ${platforms.length} platforms for user ${userId}`);
+            }
+          }
+        }
+      }
+
       return new Response(
         JSON.stringify({ success: true, message: userId === userData?.user?.id ? "User created" : "User updated", userId }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
