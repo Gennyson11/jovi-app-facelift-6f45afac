@@ -98,6 +98,7 @@ export default function Dashboard() {
   const [platformCredentials, setPlatformCredentials] = useState<Credential[]>([]);
   const [platformClicks, setPlatformClicks] = useState<Record<string, number>>({});
   const [activeCategory, setActiveCategory] = useState<string | null>('ai_tools');
+  const [isSocio, setIsSocio] = useState(false);
   const {
     user,
     signOut,
@@ -162,6 +163,15 @@ export default function Dashboard() {
       if (accessData) {
         setUserPlatformAccess(accessData.map(a => a.platform_id));
       }
+      
+      // Check if user has socio role
+      const { data: socioRole } = await supabase
+        .from('user_roles')
+        .select('role')
+        .eq('user_id', user?.id)
+        .eq('role', 'socio')
+        .maybeSingle();
+      setIsSocio(!!socioRole);
     }
     setLoading(false);
   };
@@ -286,7 +296,7 @@ export default function Dashboard() {
   const filteredCategoryOrder = activeCategory ? CATEGORY_ORDER.filter(cat => cat === activeCategory) : CATEGORY_ORDER;
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex w-full">
       {/* Sidebar */}
-      <DashboardSidebar userProfile={userProfile} onLogout={handleLogout} activeCategory={activeCategory} onCategorySelect={setActiveCategory} />
+      <DashboardSidebar userProfile={userProfile} onLogout={handleLogout} activeCategory={activeCategory} onCategorySelect={setActiveCategory} isSocio={isSocio} />
 
       {/* Main Content Area */}
       <div className="flex-1 min-w-0">

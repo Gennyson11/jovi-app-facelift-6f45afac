@@ -12,6 +12,7 @@ import NotFound from "./pages/NotFound";
 import Plans from "./pages/Plans";
 import Settings from "./pages/Settings";
 import Revendedores from "./pages/Revendedores";
+import Socios from "./pages/Socios";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
 
 const queryClient = new QueryClient({
@@ -38,6 +39,7 @@ const App = () => (
             <Route path="/planos" element={<Plans />} />
             <Route path="/settings" element={<Settings />} />
             <Route path="/revendedores" element={<Revendedores />} />
+            <Route path="/socios" element={<Socios />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
