@@ -300,7 +300,7 @@ export type Database = {
     }
     Enums: {
       access_type: "credentials" | "link_only"
-      app_role: "admin" | "user"
+      app_role: "admin" | "user" | "socio"
       platform_category:
         | "ai_tools"
         | "streamings"
@@ -435,7 +435,7 @@ export const Constants = {
   public: {
     Enums: {
       access_type: ["credentials", "link_only"],
-      app_role: ["admin", "user"],
+      app_role: ["admin", "user", "socio"],
       platform_category: [
         "ai_tools",
         "streamings",
