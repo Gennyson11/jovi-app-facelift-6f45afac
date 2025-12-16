@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Loader2, UserCheck, UserX, Clock, Calendar, Infinity, Users, Handshake, Eye, EyeOff, Trash2 } from 'lucide-react';
+import { LogOut, Plus, Loader2, UserCheck, UserX, Clock, Calendar, Infinity, Users, Handshake, Eye, EyeOff } from 'lucide-react';
 
 interface ClientProfile {
   id: string;
@@ -209,30 +209,6 @@ export default function Socios() {
     fetchClients();
   };
 
-  const deleteClient = async (clientId: string, clientEmail: string) => {
-    const confirmed = window.confirm(`Tem certeza que deseja remover o cliente "${clientEmail}"?`);
-    if (!confirmed) return;
-
-    const { error } = await supabase
-      .from('profiles')
-      .update({ partner_id: null })
-      .eq('id', clientId);
-
-    if (error) {
-      toast({
-        title: 'Erro',
-        description: 'Falha ao remover cliente',
-        variant: 'destructive'
-      });
-      return;
-    }
-
-    toast({
-      title: 'Sucesso',
-      description: 'Cliente removido da sua lista'
-    });
-    fetchClients();
-  };
 
   const getAccessStatus = (client: ClientProfile) => {
     if (!client.has_access) {
@@ -393,34 +369,23 @@ export default function Socios() {
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant={client.has_access ? "destructive" : "default"}
-                              size="sm"
-                              onClick={() => toggleClientAccess(client.id, client.has_access)}
-                            >
-                              {client.has_access ? (
-                                <>
-                                  <UserX className="w-4 h-4 mr-2" />
-                                  Bloquear
-                                </>
-                              ) : (
-                                <>
-                                  <UserCheck className="w-4 h-4 mr-2" />
-                                  Liberar
-                                </>
-                              )}
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                              onClick={() => deleteClient(client.id, client.email)}
-                              title="Remover cliente"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          </div>
+                          <Button
+                            variant={client.has_access ? "destructive" : "default"}
+                            size="sm"
+                            onClick={() => toggleClientAccess(client.id, client.has_access)}
+                          >
+                            {client.has_access ? (
+                              <>
+                                <UserX className="w-4 h-4 mr-2" />
+                                Bloquear
+                              </>
+                            ) : (
+                              <>
+                                <UserCheck className="w-4 h-4 mr-2" />
+                                Liberar
+                              </>
+                            )}
+                          </Button>
                         </TableCell>
                       </TableRow>
                     );
