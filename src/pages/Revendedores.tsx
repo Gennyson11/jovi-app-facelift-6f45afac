@@ -61,7 +61,7 @@ const Revendedores = () => {
                 <span className="text-primary mt-1">•</span>
                 <span>
                   <span className="text-pink-500 font-medium">
-                    Não é permitido
+                    mínimo de R$ 27,00
                   </span>{" "}
                   realizar transações abaixo desse valor em hipótese alguma.
                 </span>
