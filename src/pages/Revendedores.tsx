@@ -139,6 +139,33 @@ Junte-se a nós como sócio e ganhe 100% de lucro</p>
           </div>
         </div>
 
+        {/* Vantagens Exclusivas Section */}
+        <div className="mt-8 card-glass rounded-xl overflow-hidden border-2 border-primary/50 bg-gradient-to-br from-primary/10 via-background to-pink-500/10">
+          <div className="bg-gradient-to-r from-primary/20 to-pink-500/20 px-6 py-4 border-b border-border/30">
+            <h2 className="text-2xl font-bold text-center text-foreground">
+              ✨ Vantagens Exclusivas ✨
+            </h2>
+          </div>
+          <div className="px-6 py-6 space-y-4">
+            <div className="flex items-center gap-3 text-lg">
+              <span className="text-primary text-xl">✅</span>
+              <span className="text-foreground font-medium">Acesso total ao painel administrativo</span>
+            </div>
+            <div className="flex items-center gap-3 text-lg">
+              <span className="text-primary text-xl">✅</span>
+              <span className="text-foreground font-medium">Cadastro de até 50 usuários</span>
+            </div>
+            <div className="flex items-center gap-3 text-lg">
+              <span className="text-primary text-xl">✅</span>
+              <span className="text-foreground font-medium">Revenda com 100% de lucro</span>
+            </div>
+            <div className="flex items-center gap-3 text-lg">
+              <span className="text-primary text-xl">✅</span>
+              <span className="text-foreground font-medium">Novas ferramentas adicionadas toda semana</span>
+            </div>
+          </div>
+        </div>
+
         {/* Agreement Text */}
         <p className="text-center text-muted-foreground mt-8 mb-6">
           Ao utilizar a plataforma, você concorda com todos os termos e
