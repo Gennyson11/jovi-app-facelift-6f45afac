@@ -360,6 +360,7 @@ export default function Socios() {
                     <TableHead>Nome</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Cadastro</TableHead>
+                    <TableHead>Validade</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead className="text-right">Ações</TableHead>
                   </TableRow>
@@ -368,6 +369,9 @@ export default function Socios() {
                   {clients.map(client => {
                     const status = getAccessStatus(client);
                     const StatusIcon = status.icon;
+                    const expirationDate = client.access_expires_at 
+                      ? new Date(client.access_expires_at).toLocaleDateString('pt-BR')
+                      : 'Vitalício';
                     return (
                       <TableRow key={client.id}>
                         <TableCell className="font-medium">
@@ -378,6 +382,9 @@ export default function Socios() {
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {new Date(client.created_at).toLocaleDateString('pt-BR')}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground">
+                          {expirationDate}
                         </TableCell>
                         <TableCell>
                           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${status.color}`}>
@@ -420,7 +427,7 @@ export default function Socios() {
                   })}
                   {clients.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={5} className="text-center text-muted-foreground py-12">
+                      <TableCell colSpan={6} className="text-center text-muted-foreground py-12">
                         <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
                         <p>Você ainda não cadastrou nenhum cliente</p>
                         <p className="text-sm mt-1">Clique em "Novo Cliente" para começar</p>
