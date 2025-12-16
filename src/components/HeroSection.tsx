@@ -1,5 +1,6 @@
-import { ChevronRight, Shield } from "lucide-react";
+import { ChevronRight, Shield, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-hacker.jpg";
 interface HeroSectionProps {
   onAccessClick?: () => void;
@@ -68,11 +69,20 @@ const HeroSection = ({
           Acesso imediato após a confirmação do pagamento
         </p>
 
-        {/* CTA Button with arrow */}
-        <Button variant="hero" size="xl" className="px-12 group" onClick={onAccessClick}>
-          Acessar Plataforma
-          <ChevronRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
-        </Button>
+        {/* CTA Buttons */}
+        <div className="flex flex-col items-center gap-4">
+          <Button variant="hero" size="xl" className="px-12 group" onClick={onAccessClick}>
+            Acessar Plataforma
+            <ChevronRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
+          </Button>
+          
+          <Button variant="accent" size="lg" className="group" asChild>
+            <Link to="/revendedores">
+              <Users className="mr-2 w-4 h-4" />
+              Torne-se um revendedor parceiro
+            </Link>
+          </Button>
+        </div>
       </div>
     </section>;
 };
