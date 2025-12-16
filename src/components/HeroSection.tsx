@@ -1,6 +1,5 @@
 import { ChevronRight, Shield, Users } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
 import heroImage from "@/assets/hero-hacker.jpg";
 interface HeroSectionProps {
   onAccessClick?: () => void;
@@ -77,10 +76,10 @@ const HeroSection = ({
           </Button>
           
           <Button variant="accent" size="lg" className="group" asChild>
-            <Link to="/revendedores">
+            <a href="https://www.jovitools.online/revendedores" target="_blank" rel="noopener noreferrer">
               <Users className="mr-2 w-4 h-4" />
               Torne-se um revendedor parceiro
-            </Link>
+            </a>
           </Button>
         </div>
       </div>
