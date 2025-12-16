@@ -53,7 +53,7 @@ Junte-se a nós como sócio e ganhe 100% de lucro</p>
                 <span className="text-primary mt-1">•</span>
                 <span>
                   As vendas realizadas devem ter valor{" "}
-                  <strong className="text-foreground">mínimo de R$ 27,99</strong>.
+                  <strong className="text-foreground">mínimo de R$ 27,00</strong>.
                 </span>
               </p>
               <p className="text-muted-foreground flex items-start gap-2">
