@@ -18,8 +18,8 @@ serve(async (req) => {
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
-    const { action, email, password, role } = await req.json();
-    console.log("Setup action:", action, "email:", email);
+    const { action, email, password, role, partner_id, name, has_access, access_expires_at } = await req.json();
+    console.log("Setup action:", action, "email:", email, "partner_id:", partner_id);
 
     if (action === "create_user") {
       // Create user
@@ -29,6 +29,8 @@ serve(async (req) => {
         email_confirm: true,
       });
 
+      let userId: string | undefined;
+
       if (createError) {
         // User might already exist
         if (createError.message.includes("already been registered")) {
@@ -37,6 +39,7 @@ serve(async (req) => {
           const existingUser = users?.find(u => u.email === email);
           
           if (existingUser) {
+            userId = existingUser.id;
             // Update password
             await supabaseAdmin.auth.admin.updateUserById(existingUser.id, { password });
             
@@ -53,26 +56,43 @@ serve(async (req) => {
                 role: role,
               });
             }
-
-            return new Response(
-              JSON.stringify({ success: true, message: "User updated", userId: existingUser.id }),
-              { headers: { ...corsHeaders, "Content-Type": "application/json" } }
-            );
+          } else {
+            throw createError;
           }
+        } else {
+          throw createError;
         }
-        throw createError;
+      } else {
+        userId = userData.user?.id;
+        // Add role
+        if (userData.user) {
+          await supabaseAdmin.from("user_roles").insert({
+            user_id: userData.user.id,
+            role: role,
+          });
+        }
       }
 
-      // Add role
-      if (userData.user) {
-        await supabaseAdmin.from("user_roles").insert({
-          user_id: userData.user.id,
-          role: role,
-        });
+      // Update profile with partner_id and other data if provided (using service role bypasses RLS)
+      if (userId && (partner_id || name || has_access !== undefined || access_expires_at)) {
+        const updateData: Record<string, any> = {};
+        if (partner_id) updateData.partner_id = partner_id;
+        if (name) updateData.name = name;
+        if (has_access !== undefined) updateData.has_access = has_access;
+        if (access_expires_at) updateData.access_expires_at = access_expires_at;
+
+        const { error: profileError } = await supabaseAdmin
+          .from("profiles")
+          .update(updateData)
+          .eq("user_id", userId);
+
+        if (profileError) {
+          console.error("Error updating profile:", profileError);
+        }
       }
 
       return new Response(
-        JSON.stringify({ success: true, message: "User created", userId: userData.user?.id }),
+        JSON.stringify({ success: true, message: userId === userData?.user?.id ? "User created" : "User updated", userId }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
