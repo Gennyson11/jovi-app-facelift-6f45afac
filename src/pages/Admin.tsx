@@ -310,8 +310,8 @@ export default function Admin() {
   // Open permissions dialog
   const openPermissionsDialog = async (userProfile: UserProfile) => {
     setSelectedUser(userProfile);
-    // Use user_id (auth id) to filter platform access, not profile id
-    const userAccess = userPlatformAccess.filter(a => a.user_id === userProfile.user_id).map(a => a.platform_id);
+    // user_platform_access.user_id references profiles.id (not profiles.user_id)
+    const userAccess = userPlatformAccess.filter(a => a.user_id === userProfile.id).map(a => a.platform_id);
     setSelectedPlatforms(userAccess);
 
     // Set current duration based on expiration
@@ -357,16 +357,7 @@ export default function Admin() {
     if (!selectedUser) return;
     setSavingPermissions(true);
 
-    // Get current access for this user - use user_id (auth id), not profile id
-    const currentAccess = userPlatformAccess.filter(a => a.user_id === selectedUser.user_id);
-    const currentPlatformIds = currentAccess.map(a => a.platform_id);
-
-    // Platforms to add
-    const toAdd = selectedPlatforms.filter(id => !currentPlatformIds.includes(id));
-    // Platforms to remove
-    const toRemove = currentPlatformIds.filter(id => !selectedPlatforms.includes(id));
-
-    // Calculate expiration date
+    // Calculate expiration date first
     let accessExpiresAt: string | null = null;
     const daysToAdd = customDays ? parseInt(customDays) : selectedDuration;
     if (daysToAdd !== null && daysToAdd > 0) {
@@ -374,24 +365,23 @@ export default function Admin() {
       expirationDate.setDate(expirationDate.getDate() + daysToAdd);
       accessExpiresAt = expirationDate.toISOString();
     }
+    
     try {
-      // Remove access - use user_id (auth id)
-      if (toRemove.length > 0) {
-        const {
-          error: deleteError
-        } = await supabase.from('user_platform_access').delete().eq('user_id', selectedUser.user_id).in('platform_id', toRemove);
-        if (deleteError) throw deleteError;
-      }
+      // user_platform_access.user_id references profiles.id
+      // Delete ALL existing access for this user first, then insert fresh
+      await supabase.from('user_platform_access')
+        .delete()
+        .eq('user_id', selectedUser.id);
 
-      // Add access - use user_id (auth id)
-      if (toAdd.length > 0) {
-        const newAccess = toAdd.map(platformId => ({
-          user_id: selectedUser.user_id,
+      // Add new access for selected platforms
+      if (selectedPlatforms.length > 0) {
+        const newAccess = selectedPlatforms.map(platformId => ({
+          user_id: selectedUser.id,
           platform_id: platformId
         }));
-        const {
-          error: insertError
-        } = await supabase.from('user_platform_access').insert(newAccess);
+        const { error: insertError } = await supabase
+          .from('user_platform_access')
+          .insert(newAccess);
         if (insertError) throw insertError;
       }
 
@@ -529,9 +519,10 @@ export default function Admin() {
     fetchData();
   };
 
-  // Get number of platforms user has access to - use user_id (auth id)
-  const getUserPlatformCount = (userAuthId: string) => {
-    return userPlatformAccess.filter(a => a.user_id === userAuthId).length;
+  // Get number of platforms user has access to
+  // user_platform_access.user_id references profiles.id
+  const getUserPlatformCount = (profileId: string) => {
+    return userPlatformAccess.filter(a => a.user_id === profileId).length;
   };
 
   // Image upload
@@ -1137,7 +1128,7 @@ export default function Admin() {
                           </TableCell>
                           <TableCell>
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                              {getUserPlatformCount(userProfile.user_id)} / {platforms.length}
+                              {getUserPlatformCount(userProfile.id)} / {platforms.length}
                             </span>
                           </TableCell>
                           <TableCell>
