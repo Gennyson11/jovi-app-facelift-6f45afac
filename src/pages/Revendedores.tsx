@@ -32,9 +32,8 @@ const Revendedores = () => {
           <p className="text-primary font-bold text-lg tracking-wider mb-2">
             PAINEL REVENDEDORES
           </p>
-          <p className="text-muted-foreground">
-            Leia atentamente os termos e condições que regem o uso da plataforma
-          </p>
+          <p className="text-muted-foreground">Leia atentamente os termos e condições que regem o uso da plataforma
+Junte-se a nós como sócio e ganhe 100% de lucro</p>
         </div>
 
         {/* Terms Sections */}
