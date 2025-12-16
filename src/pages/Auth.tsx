@@ -41,16 +41,15 @@ export default function Auth() {
     toast
   } = useToast();
   useEffect(() => {
-    // Only redirect when we have both user AND role loaded (not loading)
-    if (!loading && user && role) {
+    console.log('Auth useEffect - loading:', loading, 'user:', !!user, 'role:', role);
+    
+    // Redirect when we have user AND role (or default after timeout)
+    if (!loading && user) {
+      // If role is set, redirect based on role
       if (role === 'admin') {
-        navigate('/admin', {
-          replace: true
-        });
-      } else {
-        navigate('/dashboard', {
-          replace: true
-        });
+        navigate('/admin', { replace: true });
+      } else if (role) {
+        navigate('/dashboard', { replace: true });
       }
     }
   }, [user, role, loading, navigate]);

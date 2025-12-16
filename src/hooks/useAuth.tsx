@@ -23,7 +23,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const initializedRef = useRef(false);
 
-  const fetchUserRole = async (userId: string) => {
+  const fetchUserRole = async (userId: string): Promise<UserRole> => {
+    console.log('Fetching role for user:', userId);
     const { data, error } = await supabase
       .from('user_roles')
       .select('role')
@@ -32,9 +33,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     
     if (error) {
       console.error('Error fetching role:', error);
-      return null;
+      return 'user'; // Default to 'user' role if fetch fails
     }
-    return data?.role as UserRole;
+    
+    const fetchedRole = (data?.role as UserRole) || 'user';
+    console.log('Fetched role:', fetchedRole);
+    return fetchedRole;
   };
 
   useEffect(() => {
