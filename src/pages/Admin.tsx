@@ -858,9 +858,9 @@ export default function Admin() {
               <Megaphone className="w-4 h-4" />
               Notícias ({news.length})
             </TabsTrigger>
-            <TabsTrigger value="raffles" className="gap-2">
-              <Gift className="w-4 h-4" />
-              Sorteios
+            <TabsTrigger value="partners" className="gap-2">
+              <Users className="w-4 h-4" />
+              Sócios
             </TabsTrigger>
           </TabsList>
 
@@ -1265,13 +1265,13 @@ export default function Admin() {
             </Card>
           </TabsContent>
 
-          {/* Raffles/Coupons Tab */}
-          <TabsContent value="raffles">
+          {/* Partners Tab */}
+          <TabsContent value="partners">
             <div className="space-y-8">
               {/* Header */}
               <div>
-                <h2 className="text-2xl font-bold text-foreground">Resgatar Cupom</h2>
-                <p className="text-muted-foreground mt-1">Digite seu código promocional para ativar benefícios exclusivos.</p>
+                <h2 className="text-2xl font-bold text-foreground">Sócios</h2>
+                <p className="text-muted-foreground mt-1">Gerencie os sócios e parceiros do sistema.</p>
               </div>
 
               {/* Coupon Redemption Card */}
