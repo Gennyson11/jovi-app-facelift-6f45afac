@@ -1,16 +1,10 @@
 import { AlertTriangle, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-
 const Revendedores = () => {
   const handleWhatsApp = () => {
-    window.open(
-      "https://wa.me/558499889568?text=Olá! Tenho interesse em me tornar revendedor JoviTools.",
-      "_blank"
-    );
+    window.open("https://wa.me/558499889568?text=Olá! Tenho interesse em me tornar revendedor JoviTools.", "_blank");
   };
-
-  return (
-    <div className="min-h-screen bg-background">
+  return <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="py-4 border-b border-border/30">
         <div className="max-w-4xl mx-auto px-4 flex justify-center">
@@ -60,7 +54,7 @@ const Revendedores = () => {
                 <span className="text-primary mt-1">•</span>
                 <span>
                   As vendas realizadas devem ter valor{" "}
-                  <strong className="text-foreground">mínimo de R$ 29,99</strong>.
+                  <strong className="text-foreground">mínimo de R$ 27,99</strong>.
                 </span>
               </p>
               <p className="text-muted-foreground flex items-start gap-2">
@@ -154,10 +148,7 @@ const Revendedores = () => {
 
         {/* CTA Button */}
         <div className="flex justify-center">
-          <Button
-            onClick={handleWhatsApp}
-            className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-4 px-8 rounded-xl text-lg shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all"
-          >
+          <Button onClick={handleWhatsApp} className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold py-4 px-8 rounded-xl text-lg shadow-lg shadow-primary/30 hover:shadow-primary/50 transition-all">
             Quero me tornar revendedor
           </Button>
         </div>
@@ -167,8 +158,6 @@ const Revendedores = () => {
       <footer className="py-6 text-center text-muted-foreground text-sm border-t border-border/30">
         © 2025 JoviTools. Todos os direitos reservados.
       </footer>
-    </div>
-  );
+    </div>;
 };
-
 export default Revendedores;
