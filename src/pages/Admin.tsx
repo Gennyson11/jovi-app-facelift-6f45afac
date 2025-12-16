@@ -58,6 +58,13 @@ interface News {
   updated_at: string;
 }
 
+interface SocioUser {
+  user_id: string;
+  email: string;
+  name: string | null;
+  created_at: string;
+}
+
 // Access duration options
 const ACCESS_DURATION_OPTIONS = [{
   label: '2 dias',
@@ -93,6 +100,7 @@ export default function Admin() {
   const [userPlatformAccess, setUserPlatformAccess] = useState<UserPlatformAccess[]>([]);
   const [news, setNews] = useState<News[]>([]);
   const [platformClicks, setPlatformClicks] = useState<Record<string, number>>({});
+  const [socios, setSocios] = useState<SocioUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
 
@@ -174,12 +182,13 @@ export default function Admin() {
   }, [user?.id, isAdmin]);
   const fetchData = async () => {
     setLoading(true);
-    const [platformsRes, usersRes, accessRes, newsRes, clicksRes] = await Promise.all([
+    const [platformsRes, usersRes, accessRes, newsRes, clicksRes, sociosRes] = await Promise.all([
       supabase.from('streaming_platforms').select('*').order('name'), 
       supabase.from('profiles').select('*').order('created_at', { ascending: false }), 
       supabase.from('user_platform_access').select('*'), 
       supabase.from('news').select('*').order('created_at', { ascending: false }),
-      supabase.from('platform_clicks').select('platform_id, click_count')
+      supabase.from('platform_clicks').select('platform_id, click_count'),
+      supabase.from('user_roles').select('user_id, created_at').eq('role', 'socio')
     ]);
     if (platformsRes.data) setPlatforms(platformsRes.data as Platform[]);
     if (usersRes.data) setUsers(usersRes.data as UserProfile[]);
@@ -192,6 +201,21 @@ export default function Admin() {
       });
       setPlatformClicks(clicksMap);
     }
+    
+    // Map socios with profile data
+    if (sociosRes.data && usersRes.data) {
+      const sociosList: SocioUser[] = sociosRes.data.map(socio => {
+        const profile = usersRes.data.find(u => u.user_id === socio.user_id);
+        return {
+          user_id: socio.user_id,
+          email: profile?.email || 'Email não encontrado',
+          name: profile?.name || null,
+          created_at: socio.created_at
+        };
+      });
+      setSocios(sociosList);
+    }
+    
     setLoading(false);
   };
   const handleLogout = async () => {
@@ -1300,23 +1324,53 @@ export default function Admin() {
 
           {/* Partners Tab */}
           <TabsContent value="partners">
-            <div className="space-y-8">
-              {/* Header */}
-              <div>
-                <h2 className="text-2xl font-bold text-foreground">Sócios</h2>
-                <p className="text-muted-foreground mt-1">Gerencie os sócios e parceiros do sistema.</p>
-              </div>
-
-              {/* Placeholder for future partners management */}
-              <Card className="border-border">
-                <CardContent className="pt-8 pb-8">
-                  <div className="flex flex-col items-center text-center space-y-4">
-                    <Users className="w-12 h-12 text-muted-foreground" />
-                    <p className="text-muted-foreground">Funcionalidade de sócios em desenvolvimento.</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
+            <Card className="border-border">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-foreground">Sócios Cadastrados</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">Usuários com cargo de sócio no sistema</p>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-primary/10 text-primary">
+                  <Handshake className="w-4 h-4" />
+                  <span className="font-semibold">{socios.length}</span>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Nome</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Cadastrado como sócio em</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {socios.map(socio => (
+                        <TableRow key={socio.user_id}>
+                          <TableCell className="font-medium">
+                            {socio.name || '-'}
+                          </TableCell>
+                          <TableCell className="text-muted-foreground">
+                            {socio.email}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {new Date(socio.created_at).toLocaleDateString('pt-BR')}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {socios.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={3} className="text-center text-muted-foreground py-8">
+                            Nenhum sócio cadastrado
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
           </TabsContent>
         </Tabs>
       </main>
