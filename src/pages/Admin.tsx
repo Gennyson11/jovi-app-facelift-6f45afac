@@ -310,8 +310,14 @@ export default function Admin() {
   // Open permissions dialog
   const openPermissionsDialog = async (userProfile: UserProfile) => {
     setSelectedUser(userProfile);
-    // user_platform_access.user_id references profiles.id (not profiles.user_id)
-    const userAccess = userPlatformAccess.filter(a => a.user_id === userProfile.id).map(a => a.platform_id);
+    
+    // Fetch fresh platform access data from database
+    const { data: freshAccess } = await supabase
+      .from('user_platform_access')
+      .select('platform_id')
+      .eq('user_id', userProfile.id);
+    
+    const userAccess = freshAccess?.map(a => a.platform_id) || [];
     setSelectedPlatforms(userAccess);
 
     // Set current duration based on expiration
