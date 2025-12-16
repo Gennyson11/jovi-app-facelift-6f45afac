@@ -310,7 +310,8 @@ export default function Admin() {
   // Open permissions dialog
   const openPermissionsDialog = async (userProfile: UserProfile) => {
     setSelectedUser(userProfile);
-    const userAccess = userPlatformAccess.filter(a => a.user_id === userProfile.id).map(a => a.platform_id);
+    // Use user_id (auth id) to filter platform access, not profile id
+    const userAccess = userPlatformAccess.filter(a => a.user_id === userProfile.user_id).map(a => a.platform_id);
     setSelectedPlatforms(userAccess);
 
     // Set current duration based on expiration
@@ -356,8 +357,8 @@ export default function Admin() {
     if (!selectedUser) return;
     setSavingPermissions(true);
 
-    // Get current access for this user
-    const currentAccess = userPlatformAccess.filter(a => a.user_id === selectedUser.id);
+    // Get current access for this user - use user_id (auth id), not profile id
+    const currentAccess = userPlatformAccess.filter(a => a.user_id === selectedUser.user_id);
     const currentPlatformIds = currentAccess.map(a => a.platform_id);
 
     // Platforms to add
@@ -374,18 +375,18 @@ export default function Admin() {
       accessExpiresAt = expirationDate.toISOString();
     }
     try {
-      // Remove access
+      // Remove access - use user_id (auth id)
       if (toRemove.length > 0) {
         const {
           error: deleteError
-        } = await supabase.from('user_platform_access').delete().eq('user_id', selectedUser.id).in('platform_id', toRemove);
+        } = await supabase.from('user_platform_access').delete().eq('user_id', selectedUser.user_id).in('platform_id', toRemove);
         if (deleteError) throw deleteError;
       }
 
-      // Add access
+      // Add access - use user_id (auth id)
       if (toAdd.length > 0) {
         const newAccess = toAdd.map(platformId => ({
-          user_id: selectedUser.id,
+          user_id: selectedUser.user_id,
           platform_id: platformId
         }));
         const {
@@ -528,9 +529,9 @@ export default function Admin() {
     fetchData();
   };
 
-  // Get number of platforms user has access to
-  const getUserPlatformCount = (userId: string) => {
-    return userPlatformAccess.filter(a => a.user_id === userId).length;
+  // Get number of platforms user has access to - use user_id (auth id)
+  const getUserPlatformCount = (userAuthId: string) => {
+    return userPlatformAccess.filter(a => a.user_id === userAuthId).length;
   };
 
   // Image upload
@@ -1136,7 +1137,7 @@ export default function Admin() {
                           </TableCell>
                           <TableCell>
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                              {getUserPlatformCount(userProfile.id)} / {platforms.length}
+                              {getUserPlatformCount(userProfile.user_id)} / {platforms.length}
                             </span>
                           </TableCell>
                           <TableCell>
