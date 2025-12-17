@@ -202,12 +202,20 @@ export default function Admin() {
       supabase.from('user_roles').select('user_id, created_at').eq('role', 'socio')
     ]);
     
-    // Debug logging
-    console.log('Access data:', accessRes.data?.length, 'records', accessRes.error);
+    // Debug logging - IMPORTANT
+    console.log('=== ADMIN FETCH DATA ===');
+    console.log('Access data count:', accessRes.data?.length || 0);
+    console.log('Access error:', accessRes.error);
+    console.log('Access data sample:', accessRes.data?.slice(0, 3));
     
     if (platformsRes.data) setPlatforms(platformsRes.data as Platform[]);
     if (usersRes.data) setUsers(usersRes.data as UserProfile[]);
-    if (accessRes.data) setUserPlatformAccess(accessRes.data as UserPlatformAccess[]);
+    if (accessRes.data) {
+      console.log('Setting userPlatformAccess with', accessRes.data.length, 'records');
+      setUserPlatformAccess(accessRes.data as UserPlatformAccess[]);
+    } else {
+      console.log('No access data returned, keeping current state');
+    }
     if (newsRes.data) setNews(newsRes.data as News[]);
     if (clicksRes.data) {
       const clicksMap: Record<string, number> = {};
