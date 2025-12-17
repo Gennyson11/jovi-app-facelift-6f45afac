@@ -59,9 +59,7 @@ Junte-se a nós como sócio e ganhe 100% de lucro</p>
               <p className="text-muted-foreground flex items-start gap-2">
                 <span className="text-primary mt-1">•</span>
                 <span>
-                  <span className="text-pink-500 font-medium">
-                    mínimo de R$ 27,00
-                  </span>{" "}
+                  <span className="text-pink-500 font-medium">mínimo de R$ 27,00</span>{" "}
                   realizar transações abaixo desse valor em hipótese alguma.
                 </span>
               </p>
@@ -153,7 +151,7 @@ Junte-se a nós como sócio e ganhe 100% de lucro</p>
             </div>
             <div className="flex items-center gap-3 text-lg">
               <span className="text-primary text-xl">✅</span>
-              <span className="text-foreground font-medium">Cadastro de até 50 usuários</span>
+              <span className="text-foreground font-medium">Cadastro de até 100 usuários</span>
             </div>
             <div className="flex items-center gap-3 text-lg">
               <span className="text-primary text-xl">✅</span>
