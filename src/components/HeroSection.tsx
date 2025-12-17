@@ -33,7 +33,7 @@ const HeroSection = ({
         </div>
 
         {/* Main Heading */}
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-6">
+        <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-tight mb-4 md:mb-6 px-2">
           <span className="text-foreground">CHEGA DE GASTAR CARO</span>
           <br />
           <span className="text-foreground">EM FERRAMENTAS DE</span>
@@ -43,7 +43,7 @@ const HeroSection = ({
         </h1>
 
         {/* Hero Image with Play Button */}
-        <div className="relative my-10 max-w-3xl mx-auto group">
+        <div className="relative my-6 md:my-10 max-w-3xl mx-auto group px-2">
           {/* Animated glow background */}
           <div className="absolute -inset-2 bg-gradient-to-r from-primary via-accent to-primary rounded-3xl blur-xl opacity-40 group-hover:opacity-60 transition-opacity duration-500 animate-pulse" />
           <div className="absolute -inset-1 bg-gradient-to-r from-accent/50 via-primary/50 to-accent/50 rounded-3xl blur-md opacity-60" />
@@ -74,25 +74,25 @@ const HeroSection = ({
         </div>
 
         {/* Subtitle */}
-        <p className="text-xl md:text-2xl text-foreground mb-2">
+        <p className="text-lg sm:text-xl md:text-2xl text-foreground mb-2 px-2">
           Tenha <span className="text-accent font-semibold">mais de +50 ferramentas premium</span> de IA e Marketing Digital
         </p>
-        <p className="text-lg md:text-xl text-foreground mb-4">
+        <p className="text-base sm:text-lg md:text-xl text-foreground mb-4 px-2">
           em um só acesso, pagando apenas <span className="text-primary font-semibold">R$37,00/mês</span>
         </p>
-        <p className="text-muted-foreground text-sm flex items-center justify-center gap-2 mb-8">
+        <p className="text-muted-foreground text-xs sm:text-sm flex items-center justify-center gap-2 mb-6 md:mb-8 px-2">
           <span className="text-primary animate-pulse">✨</span>
           Acesso imediato após a confirmação do pagamento
         </p>
 
         {/* CTA Buttons */}
-        <div className="flex flex-col items-center gap-4">
-          <Button variant="hero" size="xl" className="px-12 group" onClick={onAccessClick}>
+        <div className="flex flex-col items-center gap-3 md:gap-4 px-4">
+          <Button variant="hero" size="xl" className="px-8 md:px-12 w-full sm:w-auto group" onClick={onAccessClick}>
             Acessar Plataforma
             <ChevronRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
           </Button>
           
-          <Button variant="accent" size="lg" className="group" asChild>
+          <Button variant="accent" size="lg" className="group w-full sm:w-auto" asChild>
             <a href="https://www.jovitools.online/revendedores" target="_blank" rel="noopener noreferrer">
               <Users className="mr-2 w-4 h-4" />
               Torne-se um revendedor parceiro
