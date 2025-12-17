@@ -1882,19 +1882,36 @@ export default function Admin() {
               </div>
             </div>
             
-            <div className="border border-border rounded-lg divide-y divide-border max-h-[300px] overflow-y-auto">
-              {platforms.map(platform => <label key={platform.id} className="flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors">
-                  <Checkbox checked={selectedPlatforms.includes(platform.id)} onCheckedChange={() => togglePlatformSelection(platform.id)} />
-                  <div className="flex items-center gap-3 flex-1">
-                    {platform.cover_image_url ? <img src={platform.cover_image_url} alt={platform.name} className="w-10 h-6 object-cover rounded" /> : <div className="w-10 h-6 bg-muted rounded flex items-center justify-center">
-                        <Image className="w-3 h-3 text-muted-foreground" />
-                      </div>}
-                    <span className="font-medium text-sm">{platform.name}</span>
+            <div className="border border-border rounded-lg max-h-[300px] overflow-y-auto">
+              {(['ai_tools', 'streamings', 'software', 'bonus_courses'] as PlatformCategory[]).map(category => {
+                const categoryPlatforms = platforms.filter(p => p.category === category);
+                if (categoryPlatforms.length === 0) return null;
+                return (
+                  <div key={category}>
+                    <div className="sticky top-0 bg-muted/80 backdrop-blur-sm px-3 py-2 border-b border-border">
+                      <span className="text-xs font-semibold text-primary uppercase tracking-wide">
+                        {CATEGORY_LABELS[category]} ({categoryPlatforms.length})
+                      </span>
+                    </div>
+                    <div className="divide-y divide-border">
+                      {categoryPlatforms.map(platform => (
+                        <label key={platform.id} className="flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors">
+                          <Checkbox checked={selectedPlatforms.includes(platform.id)} onCheckedChange={() => togglePlatformSelection(platform.id)} />
+                          <div className="flex items-center gap-3 flex-1">
+                            {platform.cover_image_url ? <img src={platform.cover_image_url} alt={platform.name} className="w-10 h-6 object-cover rounded" /> : <div className="w-10 h-6 bg-muted rounded flex items-center justify-center">
+                                <Image className="w-3 h-3 text-muted-foreground" />
+                              </div>}
+                            <span className="font-medium text-sm">{platform.name}</span>
+                          </div>
+                          <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${platform.status === 'online' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}`}>
+                            {platform.status === 'online' ? 'Online' : 'Manutenção'}
+                          </span>
+                        </label>
+                      ))}
+                    </div>
                   </div>
-                  <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${platform.status === 'online' ? 'bg-green-500/10 text-green-500' : 'bg-yellow-500/10 text-yellow-500'}`}>
-                    {platform.status === 'online' ? 'Online' : 'Manutenção'}
-                  </span>
-                </label>)}
+                );
+              })}
               {platforms.length === 0 && <p className="text-center text-muted-foreground py-8">
                   Nenhuma plataforma cadastrada
                 </p>}
