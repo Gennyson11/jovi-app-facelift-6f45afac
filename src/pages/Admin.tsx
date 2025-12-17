@@ -201,6 +201,10 @@ export default function Admin() {
       supabase.from('platform_clicks').select('platform_id, click_count'),
       supabase.from('user_roles').select('user_id, created_at').eq('role', 'socio')
     ]);
+    
+    // Debug logging
+    console.log('Access data:', accessRes.data?.length, 'records', accessRes.error);
+    
     if (platformsRes.data) setPlatforms(platformsRes.data as Platform[]);
     if (usersRes.data) setUsers(usersRes.data as UserProfile[]);
     if (accessRes.data) setUserPlatformAccess(accessRes.data as UserPlatformAccess[]);
