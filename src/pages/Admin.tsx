@@ -196,7 +196,7 @@ export default function Admin() {
     const [platformsRes, usersRes, accessRes, newsRes, clicksRes, sociosRes] = await Promise.all([
       supabase.from('streaming_platforms').select('*').order('name'), 
       supabase.from('profiles').select('*').order('created_at', { ascending: false }), 
-      supabase.from('user_platform_access').select('*'), 
+      supabase.from('user_platform_access').select('*').limit(10000), 
       supabase.from('news').select('*').order('created_at', { ascending: false }),
       supabase.from('platform_clicks').select('platform_id, click_count'),
       supabase.from('user_roles').select('user_id, created_at').eq('role', 'socio')
