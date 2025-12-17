@@ -193,29 +193,56 @@ export default function Admin() {
   }, [user?.id, isAdmin]);
   const fetchData = async () => {
     setLoading(true);
-    const [platformsRes, usersRes, accessRes, newsRes, clicksRes, sociosRes] = await Promise.all([
+    
+    // Fetch all platform access with pagination (Supabase default limit is 1000)
+    const fetchAllPlatformAccess = async () => {
+      const allAccess: UserPlatformAccess[] = [];
+      let from = 0;
+      const pageSize = 1000;
+      let hasMore = true;
+      
+      while (hasMore) {
+        const { data, error } = await supabase
+          .from('user_platform_access')
+          .select('*')
+          .range(from, from + pageSize - 1);
+        
+        if (error) {
+          console.error('Error fetching platform access:', error);
+          break;
+        }
+        
+        if (data && data.length > 0) {
+          allAccess.push(...(data as UserPlatformAccess[]));
+          from += pageSize;
+          hasMore = data.length === pageSize;
+        } else {
+          hasMore = false;
+        }
+      }
+      
+      return allAccess;
+    };
+    
+    const [platformsRes, usersRes, newsRes, clicksRes, sociosRes, allAccess] = await Promise.all([
       supabase.from('streaming_platforms').select('*').order('name'), 
       supabase.from('profiles').select('*').order('created_at', { ascending: false }), 
-      supabase.from('user_platform_access').select('*').limit(10000), 
       supabase.from('news').select('*').order('created_at', { ascending: false }),
       supabase.from('platform_clicks').select('platform_id, click_count'),
-      supabase.from('user_roles').select('user_id, created_at').eq('role', 'socio')
+      supabase.from('user_roles').select('user_id, created_at').eq('role', 'socio'),
+      fetchAllPlatformAccess()
     ]);
     
     // Debug logging - IMPORTANT
     console.log('=== ADMIN FETCH DATA ===');
-    console.log('Access data count:', accessRes.data?.length || 0);
-    console.log('Access error:', accessRes.error);
-    console.log('Access data sample:', accessRes.data?.slice(0, 3));
+    console.log('Access data count:', allAccess.length);
     
     if (platformsRes.data) setPlatforms(platformsRes.data as Platform[]);
     if (usersRes.data) setUsers(usersRes.data as UserProfile[]);
-    if (accessRes.data) {
-      console.log('Setting userPlatformAccess with', accessRes.data.length, 'records');
-      setUserPlatformAccess(accessRes.data as UserPlatformAccess[]);
-    } else {
-      console.log('No access data returned, keeping current state');
-    }
+    
+    console.log('Setting userPlatformAccess with', allAccess.length, 'records');
+    setUserPlatformAccess(allAccess);
+    
     if (newsRes.data) setNews(newsRes.data as News[]);
     if (clicksRes.data) {
       const clicksMap: Record<string, number> = {};
