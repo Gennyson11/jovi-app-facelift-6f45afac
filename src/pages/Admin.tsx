@@ -316,10 +316,22 @@ export default function Admin() {
     setSelectedUser(userProfile);
     
     // Fetch fresh platform access data from database
-    const { data: freshAccess } = await supabase
+    const { data: freshAccess, error: accessError } = await supabase
       .from('user_platform_access')
       .select('platform_id')
       .eq('user_id', userProfile.id);
+    
+    console.log('Loading permissions for:', userProfile.name, 'Profile ID:', userProfile.id);
+    console.log('Fresh access data:', freshAccess?.length, 'platforms', accessError);
+    
+    if (accessError) {
+      toast({
+        title: 'Erro',
+        description: 'Falha ao carregar permissões do usuário',
+        variant: 'destructive'
+      });
+      return;
+    }
     
     const userAccess = freshAccess?.map(a => a.platform_id) || [];
     setSelectedPlatforms(userAccess);
