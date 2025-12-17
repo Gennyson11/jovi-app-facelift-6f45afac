@@ -33,13 +33,13 @@ const ToolsList = ({ tools }: { tools: string[] }) => (
 
 const ToolsSection = () => {
   return (
-    <section className="py-20 px-4 relative">
+    <section className="py-12 md:py-20 px-4 relative">
       <div className="max-w-6xl mx-auto relative z-10">
-        <div className="rounded-xl border border-primary/20 bg-card/30 p-8 md:p-12">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+        <div className="rounded-xl border border-primary/20 bg-card/30 p-6 md:p-8 lg:p-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 md:gap-12">
             {/* AI Tools */}
             <div>
-              <h3 className="text-lg font-display font-bold text-primary mb-8">
+              <h3 className="text-base md:text-lg font-display font-bold text-primary mb-6 md:mb-8">
                 INTELIGÊNCIAS ARTIFICIAIS
               </h3>
               <ToolsList tools={aiTools} />
@@ -47,15 +47,15 @@ const ToolsSection = () => {
 
             {/* Editing Tools */}
             <div>
-              <h3 className="text-lg font-display font-bold text-primary mb-8">
+              <h3 className="text-base md:text-lg font-display font-bold text-primary mb-6 md:mb-8">
                 EDIÇÕES / DISTRAÇÕES
               </h3>
               <ToolsList tools={editingTools} />
             </div>
 
             {/* SEO Tools */}
-            <div>
-              <h3 className="text-lg font-display font-bold text-primary mb-8">
+            <div className="sm:col-span-2 md:col-span-1">
+              <h3 className="text-base md:text-lg font-display font-bold text-primary mb-6 md:mb-8">
                 SEO/MINERAÇÃO
               </h3>
               <ToolsList tools={seoTools} />
