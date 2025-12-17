@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Users, UserCheck, UserX, Settings, CheckSquare, Clock, Calendar, Infinity, PlusCircle, MinusCircle, Megaphone, ToggleLeft, ToggleRight, Wifi, WifiOff, MousePointerClick, Gift, QrCode, Handshake } from 'lucide-react';
+import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Users, UserCheck, UserX, Settings, CheckSquare, Clock, Calendar, Infinity, PlusCircle, MinusCircle, Megaphone, ToggleLeft, ToggleRight, Wifi, WifiOff, MousePointerClick, Gift, QrCode, Handshake, Search } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
@@ -114,6 +114,7 @@ export default function Admin() {
   const [loading, setLoading] = useState(true);
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
   const [userSearchQuery, setUserSearchQuery] = useState('');
+  const [platformSearchQuery, setPlatformSearchQuery] = useState('');
 
   // Platform Dialog
   const [platformDialogOpen, setPlatformDialogOpen] = useState(false);
@@ -996,12 +997,23 @@ export default function Admin() {
           {/* Platforms Tab */}
           <TabsContent value="platforms">
             <Card className="border-border">
-              <CardHeader className="flex flex-row items-center justify-between">
+              <CardHeader className="flex flex-row items-center justify-between flex-wrap gap-4">
                 <CardTitle className="text-foreground">Gerenciar Plataformas</CardTitle>
-                <Button onClick={() => openPlatformDialog()} size="sm">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Nova Plataforma
-                </Button>
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Buscar plataforma..."
+                      value={platformSearchQuery}
+                      onChange={(e) => setPlatformSearchQuery(e.target.value)}
+                      className="pl-9 w-[200px] sm:w-[250px]"
+                    />
+                  </div>
+                  <Button onClick={() => openPlatformDialog()} size="sm">
+                    <Plus className="w-4 h-4 mr-2" />
+                    Nova Plataforma
+                  </Button>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
@@ -1018,7 +1030,11 @@ export default function Admin() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {platforms.map(platform => <TableRow key={platform.id}>
+                      {platforms
+                        .filter(platform => 
+                          platform.name.toLowerCase().includes(platformSearchQuery.toLowerCase())
+                        )
+                        .map(platform => <TableRow key={platform.id}>
                           <TableCell>
                             {platform.cover_image_url ? <img src={platform.cover_image_url} alt={platform.name} className="w-16 h-10 object-cover rounded-md" /> : <div className="w-16 h-10 bg-muted rounded-md flex items-center justify-center">
                                 <Image className="w-5 h-5 text-muted-foreground" />
