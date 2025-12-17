@@ -1,13 +1,20 @@
-import { ChevronRight, Shield, Users } from "lucide-react";
+import { useState } from "react";
+import { ChevronRight, Shield, Users, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import heroImage from "@/assets/hero-hacker.jpg";
+
 interface HeroSectionProps {
   onAccessClick?: () => void;
 }
+
 const HeroSection = ({
   onAccessClick
 }: HeroSectionProps) => {
-  return <section className="relative min-h-screen flex flex-col items-center justify-center px-4 py-20 overflow-hidden">
+  const [videoOpen, setVideoOpen] = useState(false);
+
+  return (
+    <section className="relative min-h-screen flex flex-col items-center justify-center px-4 py-20 overflow-hidden">
       {/* Background gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background pointer-events-none" />
       
@@ -15,8 +22,8 @@ const HeroSection = ({
       <div className="absolute inset-0 opacity-20">
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent/20 rounded-full blur-3xl animate-pulse" style={{
-        animationDelay: '1s'
-      }} />
+          animationDelay: '1s'
+        }} />
       </div>
 
       <div className="relative z-10 max-w-5xl mx-auto text-center">
@@ -35,18 +42,28 @@ const HeroSection = ({
           <span className="ml-2">💸</span>
         </h1>
 
-        {/* Hero Image with Effects */}
+        {/* Hero Image with Play Button */}
         <div className="relative my-10 max-w-3xl mx-auto group">
           {/* Animated glow background */}
           <div className="absolute -inset-2 bg-gradient-to-r from-primary via-accent to-primary rounded-3xl blur-xl opacity-40 group-hover:opacity-60 transition-opacity duration-500 animate-pulse" />
           <div className="absolute -inset-1 bg-gradient-to-r from-accent/50 via-primary/50 to-accent/50 rounded-3xl blur-md opacity-60" />
           
           {/* Image container */}
-          <div className="relative rounded-2xl overflow-hidden border-2 border-primary/40 shadow-2xl shadow-primary/20">
+          <div 
+            className="relative rounded-2xl overflow-hidden border-2 border-primary/40 shadow-2xl shadow-primary/20 cursor-pointer"
+            onClick={() => setVideoOpen(true)}
+          >
             <img src={heroImage} alt="Hacker com ferramentas de IA" className="w-full transition-transform duration-700 group-hover:scale-105" />
             {/* Gradient overlays */}
             <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent pointer-events-none" />
             <div className="absolute inset-0 bg-gradient-to-r from-primary/10 via-transparent to-accent/10 pointer-events-none" />
+            
+            {/* Play Button Overlay */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+              <div className="w-20 h-20 md:w-24 md:h-24 rounded-full bg-primary/90 flex items-center justify-center shadow-lg shadow-primary/50 transition-all duration-300 group-hover:scale-110 group-hover:bg-primary">
+                <Play className="w-8 h-8 md:w-10 md:h-10 text-primary-foreground fill-primary-foreground ml-1" />
+              </div>
+            </div>
             
             {/* Corner accents */}
             <div className="absolute top-0 left-0 w-20 h-20 border-t-2 border-l-2 border-primary/60 rounded-tl-2xl" />
@@ -83,6 +100,26 @@ const HeroSection = ({
           </Button>
         </div>
       </div>
-    </section>;
+
+      {/* Video Modal */}
+      <Dialog open={videoOpen} onOpenChange={setVideoOpen}>
+        <DialogContent className="max-w-4xl p-0 bg-background border-primary/30 overflow-hidden">
+          <div className="aspect-video w-full">
+            <iframe
+              width="100%"
+              height="100%"
+              src={videoOpen ? "https://www.youtube.com/embed/b1hxzIUPQik?autoplay=1" : ""}
+              title="JoviTools Video"
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full"
+            />
+          </div>
+        </DialogContent>
+      </Dialog>
+    </section>
+  );
 };
+
 export default HeroSection;
