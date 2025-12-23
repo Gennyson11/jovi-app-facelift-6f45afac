@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Users, UserCheck, UserX, Settings, CheckSquare, Clock, Calendar, Infinity, PlusCircle, MinusCircle, Megaphone, ToggleLeft, ToggleRight, Wifi, WifiOff, MousePointerClick, Gift, QrCode, Handshake, Search } from 'lucide-react';
+import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Users, UserCheck, UserX, Settings, CheckSquare, Clock, Calendar, Infinity, PlusCircle, MinusCircle, Megaphone, ToggleLeft, ToggleRight, Wifi, WifiOff, MousePointerClick, Gift, QrCode, Handshake, Search, ShoppingCart, Package } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
@@ -54,6 +54,18 @@ interface News {
   id: string;
   title: string;
   content: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+}
+
+interface Product {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  image_url: string | null;
+  stock: number;
   is_active: boolean;
   created_at: string;
   updated_at: string;
@@ -149,6 +161,19 @@ export default function Admin() {
   const [newsTitle, setNewsTitle] = useState('');
   const [newsContent, setNewsContent] = useState('');
   const [newsIsActive, setNewsIsActive] = useState(true);
+
+  // Products (Loja)
+  const [products, setProducts] = useState<Product[]>([]);
+  const [productDialogOpen, setProductDialogOpen] = useState(false);
+  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [productName, setProductName] = useState('');
+  const [productDescription, setProductDescription] = useState('');
+  const [productPrice, setProductPrice] = useState('');
+  const [productStock, setProductStock] = useState('');
+  const [productImageUrl, setProductImageUrl] = useState('');
+  const [productIsActive, setProductIsActive] = useState(true);
+  const [uploadingProductImage, setUploadingProductImage] = useState(false);
+  const productFileInputRef = useRef<HTMLInputElement>(null);
   const {
     user,
     isAdmin,
@@ -226,12 +251,13 @@ export default function Admin() {
       return allAccess;
     };
     
-    const [platformsRes, usersRes, newsRes, clicksRes, sociosRes, allAccess] = await Promise.all([
+    const [platformsRes, usersRes, newsRes, clicksRes, sociosRes, productsRes, allAccess] = await Promise.all([
       supabase.from('streaming_platforms').select('*').order('name'), 
       supabase.from('profiles').select('*').order('created_at', { ascending: false }), 
       supabase.from('news').select('*').order('created_at', { ascending: false }),
       supabase.from('platform_clicks').select('platform_id, click_count'),
       supabase.from('user_roles').select('user_id, created_at').eq('role', 'socio'),
+      supabase.from('products').select('*').order('created_at', { ascending: false }),
       fetchAllPlatformAccess()
     ]);
     
@@ -246,6 +272,7 @@ export default function Admin() {
     setUserPlatformAccess(allAccess);
     
     if (newsRes.data) setNews(newsRes.data as News[]);
+    if (productsRes.data) setProducts(productsRes.data as Product[]);
     if (clicksRes.data) {
       const clicksMap: Record<string, number> = {};
       clicksRes.data.forEach((c: { platform_id: string; click_count: number }) => {
@@ -940,6 +967,148 @@ export default function Admin() {
     });
     fetchData();
   };
+
+  // Products CRUD
+  const openProductDialog = (product?: Product) => {
+    if (product) {
+      setEditingProduct(product);
+      setProductName(product.name);
+      setProductDescription(product.description || '');
+      setProductPrice(product.price.toString());
+      setProductStock(product.stock.toString());
+      setProductImageUrl(product.image_url || '');
+      setProductIsActive(product.is_active);
+    } else {
+      setEditingProduct(null);
+      setProductName('');
+      setProductDescription('');
+      setProductPrice('');
+      setProductStock('0');
+      setProductImageUrl('');
+      setProductIsActive(true);
+    }
+    setProductDialogOpen(true);
+  };
+
+  const handleProductImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setUploadingProductImage(true);
+    const fileExt = file.name.split('.').pop();
+    const fileName = `${crypto.randomUUID()}.${fileExt}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('product-images')
+      .upload(fileName, file);
+
+    if (uploadError) {
+      toast({
+        title: 'Erro',
+        description: 'Falha ao fazer upload da imagem',
+        variant: 'destructive'
+      });
+      setUploadingProductImage(false);
+      return;
+    }
+
+    const { data } = supabase.storage.from('product-images').getPublicUrl(fileName);
+    setProductImageUrl(data.publicUrl);
+    setUploadingProductImage(false);
+    toast({
+      title: 'Sucesso',
+      description: 'Imagem carregada'
+    });
+  };
+
+  const saveProduct = async () => {
+    if (!productName.trim()) {
+      toast({
+        title: 'Erro',
+        description: 'Nome é obrigatório',
+        variant: 'destructive'
+      });
+      return;
+    }
+
+    const productData = {
+      name: productName.trim(),
+      description: productDescription.trim() || null,
+      price: parseFloat(productPrice) || 0,
+      stock: parseInt(productStock) || 0,
+      image_url: productImageUrl || null,
+      is_active: productIsActive
+    };
+
+    if (editingProduct) {
+      const { error } = await supabase.from('products').update(productData).eq('id', editingProduct.id);
+      if (error) {
+        toast({
+          title: 'Erro',
+          description: 'Falha ao atualizar produto',
+          variant: 'destructive'
+        });
+        return;
+      }
+      toast({
+        title: 'Sucesso',
+        description: 'Produto atualizado'
+      });
+    } else {
+      const { error } = await supabase.from('products').insert(productData);
+      if (error) {
+        toast({
+          title: 'Erro',
+          description: 'Falha ao criar produto',
+          variant: 'destructive'
+        });
+        return;
+      }
+      toast({
+        title: 'Sucesso',
+        description: 'Produto criado'
+      });
+    }
+    setProductDialogOpen(false);
+    fetchData();
+  };
+
+  const deleteProduct = async (id: string) => {
+    const { error } = await supabase.from('products').delete().eq('id', id);
+    if (error) {
+      toast({
+        title: 'Erro',
+        description: 'Falha ao deletar produto',
+        variant: 'destructive'
+      });
+      return;
+    }
+    toast({
+      title: 'Sucesso',
+      description: 'Produto deletado'
+    });
+    fetchData();
+  };
+
+  const toggleProductActive = async (product: Product) => {
+    const { error } = await supabase.from('products').update({
+      is_active: !product.is_active
+    }).eq('id', product.id);
+    if (error) {
+      toast({
+        title: 'Erro',
+        description: 'Falha ao alterar status',
+        variant: 'destructive'
+      });
+      return;
+    }
+    toast({
+      title: 'Sucesso',
+      description: product.is_active ? 'Produto desativado' : 'Produto ativado'
+    });
+    fetchData();
+  };
+
   if (authLoading || loading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
@@ -988,6 +1157,10 @@ export default function Admin() {
             <TabsTrigger value="news" className="gap-2">
               <Megaphone className="w-4 h-4" />
               Notícias ({news.length})
+            </TabsTrigger>
+            <TabsTrigger value="store" className="gap-2">
+              <ShoppingCart className="w-4 h-4" />
+              Loja ({products.length})
             </TabsTrigger>
             <TabsTrigger value="partners" className="gap-2">
               <Users className="w-4 h-4" />
@@ -1422,6 +1595,93 @@ export default function Admin() {
                             Nenhuma notícia criada
                           </TableCell>
                         </TableRow>}
+                    </TableBody>
+                  </Table>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Store Tab */}
+          <TabsContent value="store">
+            <Card className="border-border">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <CardTitle className="text-foreground">Gerenciar Produtos</CardTitle>
+                <Button onClick={() => openProductDialog()} size="sm">
+                  <Plus className="w-4 h-4 mr-2" />
+                  Novo Produto
+                </Button>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Imagem</TableHead>
+                        <TableHead>Nome</TableHead>
+                        <TableHead>Preço</TableHead>
+                        <TableHead>Estoque</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead className="text-right">Ações</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {products.map(product => (
+                        <TableRow key={product.id}>
+                          <TableCell>
+                            {product.image_url ? (
+                              <img src={product.image_url} alt={product.name} className="w-12 h-12 object-cover rounded-md" />
+                            ) : (
+                              <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center">
+                                <Package className="w-5 h-5 text-muted-foreground" />
+                              </div>
+                            )}
+                          </TableCell>
+                          <TableCell className="font-medium max-w-[200px] truncate">
+                            {product.name}
+                          </TableCell>
+                          <TableCell>
+                            R$ {product.price.toFixed(2)}
+                          </TableCell>
+                          <TableCell>
+                            <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${product.stock > 0 ? 'bg-green-500/10 text-green-500' : 'bg-red-500/10 text-red-500'}`}>
+                              {product.stock} un.
+                            </span>
+                          </TableCell>
+                          <TableCell>
+                            <button onClick={() => toggleProductActive(product)} className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${product.is_active ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>
+                              {product.is_active ? (
+                                <>
+                                  <ToggleRight className="w-3 h-3" />
+                                  Ativo
+                                </>
+                              ) : (
+                                <>
+                                  <ToggleLeft className="w-3 h-3" />
+                                  Inativo
+                                </>
+                              )}
+                            </button>
+                          </TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button variant="outline" size="icon" onClick={() => openProductDialog(product)}>
+                                <Pencil className="w-4 h-4" />
+                              </Button>
+                              <Button variant="destructive" size="icon" onClick={() => deleteProduct(product.id)}>
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {products.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
+                            Nenhum produto criado
+                          </TableCell>
+                        </TableRow>
+                      )}
                     </TableBody>
                   </Table>
                 </div>
@@ -1966,6 +2226,86 @@ export default function Admin() {
               Cancelar
             </Button>
             <Button onClick={saveNews}>
+              Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Product Dialog */}
+      <Dialog open={productDialogOpen} onOpenChange={setProductDialogOpen}>
+        <DialogContent className="bg-card border-border max-w-lg">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">
+              {editingProduct ? 'Editar Produto' : 'Novo Produto'}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="product-name">Nome *</Label>
+              <Input id="product-name" value={productName} onChange={e => setProductName(e.target.value)} placeholder="Ex: Camiseta Premium..." className="bg-background/50 border-border" />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="product-description">Descrição</Label>
+              <Textarea id="product-description" value={productDescription} onChange={e => setProductDescription(e.target.value)} placeholder="Descreva o produto..." className="bg-background/50 border-border min-h-[80px]" />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="product-price">Preço (R$)</Label>
+                <Input id="product-price" type="number" step="0.01" value={productPrice} onChange={e => setProductPrice(e.target.value)} placeholder="0.00" className="bg-background/50 border-border" />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="product-stock">Estoque</Label>
+                <Input id="product-stock" type="number" value={productStock} onChange={e => setProductStock(e.target.value)} placeholder="0" className="bg-background/50 border-border" />
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label>Imagem do Produto</Label>
+              <div className="flex items-center gap-4">
+                {productImageUrl ? (
+                  <img src={productImageUrl} alt="Preview" className="w-16 h-16 object-cover rounded-md" />
+                ) : (
+                  <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center">
+                    <Package className="w-6 h-6 text-muted-foreground" />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <input
+                    type="file"
+                    ref={productFileInputRef}
+                    onChange={handleProductImageUpload}
+                    accept="image/*"
+                    className="hidden"
+                  />
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => productFileInputRef.current?.click()}
+                    disabled={uploadingProductImage}
+                  >
+                    {uploadingProductImage ? (
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    ) : (
+                      <Upload className="w-4 h-4 mr-2" />
+                    )}
+                    {uploadingProductImage ? 'Enviando...' : 'Escolher imagem'}
+                  </Button>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <Label htmlFor="product-active" className="cursor-pointer">Produto ativo</Label>
+              <button type="button" onClick={() => setProductIsActive(!productIsActive)} className={`relative w-11 h-6 rounded-full transition-colors ${productIsActive ? 'bg-primary' : 'bg-muted'}`}>
+                <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${productIsActive ? 'translate-x-5' : 'translate-x-0'}`} />
+              </button>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setProductDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={saveProduct}>
               Salvar
             </Button>
           </DialogFooter>
