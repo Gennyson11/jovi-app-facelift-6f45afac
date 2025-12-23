@@ -592,6 +592,12 @@ export default function Dashboard() {
                           {!isBlocked && <div className={`absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold backdrop-blur-sm ${platform.access_type === 'credentials' ? 'bg-primary/20 text-primary border border-primary/30' : 'bg-purple-500/20 text-purple-400 border border-purple-500/30'}`}>
                               {platform.access_type === 'credentials' ? <KeyRound className="w-3 h-3" /> : <Link className="w-3 h-3" />}
                             </div>}
+
+                          {/* Rating Badge */}
+                          <div className="absolute top-3 right-3 inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-bold bg-black/70 text-white backdrop-blur-sm">
+                            <span className="text-yellow-400">★</span>
+                            <span>4.9</span>
+                          </div>
                         </div>
 
                         {/* Status Bar - Below Image */}
