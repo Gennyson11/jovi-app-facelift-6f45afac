@@ -83,6 +83,15 @@ interface PlatformClick {
   platform_id: string;
   click_count: number;
 }
+interface Product {
+  id: string;
+  name: string;
+  description: string | null;
+  price: number;
+  image_url: string | null;
+  stock: number;
+  is_active: boolean;
+}
 const platformIcons: Record<string, string> = {
   'Netflix': '🎬',
   'Amazon Prime Video': '📦',
@@ -104,6 +113,7 @@ export default function Dashboard() {
   const [platformClicks, setPlatformClicks] = useState<Record<string, number>>({});
   const [activeCategory, setActiveCategory] = useState<string | null>('ai_tools');
   const [isSocio, setIsSocio] = useState(false);
+  const [products, setProducts] = useState<Product[]>([]);
   const {
     user,
     signOut,
@@ -140,12 +150,13 @@ export default function Dashboard() {
   const fetchData = async () => {
     setLoading(true);
 
-    // Fetch platforms, news, and click counts
-    const [platformsRes, newsRes, clicksRes] = await Promise.all([supabase.from('streaming_platforms').select('*').order('name'), supabase.from('news').select('*').eq('is_active', true).order('created_at', {
+    // Fetch platforms, news, click counts, and products
+    const [platformsRes, newsRes, clicksRes, productsRes] = await Promise.all([supabase.from('streaming_platforms').select('*').order('name'), supabase.from('news').select('*').eq('is_active', true).order('created_at', {
       ascending: false
-    }), supabase.from('platform_clicks').select('platform_id, click_count')]);
+    }), supabase.from('platform_clicks').select('platform_id, click_count'), supabase.from('products').select('*').eq('is_active', true).order('name')]);
     if (platformsRes.data) setPlatforms(platformsRes.data as Platform[]);
     if (newsRes.data) setNews(newsRes.data as News[]);
+    if (productsRes.data) setProducts(productsRes.data as Product[]);
     if (clicksRes.data) {
       const clicksMap: Record<string, number> = {};
       clicksRes.data.forEach((c: PlatformClick) => {
@@ -540,8 +551,82 @@ export default function Dashboard() {
         {/* Veo3 Section */}
         {activeCategory === 'veo3' && <Veo3Chat />}
 
+        {/* Loja Section */}
+        {activeCategory === 'loja' && (
+          <div className="mb-10">
+            {/* Category Header */}
+            <div className="flex items-center gap-3 mb-6">
+              <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center shadow-lg">
+                <span className="text-xl">🛒</span>
+              </div>
+              <div>
+                <h2 className="text-xl font-display font-bold text-foreground">
+                  Loja
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  {products.length} {products.length === 1 ? 'produto' : 'produtos'}
+                </p>
+              </div>
+            </div>
+
+            {/* Products Grid */}
+            {products.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.map(product => (
+                  <div key={product.id} className="group cursor-pointer transition-all duration-300">
+                    <div className="bg-card border border-border rounded-xl overflow-hidden transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10">
+                      {/* Product Image */}
+                      <div className="relative aspect-video bg-gradient-to-br from-secondary to-background">
+                        {product.image_url ? (
+                          <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center">
+                            <span className="text-6xl">📦</span>
+                          </div>
+                        )}
+                        
+                        {/* Price Badge */}
+                        <div className="absolute top-3 right-3 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold bg-green-500 text-white shadow-lg">
+                          R$ {product.price.toFixed(2)}
+                        </div>
+                        
+                        {/* Stock Badge */}
+                        <div className={`absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold backdrop-blur-sm ${product.stock > 0 ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`}>
+                          {product.stock > 0 ? `${product.stock} em estoque` : 'Esgotado'}
+                        </div>
+                      </div>
+
+                      {/* Product Info */}
+                      <div className="p-4 space-y-2">
+                        <h3 className="font-semibold text-foreground truncate">{product.name}</h3>
+                        {product.description && (
+                          <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
+                        )}
+                        <button 
+                          className="w-full mt-2 py-2 px-4 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                          disabled={product.stock === 0}
+                          onClick={() => {
+                            window.open('https://bit.ly/whatsapp-suportejt', '_blank');
+                          }}
+                        >
+                          {product.stock > 0 ? 'Comprar via WhatsApp' : 'Indisponível'}
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-12">
+                <span className="text-4xl mb-4 block">🛒</span>
+                <p className="text-muted-foreground">Nenhum produto disponível no momento</p>
+              </div>
+            )}
+          </div>
+        )}
+
         {/* Categories */}
-        {activeCategory !== 'sorteios' && activeCategory !== 'jovi_ia' && activeCategory !== 'veo3' && filteredCategoryOrder.map(categoryKey => {
+        {activeCategory !== 'sorteios' && activeCategory !== 'jovi_ia' && activeCategory !== 'veo3' && activeCategory !== 'loja' && filteredCategoryOrder.map(categoryKey => {
           const categoryPlatforms = filteredPlatforms.filter(p => p.category === categoryKey);
           if (categoryPlatforms.length === 0) return null;
           const config = CATEGORY_CONFIG[categoryKey];
