@@ -625,7 +625,7 @@ export default function Dashboard() {
                                 window.open('https://bit.ly/whatsapp-suportejt', '_blank');
                               }}
                             >
-                              {product.stock === 0 ? 'Indisponível' : 'VER PRODUTO'}
+                              {product.stock === 0 ? 'Indisponível' : 'COMPRAR'}
                             </button>
                             <button 
                               className="py-3 px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
