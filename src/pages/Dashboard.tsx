@@ -591,7 +591,7 @@ export default function Dashboard() {
                         {/* Product Info */}
                         <div className="p-4 space-y-3 bg-card">
                           {/* Product Name */}
-                          <h3 className="font-bold text-foreground text-sm uppercase tracking-wide line-clamp-2 min-h-[40px]">
+                          <h3 className="font-display font-bold text-foreground uppercase tracking-wide line-clamp-2">
                             {product.name}
                           </h3>
                           
