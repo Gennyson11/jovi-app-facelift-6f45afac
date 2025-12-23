@@ -583,7 +583,7 @@ export default function Dashboard() {
                     <div key={product.id} className="group">
                       <div className="bg-card border border-border rounded-xl overflow-hidden transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10">
                         {/* Product Image */}
-                        <div className="relative aspect-[4/3] bg-gradient-to-br from-secondary to-background">
+                        <div className="relative aspect-video bg-gradient-to-br from-secondary to-background">
                           {product.image_url ? (
                             <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
                           ) : (
