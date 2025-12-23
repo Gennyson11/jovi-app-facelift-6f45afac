@@ -88,6 +88,7 @@ interface Product {
   name: string;
   description: string | null;
   price: number;
+  original_price: number | null;
   image_url: string | null;
   stock: number;
   is_active: boolean;
@@ -571,50 +572,81 @@ export default function Dashboard() {
 
             {/* Products Grid */}
             {products.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map(product => (
-                  <div key={product.id} className="group cursor-pointer transition-all duration-300">
-                    <div className="bg-card border border-border rounded-xl overflow-hidden transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10">
-                      {/* Product Image */}
-                      <div className="relative aspect-video bg-gradient-to-br from-secondary to-background">
-                        {product.image_url ? (
-                          <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
-                        ) : (
-                          <div className="w-full h-full flex items-center justify-center">
-                            <span className="text-6xl">📦</span>
-                          </div>
-                        )}
-                        
-                        {/* Price Badge */}
-                        <div className="absolute top-3 right-3 inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-sm font-bold bg-green-500 text-white shadow-lg">
-                          R$ {product.price.toFixed(2)}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                {products.map(product => {
+                  const hasDiscount = product.original_price && product.original_price > product.price;
+                  const discountPercent = hasDiscount 
+                    ? Math.round((1 - product.price / product.original_price!) * 100)
+                    : 0;
+                  
+                  return (
+                    <div key={product.id} className="group">
+                      <div className="bg-card border border-border rounded-xl overflow-hidden transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10">
+                        {/* Product Image */}
+                        <div className="relative aspect-[4/3] bg-gradient-to-br from-secondary to-background">
+                          {product.image_url ? (
+                            <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
+                          ) : (
+                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900">
+                              <span className="text-5xl">📦</span>
+                            </div>
+                          )}
                         </div>
-                        
-                        {/* Stock Badge */}
-                        <div className={`absolute top-3 left-3 inline-flex items-center gap-1 px-2 py-1 rounded-full text-[10px] font-semibold backdrop-blur-sm ${product.stock > 0 ? 'bg-green-500/20 text-green-400 border border-green-500/30' : 'bg-red-500/20 text-red-400 border border-red-500/30'}`}>
-                          {product.stock > 0 ? `${product.stock} em estoque` : 'Esgotado'}
-                        </div>
-                      </div>
 
-                      {/* Product Info */}
-                      <div className="p-4 space-y-2">
-                        <h3 className="font-semibold text-foreground truncate">{product.name}</h3>
-                        {product.description && (
-                          <p className="text-sm text-muted-foreground line-clamp-2">{product.description}</p>
-                        )}
-                        <button 
-                          className="w-full mt-2 py-2 px-4 bg-primary text-primary-foreground rounded-lg font-medium text-sm hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                          disabled={product.stock === 0}
-                          onClick={() => {
-                            window.open('https://bit.ly/whatsapp-suportejt', '_blank');
-                          }}
-                        >
-                          {product.stock > 0 ? 'Comprar via WhatsApp' : 'Indisponível'}
-                        </button>
+                        {/* Product Info */}
+                        <div className="p-4 space-y-3 bg-card">
+                          {/* Product Name */}
+                          <h3 className="font-semibold text-foreground text-sm uppercase tracking-wide line-clamp-2 min-h-[40px]">
+                            {product.name}
+                          </h3>
+                          
+                          {/* Price Section */}
+                          <div className="space-y-1">
+                            {hasDiscount && (
+                              <div className="flex items-center gap-2">
+                                <span className="text-muted-foreground text-sm line-through">
+                                  R$ {product.original_price!.toFixed(2).replace('.', ',')}
+                                </span>
+                                <span className="text-red-500 text-xs font-semibold flex items-center gap-0.5">
+                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                  </svg>
+                                  {discountPercent}%
+                                </span>
+                              </div>
+                            )}
+                            
+                            <div className="flex items-center gap-2">
+                              <span className="text-foreground text-xl font-bold">
+                                R$ {product.price.toFixed(2).replace('.', ',')}
+                              </span>
+                              {hasDiscount && (
+                                <span className="text-amber-500">
+                                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M13 3L4 14h7l-2 7 9-11h-7l2-7z"/>
+                                  </svg>
+                                </span>
+                              )}
+                            </div>
+                            
+                            <p className="text-muted-foreground text-xs">À vista no PIX</p>
+                          </div>
+                          
+                          {/* Buy Button */}
+                          <button 
+                            className="w-full py-2.5 px-4 bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-zinc-600"
+                            disabled={product.stock === 0}
+                            onClick={() => {
+                              window.open('https://bit.ly/whatsapp-suportejt', '_blank');
+                            }}
+                          >
+                            {product.stock === 0 ? 'Indisponível' : 'Comprar'}
+                          </button>
+                        </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             ) : (
               <div className="text-center py-12">
