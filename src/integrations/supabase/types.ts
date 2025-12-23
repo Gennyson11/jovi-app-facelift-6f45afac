@@ -309,6 +309,7 @@ export type Database = {
         | "streamings"
         | "software"
         | "bonus_courses"
+        | "loja"
       streaming_status: "online" | "maintenance"
     }
     CompositeTypes: {
@@ -444,6 +445,7 @@ export const Constants = {
         "streamings",
         "software",
         "bonus_courses",
+        "loja",
       ],
       streaming_status: ["online", "maintenance"],
     },

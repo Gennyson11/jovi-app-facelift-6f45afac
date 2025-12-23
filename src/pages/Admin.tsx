@@ -16,12 +16,13 @@ import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Ima
 import { Textarea } from '@/components/ui/textarea';
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
-type PlatformCategory = 'ai_tools' | 'streamings' | 'software' | 'bonus_courses';
+type PlatformCategory = 'ai_tools' | 'streamings' | 'software' | 'bonus_courses' | 'loja';
 const CATEGORY_LABELS: Record<PlatformCategory, string> = {
   'ai_tools': 'Ferramentas IAs & Variadas',
   'streamings': 'Streamings',
   'software': 'Softwares',
-  'bonus_courses': 'Bônus: Cursos'
+  'bonus_courses': 'Bônus: Cursos',
+  'loja': 'Loja'
 };
 interface Platform {
   id: string;
@@ -1883,7 +1884,7 @@ export default function Admin() {
             </div>
             
             <div className="border border-border rounded-lg max-h-[300px] overflow-y-auto">
-              {(['ai_tools', 'streamings', 'software', 'bonus_courses'] as PlatformCategory[]).map(category => {
+              {(['ai_tools', 'streamings', 'software', 'bonus_courses', 'loja'] as PlatformCategory[]).map(category => {
                 const categoryPlatforms = platforms.filter(p => p.category === category);
                 if (categoryPlatforms.length === 0) return null;
                 return (
