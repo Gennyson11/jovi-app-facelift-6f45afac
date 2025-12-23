@@ -64,6 +64,7 @@ interface Product {
   name: string;
   description: string | null;
   price: number;
+  original_price: number | null;
   image_url: string | null;
   stock: number;
   is_active: boolean;
@@ -169,6 +170,7 @@ export default function Admin() {
   const [productName, setProductName] = useState('');
   const [productDescription, setProductDescription] = useState('');
   const [productPrice, setProductPrice] = useState('');
+  const [productOriginalPrice, setProductOriginalPrice] = useState('');
   const [productStock, setProductStock] = useState('');
   const [productImageUrl, setProductImageUrl] = useState('');
   const [productIsActive, setProductIsActive] = useState(true);
@@ -975,6 +977,7 @@ export default function Admin() {
       setProductName(product.name);
       setProductDescription(product.description || '');
       setProductPrice(product.price.toString());
+      setProductOriginalPrice(product.original_price?.toString() || '');
       setProductStock(product.stock.toString());
       setProductImageUrl(product.image_url || '');
       setProductIsActive(product.is_active);
@@ -983,6 +986,7 @@ export default function Admin() {
       setProductName('');
       setProductDescription('');
       setProductPrice('');
+      setProductOriginalPrice('');
       setProductStock('0');
       setProductImageUrl('');
       setProductIsActive(true);
@@ -1035,6 +1039,7 @@ export default function Admin() {
       name: productName.trim(),
       description: productDescription.trim() || null,
       price: parseFloat(productPrice) || 0,
+      original_price: productOriginalPrice ? parseFloat(productOriginalPrice) : null,
       stock: parseInt(productStock) || 0,
       image_url: productImageUrl || null,
       is_active: productIsActive
@@ -2251,12 +2256,30 @@ export default function Admin() {
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="product-price">Preço (R$)</Label>
-                <Input id="product-price" type="number" step="0.01" value={productPrice} onChange={e => setProductPrice(e.target.value)} placeholder="0.00" className="bg-background/50 border-border" />
+                <Label htmlFor="product-original-price">Preço Original (R$)</Label>
+                <Input id="product-original-price" type="number" step="0.01" value={productOriginalPrice} onChange={e => setProductOriginalPrice(e.target.value)} placeholder="69.99" className="bg-background/50 border-border" />
               </div>
+              <div className="space-y-2">
+                <Label htmlFor="product-price">Preço Atual (R$) *</Label>
+                <Input id="product-price" type="number" step="0.01" value={productPrice} onChange={e => setProductPrice(e.target.value)} placeholder="29.99" className="bg-background/50 border-border" />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="product-stock">Estoque</Label>
                 <Input id="product-stock" type="number" value={productStock} onChange={e => setProductStock(e.target.value)} placeholder="0" className="bg-background/50 border-border" />
+              </div>
+              <div className="space-y-2">
+                <Label className="text-muted-foreground text-xs">Desconto calculado</Label>
+                <div className="h-10 px-3 rounded-md border border-border bg-muted/50 flex items-center">
+                  {productOriginalPrice && productPrice && parseFloat(productOriginalPrice) > parseFloat(productPrice) ? (
+                    <span className="text-red-500 font-semibold">
+                      -{Math.round((1 - parseFloat(productPrice) / parseFloat(productOriginalPrice)) * 100)}%
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </div>
               </div>
             </div>
             <div className="space-y-2">
