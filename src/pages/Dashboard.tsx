@@ -14,7 +14,7 @@ import JoviAIChat from '@/components/JoviAIChat';
 import { Veo3Chat } from '@/components/Veo3Chat';
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
-type PlatformCategory = 'ai_tools' | 'streamings' | 'software' | 'bonus_courses';
+type PlatformCategory = 'ai_tools' | 'streamings' | 'software' | 'bonus_courses' | 'loja';
 const CATEGORY_CONFIG: Record<PlatformCategory, {
   label: string;
   icon: string;
@@ -39,9 +39,14 @@ const CATEGORY_CONFIG: Record<PlatformCategory, {
     label: 'Bônus',
     icon: '🎓',
     color: 'from-green-500 to-emerald-500'
+  },
+  'loja': {
+    label: 'Loja',
+    icon: '🛒',
+    color: 'from-amber-500 to-yellow-500'
   }
 };
-const CATEGORY_ORDER: PlatformCategory[] = ['ai_tools', 'streamings', 'software', 'bonus_courses'];
+const CATEGORY_ORDER: PlatformCategory[] = ['ai_tools', 'streamings', 'software', 'bonus_courses', 'loja'];
 interface Platform {
   id: string;
   name: string;
