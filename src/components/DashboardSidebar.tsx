@@ -14,7 +14,8 @@ import {
   X,
   ChevronLeft,
   Bot,
-  Handshake
+  Handshake,
+  ShoppingCart
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -40,6 +41,7 @@ const DASHBOARD_ITEMS = [
   { id: 'streamings', label: 'Streamings', icon: Clapperboard, category: 'streamings' },
   { id: 'softwares', label: 'Softwares', icon: Monitor, category: 'software' },
   { id: 'biblioteca', label: 'Bônus', icon: Library, category: 'bonus_courses' },
+  { id: 'loja', label: 'Loja', icon: ShoppingCart, category: 'loja' },
   { id: 'jovi_ia', label: 'Jovi.ia', icon: Bot, category: 'jovi_ia' },
 ];
 
