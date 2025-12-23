@@ -574,11 +574,6 @@ export default function Dashboard() {
             {products.length > 0 ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
                 {products.map(product => {
-                  const hasDiscount = product.original_price && product.original_price > product.price;
-                  const discountPercent = hasDiscount 
-                    ? Math.round((1 - product.price / product.original_price!) * 100)
-                    : 0;
-                  
                   return (
                     <div key={product.id} className="group">
                       <div className="bg-card border border-border rounded-xl overflow-hidden transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10">
@@ -596,51 +591,65 @@ export default function Dashboard() {
                         {/* Product Info */}
                         <div className="p-4 space-y-3 bg-card">
                           {/* Product Name */}
-                          <h3 className="font-semibold text-foreground text-sm uppercase tracking-wide line-clamp-2 min-h-[40px]">
+                          <h3 className="font-bold text-foreground text-sm uppercase tracking-wide line-clamp-2 min-h-[40px]">
                             {product.name}
                           </h3>
                           
+                          {/* Rating & Badge */}
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <div className="flex items-center gap-1">
+                              <span className="text-foreground text-sm font-semibold">4.9</span>
+                              <div className="flex">
+                                {[...Array(5)].map((_, i) => (
+                                  <span key={i} className="text-yellow-400 text-xs">★</span>
+                                ))}
+                              </div>
+                            </div>
+                            <span className="text-green-500 text-xs font-medium">Entrega Automática</span>
+                          </div>
+                          
                           {/* Price Section */}
                           <div className="space-y-1">
-                            {hasDiscount && (
-                              <div className="flex items-center gap-2">
-                                <span className="text-muted-foreground text-sm line-through">
-                                  R$ {product.original_price!.toFixed(2).replace('.', ',')}
-                                </span>
-                                <span className="text-red-500 text-xs font-semibold flex items-center gap-0.5">
-                                  <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
-                                    <path fillRule="evenodd" d="M14.707 10.293a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 111.414-1.414L9 12.586V5a1 1 0 012 0v7.586l2.293-2.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                  </svg>
-                                  {discountPercent}%
-                                </span>
-                              </div>
-                            )}
-                            
-                            <div className="flex items-center gap-2">
-                              <span className="text-foreground text-xl font-bold">
-                                R$ {product.price.toFixed(2).replace('.', ',')}
-                              </span>
-                              {hasDiscount && (
-                                <span className="text-amber-500">
-                                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                                    <path d="M13 3L4 14h7l-2 7 9-11h-7l2-7z"/>
-                                  </svg>
-                                </span>
-                              )}
+                            <div className="text-green-500 text-2xl font-bold">
+                              R$ {product.price.toFixed(2).replace('.', ',')}
                             </div>
-                            
-                            <p className="text-muted-foreground text-xs">À vista no PIX</p>
+                            <p className="text-muted-foreground text-xs">A partir de</p>
                           </div>
                           
                           {/* Buy Button */}
+                          <div className="flex gap-2">
+                            <button 
+                              className="flex-1 py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                              disabled={product.stock === 0}
+                              onClick={() => {
+                                window.open('https://bit.ly/whatsapp-suportejt', '_blank');
+                              }}
+                            >
+                              {product.stock === 0 ? 'Indisponível' : 'VER PRODUTO'}
+                            </button>
+                            <button 
+                              className="py-3 px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                              onClick={() => {
+                                window.open('https://bit.ly/whatsapp-suportejt', '_blank');
+                              }}
+                            >
+                              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
+                              </svg>
+                            </button>
+                          </div>
+
+                          {/* Ver mais detalhes */}
                           <button 
-                            className="w-full py-2.5 px-4 bg-zinc-700 hover:bg-zinc-600 text-white rounded-lg font-medium text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed border border-zinc-600"
-                            disabled={product.stock === 0}
+                            className="w-full text-center text-muted-foreground text-sm hover:text-foreground transition-colors flex items-center justify-center gap-1"
                             onClick={() => {
                               window.open('https://bit.ly/whatsapp-suportejt', '_blank');
                             }}
                           >
-                            {product.stock === 0 ? 'Indisponível' : 'Comprar'}
+                            Ver mais detalhes
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                            </svg>
                           </button>
                         </div>
                       </div>
