@@ -144,15 +144,15 @@ export default function Dashboard() {
   useEffect(() => {
     if (!user) return;
     
-    // Show popup after 5 seconds initially
+    // Show popup after 10 seconds initially
     const initialTimer = setTimeout(() => {
       setShowWhatsAppPopup(true);
-    }, 5000);
+    }, 10000);
     
-    // Then show every 1 minute
+    // Then show every 5 minutes (300000ms)
     const interval = setInterval(() => {
       setShowWhatsAppPopup(true);
-    }, 60000);
+    }, 300000);
     
     return () => {
       clearTimeout(initialTimer);
