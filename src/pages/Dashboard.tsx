@@ -12,7 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import JoviAIChat from '@/components/JoviAIChat';
 import { Veo3Chat } from '@/components/Veo3Chat';
-import whatsappBanner from '@/assets/whatsapp-banner.png';
+
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
 type PlatformCategory = 'ai_tools' | 'streamings' | 'software' | 'bonus_courses' | 'loja';
@@ -116,7 +116,7 @@ export default function Dashboard() {
   const [activeCategory, setActiveCategory] = useState<string | null>('ai_tools');
   const [isSocio, setIsSocio] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
-  const [showWhatsAppPopup, setShowWhatsAppPopup] = useState(false);
+  
   const {
     user,
     signOut,
@@ -140,25 +140,6 @@ export default function Dashboard() {
     }
   }, [user, authLoading, navigate]);
 
-  // WhatsApp popup timer - shows every 1 minute
-  useEffect(() => {
-    if (!user) return;
-    
-    // Show popup after 10 seconds initially
-    const initialTimer = setTimeout(() => {
-      setShowWhatsAppPopup(true);
-    }, 10000);
-    
-    // Then show every 5 minutes (300000ms)
-    const interval = setInterval(() => {
-      setShowWhatsAppPopup(true);
-    }, 300000);
-    
-    return () => {
-      clearTimeout(initialTimer);
-      clearInterval(interval);
-    };
-  }, [user]);
   useEffect(() => {
     // Only fetch data if user exists and we haven't fetched for this user yet
     if (user?.id && user.id !== currentUserIdRef.current) {
@@ -878,39 +859,5 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
 
-      {/* WhatsApp Group Popup */}
-      <Dialog open={showWhatsAppPopup} onOpenChange={setShowWhatsAppPopup}>
-        <DialogContent className="sm:max-w-lg p-0 overflow-hidden">
-          <img 
-            src={whatsappBanner} 
-            alt="JoviTools no WhatsApp" 
-            className="w-full h-auto"
-          />
-          <div className="p-4 space-y-4">
-            <p className="text-muted-foreground text-center">
-              📢 Receba em primeira mão nossas novidades, atualizações e promoções exclusivas!
-            </p>
-            <div className="flex flex-col gap-3">
-              <Button
-                onClick={() => {
-                  window.open('https://chat.whatsapp.com/JcD6FVAr1euLsQGlKtoSjf', '_blank');
-                  setShowWhatsAppPopup(false);
-                }}
-                className="w-full bg-green-500 hover:bg-green-600 text-white"
-              >
-                <ExternalLink className="w-4 h-4 mr-2" />
-                Entrar na Comunidade
-              </Button>
-              <Button
-                variant="outline"
-                onClick={() => setShowWhatsAppPopup(false)}
-                className="w-full"
-              >
-                Agora não
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>;
 }
