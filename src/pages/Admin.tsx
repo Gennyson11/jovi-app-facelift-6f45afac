@@ -1606,29 +1606,64 @@ export default function Admin() {
                           <TableHead>Status</TableHead>
                           <TableHead>Nome</TableHead>
                           <TableHead>Email</TableHead>
+                          <TableHead>IP / Localização</TableHead>
                           <TableHead>Conectado desde</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {onlineUsers.map(onlineUser => <TableRow key={onlineUser.user_id}>
-                            <TableCell>
-                              <div className="flex items-center gap-2">
-                                <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
-                                <span className="text-green-500 text-sm font-medium">Online</span>
-                              </div>
-                            </TableCell>
-                            <TableCell className="font-medium">{onlineUser.user_name}</TableCell>
-                            <TableCell className="text-muted-foreground">{onlineUser.user_email}</TableCell>
-                            <TableCell className="text-muted-foreground text-sm">
-                              {new Date(onlineUser.online_at).toLocaleString('pt-BR', {
-                          day: '2-digit',
-                          month: '2-digit',
-                          year: 'numeric',
-                          hour: '2-digit',
-                          minute: '2-digit'
+                        {onlineUsers.map(onlineUser => {
+                          const accessInfo = userAccessSummary[onlineUser.user_id];
+                          return (
+                            <TableRow key={onlineUser.user_id}>
+                              <TableCell>
+                                <div className="flex items-center gap-2">
+                                  <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
+                                  <span className="text-green-500 text-sm font-medium">Online</span>
+                                </div>
+                              </TableCell>
+                              <TableCell className="font-medium">{onlineUser.user_name}</TableCell>
+                              <TableCell className="text-muted-foreground">{onlineUser.user_email}</TableCell>
+                              <TableCell>
+                                {(() => {
+                                  if (!accessInfo || !accessInfo.lastAccess) {
+                                    return <span className="text-xs text-muted-foreground">Sem dados</span>;
+                                  }
+                                  return (
+                                    <div className="flex flex-col gap-1">
+                                      <div className="flex items-center gap-1.5">
+                                        {accessInfo.isSuspicious && (
+                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/20 text-red-500" title={`${accessInfo.uniqueIps.length} IPs diferentes detectados - Possível compartilhamento`}>
+                                            <AlertOctagon className="w-3 h-3" />
+                                            Suspeito
+                                          </span>
+                                        )}
+                                        <span className="text-xs font-mono text-muted-foreground">{accessInfo.lastAccess.ip}</span>
+                                      </div>
+                                      {accessInfo.lastAccess.city && (
+                                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                          <MapPin className="w-3 h-3" />
+                                          <span>{accessInfo.lastAccess.city}{accessInfo.lastAccess.region ? `, ${accessInfo.lastAccess.region}` : ''}</span>
+                                        </div>
+                                      )}
+                                      <span className="text-xs text-muted-foreground/60">
+                                        {accessInfo.uniqueIps.length} IP(s) únicos
+                                      </span>
+                                    </div>
+                                  );
+                                })()}
+                              </TableCell>
+                              <TableCell className="text-muted-foreground text-sm">
+                                {new Date(onlineUser.online_at).toLocaleString('pt-BR', {
+                                  day: '2-digit',
+                                  month: '2-digit',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </TableCell>
+                            </TableRow>
+                          );
                         })}
-                            </TableCell>
-                          </TableRow>)}
                       </TableBody>
                     </Table>
                   </div>}
