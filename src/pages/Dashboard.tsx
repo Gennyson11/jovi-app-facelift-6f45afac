@@ -888,7 +888,7 @@ export default function Dashboard() {
           />
           <div className="p-4 space-y-4">
             <p className="text-muted-foreground text-center">
-              Fique por dentro de todas as atualizações, novidades e promoções exclusivas!
+              📢 Receba em primeira mão nossas novidades, atualizações e promoções exclusivas!
             </p>
             <div className="flex flex-col gap-3">
               <Button
