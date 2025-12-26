@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import JoviAIChat from '@/components/JoviAIChat';
 import { Veo3Chat } from '@/components/Veo3Chat';
+import whatsappBanner from '@/assets/whatsapp-banner.png';
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
 type PlatformCategory = 'ai_tools' | 'streamings' | 'software' | 'bonus_courses' | 'loja';
@@ -879,17 +880,15 @@ export default function Dashboard() {
 
       {/* WhatsApp Group Popup */}
       <Dialog open={showWhatsAppPopup} onOpenChange={setShowWhatsAppPopup}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-xl">
-              <span className="text-2xl">📱</span>
-              Entre no nosso grupo do WhatsApp!
-            </DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p className="text-muted-foreground">
-              Fique por dentro de todas as atualizações, novidades e promoções exclusivas! 
-              Entre no nosso grupo do WhatsApp para não perder nada.
+        <DialogContent className="sm:max-w-lg p-0 overflow-hidden">
+          <img 
+            src={whatsappBanner} 
+            alt="JoviTools no WhatsApp" 
+            className="w-full h-auto"
+          />
+          <div className="p-4 space-y-4">
+            <p className="text-muted-foreground text-center">
+              Fique por dentro de todas as atualizações, novidades e promoções exclusivas!
             </p>
             <div className="flex flex-col gap-3">
               <Button
@@ -900,7 +899,7 @@ export default function Dashboard() {
                 className="w-full bg-green-500 hover:bg-green-600 text-white"
               >
                 <ExternalLink className="w-4 h-4 mr-2" />
-                Entrar no Grupo
+                Entrar na Comunidade
               </Button>
               <Button
                 variant="outline"
