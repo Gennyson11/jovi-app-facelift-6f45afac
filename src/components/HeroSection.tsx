@@ -3,18 +3,14 @@ import { ChevronRight, Shield, Users, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import heroImage from "@/assets/hero-hacker.jpg";
-
 interface HeroSectionProps {
   onAccessClick?: () => void;
 }
-
 const HeroSection = ({
   onAccessClick
 }: HeroSectionProps) => {
   const [videoOpen, setVideoOpen] = useState(false);
-
-  return (
-    <section className="relative min-h-screen flex flex-col items-center justify-center px-3 sm:px-4 py-12 sm:py-20 overflow-hidden">
+  return <section className="relative min-h-screen flex flex-col items-center justify-center px-3 sm:px-4 py-12 sm:py-20 overflow-hidden">
       {/* Background gradient overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background pointer-events-none" />
       
@@ -22,8 +18,8 @@ const HeroSection = ({
       <div className="absolute inset-0 opacity-20 hidden sm:block">
         <div className="absolute top-1/4 left-1/4 w-48 sm:w-96 h-48 sm:h-96 bg-primary/20 rounded-full blur-3xl animate-pulse" />
         <div className="absolute bottom-1/4 right-1/4 w-48 sm:w-96 h-48 sm:h-96 bg-accent/20 rounded-full blur-3xl animate-pulse" style={{
-          animationDelay: '1s'
-        }} />
+        animationDelay: '1s'
+      }} />
       </div>
 
       <div className="relative z-10 w-full max-w-5xl mx-auto text-center">
@@ -49,10 +45,7 @@ const HeroSection = ({
           <div className="absolute -inset-0.5 sm:-inset-1 bg-gradient-to-r from-accent/50 via-primary/50 to-accent/50 rounded-2xl sm:rounded-3xl blur-md opacity-60" />
           
           {/* Image container */}
-          <div 
-            className="relative rounded-xl sm:rounded-2xl overflow-hidden border border-primary/40 sm:border-2 shadow-xl sm:shadow-2xl shadow-primary/20 cursor-pointer"
-            onClick={() => setVideoOpen(true)}
-          >
+          <div className="relative rounded-xl sm:rounded-2xl overflow-hidden border border-primary/40 sm:border-2 shadow-xl sm:shadow-2xl shadow-primary/20 cursor-pointer" onClick={() => setVideoOpen(true)}>
             <img src={heroImage} alt="Hacker com ferramentas de IA" className="w-full transition-transform duration-700 group-hover:scale-105" />
             {/* Gradient overlays */}
             <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-transparent pointer-events-none" />
@@ -75,7 +68,7 @@ const HeroSection = ({
 
         {/* Subtitle */}
         <p className="text-sm sm:text-lg md:text-xl lg:text-2xl text-foreground mb-1 sm:mb-2 px-1 sm:px-2">
-          Tenha <span className="text-accent font-semibold">mais de +50 ferramentas premium</span> de IA e Marketing Digital
+          Tenha <span className="text-accent font-semibold">+50 ferramentas premium</span> de IA e Marketing Digital
         </p>
         <p className="text-sm sm:text-base md:text-lg lg:text-xl text-foreground mb-2 sm:mb-4 px-1 sm:px-2">
           em um só acesso, pagando apenas <span className="text-primary font-semibold">R$37,00/mês</span>
@@ -105,21 +98,10 @@ const HeroSection = ({
       <Dialog open={videoOpen} onOpenChange={setVideoOpen}>
         <DialogContent className="max-w-4xl p-0 bg-background border-primary/30 overflow-hidden">
           <div className="aspect-video w-full">
-            <iframe
-              width="100%"
-              height="100%"
-              src={videoOpen ? "https://www.youtube.com/embed/b1hxzIUPQik?autoplay=1" : ""}
-              title="JoviTools Video"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              className="w-full h-full"
-            />
+            <iframe width="100%" height="100%" src={videoOpen ? "https://www.youtube.com/embed/b1hxzIUPQik?autoplay=1" : ""} title="JoviTools Video" frameBorder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowFullScreen className="w-full h-full" />
           </div>
         </DialogContent>
       </Dialog>
-    </section>
-  );
+    </section>;
 };
-
 export default HeroSection;
