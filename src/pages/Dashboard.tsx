@@ -115,6 +115,7 @@ export default function Dashboard() {
   const [activeCategory, setActiveCategory] = useState<string | null>('ai_tools');
   const [isSocio, setIsSocio] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
+  const [showWhatsAppPopup, setShowWhatsAppPopup] = useState(false);
   const {
     user,
     signOut,
@@ -137,6 +138,26 @@ export default function Dashboard() {
       navigate('/login');
     }
   }, [user, authLoading, navigate]);
+
+  // WhatsApp popup timer - shows every 1 minute
+  useEffect(() => {
+    if (!user) return;
+    
+    // Show popup after 5 seconds initially
+    const initialTimer = setTimeout(() => {
+      setShowWhatsAppPopup(true);
+    }, 5000);
+    
+    // Then show every 1 minute
+    const interval = setInterval(() => {
+      setShowWhatsAppPopup(true);
+    }, 60000);
+    
+    return () => {
+      clearTimeout(initialTimer);
+      clearInterval(interval);
+    };
+  }, [user]);
   useEffect(() => {
     // Only fetch data if user exists and we haven't fetched for this user yet
     if (user?.id && user.id !== currentUserIdRef.current) {
@@ -853,6 +874,43 @@ export default function Dashboard() {
             </div> : <p className="text-muted-foreground">
               Nenhuma credencial cadastrada para esta plataforma.
             </p>}
+        </DialogContent>
+      </Dialog>
+
+      {/* WhatsApp Group Popup */}
+      <Dialog open={showWhatsAppPopup} onOpenChange={setShowWhatsAppPopup}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-xl">
+              <span className="text-2xl">📱</span>
+              Entre no nosso grupo do WhatsApp!
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-muted-foreground">
+              Fique por dentro de todas as atualizações, novidades e promoções exclusivas! 
+              Entre no nosso grupo do WhatsApp para não perder nada.
+            </p>
+            <div className="flex flex-col gap-3">
+              <Button
+                onClick={() => {
+                  window.open('https://chat.whatsapp.com/JcD6FVAr1euLsQGlKtoSjf', '_blank');
+                  setShowWhatsAppPopup(false);
+                }}
+                className="w-full bg-green-500 hover:bg-green-600 text-white"
+              >
+                <ExternalLink className="w-4 h-4 mr-2" />
+                Entrar no Grupo
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowWhatsAppPopup(false)}
+                className="w-full"
+              >
+                Agora não
+              </Button>
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>;
