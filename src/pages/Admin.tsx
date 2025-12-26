@@ -244,6 +244,58 @@ export default function Admin() {
       fetchData();
     }
   }, [user?.id, isAdmin]);
+
+  // Real-time listener for new access logs to detect suspicious users
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    const channel = supabase
+      .channel('access-logs-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'user_access_logs'
+        },
+        async (payload) => {
+          console.log('New access log detected:', payload);
+          const newLog = payload.new as { user_id: string; ip_address: string; city: string | null };
+          
+          // Check if this user now has more than 2 unique IPs
+          const currentSummary = userAccessSummary[newLog.user_id];
+          
+          if (currentSummary) {
+            const newUniqueIps = currentSummary.uniqueIps.includes(newLog.ip_address)
+              ? currentSummary.uniqueIps
+              : [...currentSummary.uniqueIps, newLog.ip_address];
+            
+            // If just became suspicious (crossing the threshold)
+            if (newUniqueIps.length > 2 && !currentSummary.isSuspicious) {
+              const userProfile = users.find(u => u.user_id === newLog.user_id);
+              toast({
+                title: '⚠️ Usuário Suspeito Detectado!',
+                description: `${userProfile?.name || userProfile?.email || 'Usuário'} acessou de ${newUniqueIps.length} IPs diferentes${newLog.city ? ` (último: ${newLog.city})` : ''}`,
+                variant: 'destructive',
+                duration: 10000,
+              });
+            }
+          } else {
+            // New user in the summary, just got their first log
+            // Refresh data to update the summary
+          }
+          
+          // Refresh data to update the summary
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isAdmin, userAccessSummary, users, toast]);
+
   const fetchData = async () => {
     setLoading(true);
     
@@ -1186,6 +1238,10 @@ export default function Admin() {
   }
   const usersWithAccess = users.filter(u => u.has_access).length;
   const usersWithoutAccess = users.filter(u => !u.has_access).length;
+  const suspiciousUsersCount = Object.values(userAccessSummary).filter(s => s.isSuspicious).length;
+  
+  // Get suspicious users details for the card
+  const suspiciousUsers = users.filter(u => userAccessSummary[u.user_id]?.isSuspicious);
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
@@ -1354,7 +1410,7 @@ export default function Admin() {
 
           {/* Users Tab */}
           <TabsContent value="users">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
               <Card className="border-border">
                 <CardContent className="pt-6">
                   <div className="flex items-center gap-4">
@@ -1394,7 +1450,68 @@ export default function Admin() {
                   </div>
                 </CardContent>
               </Card>
+              <Card className={`border-border ${suspiciousUsersCount > 0 ? 'border-red-500/50 bg-red-500/5' : ''}`}>
+                <CardContent className="pt-6">
+                  <div className="flex items-center gap-4">
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${suspiciousUsersCount > 0 ? 'bg-red-500/20 animate-pulse' : 'bg-orange-500/10'}`}>
+                      <AlertOctagon className={`w-6 h-6 ${suspiciousUsersCount > 0 ? 'text-red-500' : 'text-orange-500'}`} />
+                    </div>
+                    <div>
+                      <p className={`text-2xl font-bold ${suspiciousUsersCount > 0 ? 'text-red-500' : 'text-foreground'}`}>{suspiciousUsersCount}</p>
+                      <p className="text-sm text-muted-foreground">Suspeitos (3+ IPs)</p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
+
+            {/* Suspicious Users Alert Card */}
+            {suspiciousUsersCount > 0 && (
+              <Card className="border-red-500/50 bg-red-500/5 mb-6">
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-red-500 flex items-center gap-2 text-lg">
+                    <AlertOctagon className="w-5 h-5" />
+                    Usuários Suspeitos - Possível Compartilhamento de Conta
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <div className="space-y-2">
+                    {suspiciousUsers.map(u => {
+                      const accessInfo = userAccessSummary[u.user_id];
+                      return (
+                        <div key={u.id} className="flex items-center justify-between p-3 rounded-lg bg-background/50 border border-border">
+                          <div className="flex items-center gap-3">
+                            <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center">
+                              <AlertOctagon className="w-4 h-4 text-red-500" />
+                            </div>
+                            <div>
+                              <p className="font-medium text-foreground">{u.name || u.email}</p>
+                              <p className="text-xs text-muted-foreground">{u.email}</p>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-4">
+                            <div className="text-right">
+                              <p className="text-sm font-medium text-red-500">{accessInfo?.uniqueIps.length} IPs diferentes</p>
+                              <p className="text-xs text-muted-foreground">
+                                Último: {accessInfo?.lastAccess?.city || accessInfo?.lastAccess?.ip || 'N/A'}
+                              </p>
+                            </div>
+                            <Button 
+                              variant="destructive" 
+                              size="sm"
+                              onClick={() => toggleUserAccess(u.id, true)}
+                            >
+                              <UserX className="w-4 h-4 mr-1" />
+                              Bloquear
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </CardContent>
+              </Card>
+            )}
 
             <Card className="border-border">
               <CardHeader className="flex flex-row items-center justify-between gap-4">
