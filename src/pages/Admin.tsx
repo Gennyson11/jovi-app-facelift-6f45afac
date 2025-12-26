@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Users, UserCheck, UserX, Settings, CheckSquare, Clock, Calendar, Infinity, PlusCircle, MinusCircle, Megaphone, ToggleLeft, ToggleRight, Wifi, WifiOff, MousePointerClick, Gift, QrCode, Handshake, Search, ShoppingCart, Package } from 'lucide-react';
+import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Users, UserCheck, UserX, Settings, CheckSquare, Clock, Calendar, Infinity, PlusCircle, MinusCircle, Megaphone, ToggleLeft, ToggleRight, Wifi, WifiOff, MousePointerClick, Gift, QrCode, Handshake, Search, ShoppingCart, Package, MapPin, AlertOctagon } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
@@ -89,6 +89,29 @@ interface SocioUser {
   clients: SocioClient[];
 }
 
+interface UserAccessLog {
+  id: string;
+  user_id: string;
+  ip_address: string;
+  city: string | null;
+  region: string | null;
+  country: string | null;
+  created_at: string;
+}
+
+interface UserAccessSummary {
+  user_id: string;
+  uniqueIps: string[];
+  lastAccess: {
+    ip: string;
+    city: string | null;
+    region: string | null;
+    country: string | null;
+    created_at: string;
+  } | null;
+  isSuspicious: boolean;
+}
+
 // Access duration options
 const ACCESS_DURATION_OPTIONS = [{
   label: '2 dias',
@@ -125,6 +148,7 @@ export default function Admin() {
   const [news, setNews] = useState<News[]>([]);
   const [platformClicks, setPlatformClicks] = useState<Record<string, number>>({});
   const [socios, setSocios] = useState<SocioUser[]>([]);
+  const [userAccessSummary, setUserAccessSummary] = useState<Record<string, UserAccessSummary>>({});
   const [loading, setLoading] = useState(true);
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
   const [userSearchQuery, setUserSearchQuery] = useState('');
@@ -253,13 +277,14 @@ export default function Admin() {
       return allAccess;
     };
     
-    const [platformsRes, usersRes, newsRes, clicksRes, sociosRes, productsRes, allAccess] = await Promise.all([
+    const [platformsRes, usersRes, newsRes, clicksRes, sociosRes, productsRes, accessLogsRes, allAccess] = await Promise.all([
       supabase.from('streaming_platforms').select('*').order('name'), 
       supabase.from('profiles').select('*').order('created_at', { ascending: false }), 
       supabase.from('news').select('*').order('created_at', { ascending: false }),
       supabase.from('platform_clicks').select('platform_id, click_count'),
       supabase.from('user_roles').select('user_id, created_at').eq('role', 'socio'),
       supabase.from('products').select('*').order('created_at', { ascending: false }),
+      supabase.from('user_access_logs').select('*').order('created_at', { ascending: false }),
       fetchAllPlatformAccess()
     ]);
     
@@ -307,6 +332,46 @@ export default function Admin() {
         };
       });
       setSocios(sociosList);
+    }
+    
+    // Process access logs to create summary per user
+    if (accessLogsRes.data) {
+      const summaryMap: Record<string, UserAccessSummary> = {};
+      const logs = accessLogsRes.data as UserAccessLog[];
+      
+      logs.forEach(log => {
+        if (!summaryMap[log.user_id]) {
+          summaryMap[log.user_id] = {
+            user_id: log.user_id,
+            uniqueIps: [],
+            lastAccess: null,
+            isSuspicious: false
+          };
+        }
+        
+        // Add unique IPs
+        if (!summaryMap[log.user_id].uniqueIps.includes(log.ip_address)) {
+          summaryMap[log.user_id].uniqueIps.push(log.ip_address);
+        }
+        
+        // Update last access (logs are sorted by created_at desc)
+        if (!summaryMap[log.user_id].lastAccess) {
+          summaryMap[log.user_id].lastAccess = {
+            ip: log.ip_address,
+            city: log.city,
+            region: log.region,
+            country: log.country,
+            created_at: log.created_at
+          };
+        }
+      });
+      
+      // Mark users with more than 2 unique IPs as suspicious
+      Object.keys(summaryMap).forEach(userId => {
+        summaryMap[userId].isSuspicious = summaryMap[userId].uniqueIps.length > 2;
+      });
+      
+      setUserAccessSummary(summaryMap);
     }
     
     setLoading(false);
@@ -1352,6 +1417,7 @@ export default function Admin() {
                         <TableHead>Nome</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Cadastro</TableHead>
+                        <TableHead>IP / Localização</TableHead>
                         <TableHead>Streamings</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead>Dias</TableHead>
@@ -1377,6 +1443,36 @@ export default function Admin() {
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">
                             {new Date(userProfile.created_at).toLocaleDateString('pt-BR')}
+                          </TableCell>
+                          <TableCell>
+                            {(() => {
+                              const accessInfo = userAccessSummary[userProfile.user_id];
+                              if (!accessInfo || !accessInfo.lastAccess) {
+                                return <span className="text-xs text-muted-foreground">Sem dados</span>;
+                              }
+                              return (
+                                <div className="flex flex-col gap-1">
+                                  <div className="flex items-center gap-1.5">
+                                    {accessInfo.isSuspicious && (
+                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/20 text-red-500" title={`${accessInfo.uniqueIps.length} IPs diferentes detectados - Possível compartilhamento`}>
+                                        <AlertOctagon className="w-3 h-3" />
+                                        Suspeito
+                                      </span>
+                                    )}
+                                    <span className="text-xs font-mono text-muted-foreground">{accessInfo.lastAccess.ip}</span>
+                                  </div>
+                                  {accessInfo.lastAccess.city && (
+                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
+                                      <MapPin className="w-3 h-3" />
+                                      <span>{accessInfo.lastAccess.city}{accessInfo.lastAccess.region ? `, ${accessInfo.lastAccess.region}` : ''}</span>
+                                    </div>
+                                  )}
+                                  <span className="text-xs text-muted-foreground/60">
+                                    {accessInfo.uniqueIps.length} IP(s) únicos
+                                  </span>
+                                </div>
+                              );
+                            })()}
                           </TableCell>
                           <TableCell>
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
@@ -1449,7 +1545,7 @@ export default function Admin() {
                           </TableCell>
                         </TableRow>)}
                       {users.length === 0 && <TableRow>
-                          <TableCell colSpan={7} className="text-center text-muted-foreground py-8">
+                          <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
                             Nenhum usuário cadastrado
                           </TableCell>
                         </TableRow>}

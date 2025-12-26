@@ -234,6 +234,36 @@ export type Database = {
         }
         Relationships: []
       }
+      user_access_logs: {
+        Row: {
+          city: string | null
+          country: string | null
+          created_at: string
+          id: string
+          ip_address: string
+          region: string | null
+          user_id: string
+        }
+        Insert: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          ip_address: string
+          region?: string | null
+          user_id: string
+        }
+        Update: {
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          id?: string
+          ip_address?: string
+          region?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_coins: {
         Row: {
           coins: number

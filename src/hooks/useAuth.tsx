@@ -41,6 +41,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return fetchedRole;
   };
 
+  const logUserAccess = async (accessToken: string) => {
+    try {
+      console.log('Logging user access...');
+      const { error } = await supabase.functions.invoke('log-user-access', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        }
+      });
+      
+      if (error) {
+        console.error('Error logging user access:', error);
+      } else {
+        console.log('User access logged successfully');
+      }
+    } catch (err) {
+      console.error('Failed to log user access:', err);
+    }
+  };
+
   useEffect(() => {
     // Prevent double initialization in StrictMode
     if (initializedRef.current) return;
@@ -86,11 +105,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setSession(newSession);
           setUser(newSession.user);
           
-          // Defer role fetch to avoid deadlock
+          // Defer role fetch and access logging to avoid deadlock
           setTimeout(() => {
             fetchUserRole(newSession.user.id).then(userRole => {
               setRole(userRole);
             });
+            
+            // Log user access (IP and location)
+            logUserAccess(newSession.access_token);
           }, 0);
         }
         // Explicitly ignore: TOKEN_REFRESHED, INITIAL_SESSION, PASSWORD_RECOVERY, USER_UPDATED
