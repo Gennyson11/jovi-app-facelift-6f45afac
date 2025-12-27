@@ -33,10 +33,12 @@ serve(async (req) => {
 
       if (createError) {
         // User might already exist
-        if (createError.message.includes("already been registered")) {
+        if (createError.message.includes("already been registered") || createError.message.includes("already exists")) {
           // Get existing user
           const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
           const existingUser = users?.find(u => u.email === email);
+          
+          console.log("User already exists, updating password for:", email);
           
           if (existingUser) {
             userId = existingUser.id;
@@ -134,6 +136,39 @@ serve(async (req) => {
 
       return new Response(
         JSON.stringify({ success: true, message: userId === userData?.user?.id ? "User created" : "User updated", userId }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (action === "update_password") {
+      // Get user_id from profiles table by email
+      const { data: profileData, error: profileFetchError } = await supabaseAdmin
+        .from("profiles")
+        .select("user_id")
+        .eq("email", email)
+        .single();
+      
+      if (profileFetchError || !profileData) {
+        console.error("Profile not found:", profileFetchError);
+        return new Response(
+          JSON.stringify({ error: "User not found" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const userId = profileData.user_id;
+
+      // Update password
+      const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userId, { password });
+      
+      if (updateError) {
+        throw updateError;
+      }
+
+      console.log("Password updated for user:", email);
+
+      return new Response(
+        JSON.stringify({ success: true, message: "Password updated successfully", userId }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
