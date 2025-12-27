@@ -144,8 +144,12 @@ export default function Dashboard() {
   }, [user, authLoading, navigate]);
 
   // WhatsApp popup timer - shows on login and every 3 minutes
+  const whatsappTimerStartedRef = useRef(false);
+  
   useEffect(() => {
-    if (!user) return;
+    if (!user || whatsappTimerStartedRef.current) return;
+    
+    whatsappTimerStartedRef.current = true;
     
     // Show immediately on login
     setShowWhatsAppPopup(true);
@@ -157,6 +161,7 @@ export default function Dashboard() {
     
     return () => {
       clearInterval(interval);
+      whatsappTimerStartedRef.current = false;
     };
   }, [user]);
 
