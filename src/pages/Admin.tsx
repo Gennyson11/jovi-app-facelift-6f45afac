@@ -44,6 +44,7 @@ interface UserProfile {
   has_access: boolean;
   created_at: string;
   access_expires_at: string | null;
+  block_reason: string | null;
 }
 interface UserPlatformAccess {
   id: string;
@@ -203,6 +204,12 @@ export default function Admin() {
   const [productIsActive, setProductIsActive] = useState(true);
   const [uploadingProductImage, setUploadingProductImage] = useState(false);
   const productFileInputRef = useRef<HTMLInputElement>(null);
+  
+  // Block reason dialog
+  const [blockReasonDialogOpen, setBlockReasonDialogOpen] = useState(false);
+  const [blockingUser, setBlockingUser] = useState<UserProfile | null>(null);
+  const [blockReason, setBlockReason] = useState('');
+  
   const {
     user,
     isAdmin,
@@ -440,36 +447,71 @@ export default function Admin() {
     navigate('/login');
   };
 
-  // Toggle user access
-  const toggleUserAccess = async (userId: string, currentAccess: boolean) => {
-    // When enabling access, set a default expiration of 30 days
-    const updateData: { has_access: boolean; access_expires_at?: string | null } = {
-      has_access: !currentAccess
-    };
-    
-    // Only set expiration when enabling access (not when blocking)
-    if (!currentAccess) {
-      const expirationDate = new Date();
-      expirationDate.setDate(expirationDate.getDate() + 30);
-      updateData.access_expires_at = expirationDate.toISOString();
-    }
+  // Open block reason dialog
+  const openBlockDialog = (userProfile: UserProfile) => {
+    setBlockingUser(userProfile);
+    setBlockReason('');
+    setBlockReasonDialogOpen(true);
+  };
+
+  // Block user with reason
+  const blockUserWithReason = async () => {
+    if (!blockingUser) return;
     
     const { error } = await supabase
       .from('profiles')
-      .update(updateData)
+      .update({ 
+        has_access: false,
+        block_reason: blockReason.trim() || null
+      })
+      .eq('id', blockingUser.id);
+      
+    if (error) {
+      toast({
+        title: 'Erro',
+        description: 'Falha ao bloquear usuário',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    toast({
+      title: 'Sucesso',
+      description: 'Usuário bloqueado com sucesso'
+    });
+    
+    setBlockReasonDialogOpen(false);
+    setBlockingUser(null);
+    setBlockReason('');
+    fetchData();
+  };
+
+  // Unblock user (remove reason and enable access)
+  const unblockUser = async (userId: string) => {
+    const expirationDate = new Date();
+    expirationDate.setDate(expirationDate.getDate() + 30);
+    
+    const { error } = await supabase
+      .from('profiles')
+      .update({ 
+        has_access: true,
+        block_reason: null,
+        access_expires_at: expirationDate.toISOString()
+      })
       .eq('id', userId);
       
     if (error) {
       toast({
         title: 'Erro',
-        description: 'Falha ao atualizar acesso',
+        description: 'Falha ao liberar usuário',
         variant: 'destructive'
       });
       return;
     }
+    
     toast({
       title: 'Sucesso',
-      description: currentAccess ? 'Acesso bloqueado' : 'Acesso liberado (30 dias)'
+      description: 'Acesso liberado (30 dias)'
     });
     fetchData();
   };
@@ -1506,7 +1548,7 @@ export default function Admin() {
                             <Button 
                               variant="destructive" 
                               size="sm"
-                              onClick={() => toggleUserAccess(u.id, true)}
+                              onClick={() => openBlockDialog(u)}
                             >
                               <UserX className="w-4 h-4 mr-1" />
                               Bloquear
@@ -1652,7 +1694,11 @@ export default function Admin() {
                                 <Settings className="w-4 h-4 mr-2" />
                                 Permissões
                               </Button>
-                              <Button variant={userProfile.has_access ? "destructive" : "default"} size="sm" onClick={() => toggleUserAccess(userProfile.id, userProfile.has_access)}>
+                              <Button 
+                                variant={userProfile.has_access ? "destructive" : "default"} 
+                                size="sm" 
+                                onClick={() => userProfile.has_access ? openBlockDialog(userProfile) : unblockUser(userProfile.id)}
+                              >
                                 {userProfile.has_access ? <>
                                     <UserX className="w-4 h-4 mr-2" />
                                     Bloquear
@@ -2583,6 +2629,48 @@ export default function Admin() {
             </Button>
             <Button onClick={saveProduct}>
               Salvar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Block Reason Dialog */}
+      <Dialog open={blockReasonDialogOpen} onOpenChange={setBlockReasonDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-foreground flex items-center gap-2">
+              <UserX className="w-5 h-5 text-destructive" />
+              Bloquear Usuário
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="p-3 bg-muted/50 rounded-lg">
+              <p className="text-sm text-muted-foreground">Usuário:</p>
+              <p className="font-medium text-foreground">{blockingUser?.name || blockingUser?.email}</p>
+              <p className="text-sm text-muted-foreground">{blockingUser?.email}</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="block-reason">Motivo do bloqueio (opcional)</Label>
+              <Textarea
+                id="block-reason"
+                value={blockReason}
+                onChange={(e) => setBlockReason(e.target.value)}
+                placeholder="Ex: Compartilhamento de conta detectado, Pagamento não confirmado, etc."
+                className="min-h-[100px]"
+                maxLength={500}
+              />
+              <p className="text-xs text-muted-foreground">
+                Este motivo será exibido ao usuário quando ele tentar fazer login.
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setBlockReasonDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={blockUserWithReason}>
+              <UserX className="w-4 h-4 mr-2" />
+              Confirmar Bloqueio
             </Button>
           </DialogFooter>
         </DialogContent>

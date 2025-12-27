@@ -8,12 +8,14 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Cloud } from 'lucide-react';
+import { Loader2, Cloud, AlertTriangle } from 'lucide-react';
 import { z } from 'zod';
+
 const loginSchema = z.object({
   email: z.string().email('Email inválido'),
   password: z.string().min(6, 'Senha deve ter no mínimo 6 caracteres')
 });
+
 const signupSchema = z.object({
   name: z.string().min(2, 'Nome deve ter no mínimo 2 caracteres'),
   email: z.string().email('Email inválido'),
@@ -23,6 +25,7 @@ const signupSchema = z.object({
   message: "Senhas não coincidem",
   path: ["confirmPassword"]
 });
+
 export default function Auth() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,6 +33,8 @@ export default function Auth() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState('login');
+  const [blockMessage, setBlockMessage] = useState<string | null>(null);
+  
   const {
     signIn,
     user,
@@ -40,9 +45,8 @@ export default function Auth() {
   const {
     toast
   } = useToast();
+
   useEffect(() => {
-    console.log('Auth useEffect - loading:', loading, 'user:', !!user, 'role:', role);
-    
     // Redirect when we have user AND role (or default after timeout)
     if (!loading && user) {
       // If role is set, redirect based on role
@@ -53,12 +57,16 @@ export default function Auth() {
       }
     }
   }, [user, role, loading, navigate]);
+
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setBlockMessage(null);
+    
     const validation = loginSchema.safeParse({
       email,
       password
     });
+    
     if (!validation.success) {
       toast({
         title: 'Erro de validação',
@@ -67,27 +75,61 @@ export default function Auth() {
       });
       return;
     }
+    
     setIsLoading(true);
+    
     const {
       error
     } = await signIn(email, password);
-    setIsLoading(false);
+    
     if (error) {
+      setIsLoading(false);
       toast({
         title: 'Erro ao entrar',
         description: 'Email ou senha incorretos',
         variant: 'destructive'
       });
+      return;
     }
+    
+    // After successful login, check if user is blocked
+    const { data: { user: loggedInUser } } = await supabase.auth.getUser();
+    
+    if (loggedInUser) {
+      const { data: profile } = await supabase
+        .from('profiles')
+        .select('has_access, block_reason')
+        .eq('user_id', loggedInUser.id)
+        .maybeSingle();
+      
+      if (profile && !profile.has_access) {
+        // User is blocked - sign them out and show message
+        await supabase.auth.signOut();
+        setIsLoading(false);
+        
+        if (profile.block_reason) {
+          setBlockMessage(profile.block_reason);
+        } else {
+          setBlockMessage('Seu acesso foi bloqueado. Entre em contato com o administrador.');
+        }
+        return;
+      }
+    }
+    
+    setIsLoading(false);
   };
+
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setBlockMessage(null);
+    
     const validation = signupSchema.safeParse({
       name,
       email,
       password,
       confirmPassword
     });
+    
     if (!validation.success) {
       toast({
         title: 'Erro de validação',
@@ -96,7 +138,9 @@ export default function Auth() {
       });
       return;
     }
+    
     setIsLoading(true);
+    
     const {
       error
     } = await supabase.auth.signUp({
@@ -109,7 +153,9 @@ export default function Auth() {
         }
       }
     });
+    
     setIsLoading(false);
+    
     if (error) {
       if (error.message.includes('already registered')) {
         toast({
@@ -126,6 +172,7 @@ export default function Auth() {
       }
       return;
     }
+    
     toast({
       title: 'Cadastro realizado!',
       description: 'Aguarde a liberação do acesso pelo administrador.'
@@ -138,11 +185,13 @@ export default function Auth() {
     setConfirmPassword('');
     setActiveTab('login');
   };
+
   if (loading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>;
   }
+
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
       <Card className="w-full max-w-md border-primary/20 bg-card/80 backdrop-blur-sm">
         <CardHeader className="text-center space-y-4">
@@ -159,7 +208,23 @@ export default function Auth() {
           </div>
         </CardHeader>
         <CardContent>
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
+          {/* Block Message Alert */}
+          {blockMessage && (
+            <div className="mb-6 p-4 bg-destructive/10 border border-destructive/30 rounded-lg">
+              <div className="flex items-start gap-3">
+                <AlertTriangle className="w-5 h-5 text-destructive flex-shrink-0 mt-0.5" />
+                <div>
+                  <h4 className="font-semibold text-destructive mb-1">Acesso Bloqueado</h4>
+                  <p className="text-sm text-destructive/90">{blockMessage}</p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    Entre em contato com o administrador para mais informações.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <Tabs value={activeTab} onValueChange={(v) => { setActiveTab(v); setBlockMessage(null); }}>
             <TabsList className="grid w-full grid-cols-2 mb-6">
               <TabsTrigger value="login">Entrar</TabsTrigger>
               <TabsTrigger value="signup">Cadastrar</TabsTrigger>
