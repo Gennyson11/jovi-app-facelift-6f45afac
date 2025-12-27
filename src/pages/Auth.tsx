@@ -93,35 +93,6 @@ export default function Auth() {
       return;
     }
     
-    // After successful login, check if user is blocked
-    const { data: { user: loggedInUser } } = await supabase.auth.getUser();
-    console.log('Logged in user:', loggedInUser?.id);
-    
-    if (loggedInUser) {
-      const { data: profile, error: profileError } = await supabase
-        .from('profiles')
-        .select('has_access, block_reason')
-        .eq('user_id', loggedInUser.id)
-        .maybeSingle();
-      
-      console.log('Profile data:', profile, 'Error:', profileError);
-      
-      if (profile && !profile.has_access) {
-        console.log('User is blocked, showing popup');
-        // User is blocked - sign them out and show popup
-        await supabase.auth.signOut();
-        setIsLoading(false);
-        
-        if (profile.block_reason) {
-          setBlockMessage(profile.block_reason);
-        } else {
-          setBlockMessage('Seu acesso foi bloqueado. Entre em contato com o administrador para mais informações.');
-        }
-        setBlockDialogOpen(true);
-        return;
-      }
-    }
-    
     setIsLoading(false);
   };
 

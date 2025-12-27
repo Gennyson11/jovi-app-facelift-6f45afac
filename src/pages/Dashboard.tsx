@@ -6,7 +6,7 @@ import { usePresence } from '@/hooks/usePresence';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Eye, EyeOff, Copy, Loader2, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Lock, Clock, Megaphone, X, MousePointerClick, Zap, QrCode } from 'lucide-react';
+import { LogOut, Eye, EyeOff, Copy, Loader2, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Lock, Clock, Megaphone, X, MousePointerClick, Zap, QrCode, ShieldX } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import DashboardSidebar from '@/components/DashboardSidebar';
@@ -69,6 +69,7 @@ interface UserProfile {
   has_access: boolean;
   access_expires_at: string | null;
   avatar_url: string | null;
+  block_reason: string | null;
 }
 interface News {
   id: string;
@@ -377,15 +378,39 @@ export default function Dashboard() {
           </div>}
 
         {/* Access Blocked Banner */}
-        {!userProfile?.has_access && <div className="mb-6 p-6 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-center">
-            <Lock className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-yellow-500 mb-2">
-              Acesso Pendente
-            </h3>
-            <p className="text-yellow-500/80">
-              Seu cadastro foi recebido! Aguarde a liberação do acesso pelo administrador.
-            </p>
-          </div>}
+        {!userProfile?.has_access && (
+          userProfile?.block_reason ? (
+            <div className="mb-6 p-6 rounded-lg bg-destructive/10 border-2 border-destructive/50 text-center">
+              <ShieldX className="w-14 h-14 text-destructive mx-auto mb-4" />
+              <h3 className="text-xl font-bold text-destructive mb-3">
+                🚫 Acesso Bloqueado
+              </h3>
+              <div className="max-w-md mx-auto bg-destructive/20 rounded-lg p-4 mb-4">
+                <p className="text-sm font-medium text-destructive/80 mb-1">Motivo do bloqueio:</p>
+                <p className="text-foreground font-semibold">{userProfile.block_reason}</p>
+              </div>
+              <p className="text-muted-foreground text-sm mb-4">
+                Entre em contato com o administrador para mais informações ou para solicitar a liberação do seu acesso.
+              </p>
+              <Button 
+                onClick={() => window.open('https://bit.ly/whatsapp-suportejt', '_blank')} 
+                className="bg-green-500 hover:bg-green-600 text-white"
+              >
+                Falar com Suporte via WhatsApp
+              </Button>
+            </div>
+          ) : (
+            <div className="mb-6 p-6 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-center">
+              <Lock className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
+              <h3 className="text-lg font-bold text-yellow-500 mb-2">
+                Acesso Pendente
+              </h3>
+              <p className="text-yellow-500/80">
+                Seu cadastro foi recebido! Aguarde a liberação do acesso pelo administrador.
+              </p>
+            </div>
+          )
+        )}
 
         {/* Account Validity Card */}
         {hasAccess && userProfile && <div className="mb-6 p-4 rounded-xl bg-card border border-border">
