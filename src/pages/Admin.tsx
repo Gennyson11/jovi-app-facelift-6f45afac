@@ -99,16 +99,19 @@ interface UserAccessLog {
   created_at: string;
 }
 
+interface AccessLocation {
+  ip: string;
+  city: string | null;
+  region: string | null;
+  country: string | null;
+  created_at: string;
+}
+
 interface UserAccessSummary {
   user_id: string;
   uniqueIps: string[];
-  lastAccess: {
-    ip: string;
-    city: string | null;
-    region: string | null;
-    country: string | null;
-    created_at: string;
-  } | null;
+  accessLocations: AccessLocation[];
+  lastAccess: AccessLocation | null;
   isSuspicious: boolean;
 }
 
@@ -396,25 +399,29 @@ export default function Admin() {
           summaryMap[log.user_id] = {
             user_id: log.user_id,
             uniqueIps: [],
+            accessLocations: [],
             lastAccess: null,
             isSuspicious: false
           };
         }
         
-        // Add unique IPs
+        const locationEntry: AccessLocation = {
+          ip: log.ip_address,
+          city: log.city,
+          region: log.region,
+          country: log.country,
+          created_at: log.created_at
+        };
+        
+        // Add unique IPs and their locations
         if (!summaryMap[log.user_id].uniqueIps.includes(log.ip_address)) {
           summaryMap[log.user_id].uniqueIps.push(log.ip_address);
+          summaryMap[log.user_id].accessLocations.push(locationEntry);
         }
         
         // Update last access (logs are sorted by created_at desc)
         if (!summaryMap[log.user_id].lastAccess) {
-          summaryMap[log.user_id].lastAccess = {
-            ip: log.ip_address,
-            city: log.city,
-            region: log.region,
-            country: log.country,
-            created_at: log.created_at
-          };
+          summaryMap[log.user_id].lastAccess = locationEntry;
         }
       });
       
@@ -1564,29 +1571,28 @@ export default function Admin() {
                           <TableCell>
                             {(() => {
                               const accessInfo = userAccessSummary[userProfile.user_id];
-                              if (!accessInfo || !accessInfo.lastAccess) {
+                              if (!accessInfo || accessInfo.accessLocations.length === 0) {
                                 return <span className="text-xs text-muted-foreground">Sem dados</span>;
                               }
                               return (
-                                <div className="flex flex-col gap-1">
-                                  <div className="flex items-center gap-1.5">
-                                    {accessInfo.isSuspicious && (
-                                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/20 text-red-500" title={`${accessInfo.uniqueIps.length} IPs diferentes detectados - Possível compartilhamento`}>
-                                        <AlertOctagon className="w-3 h-3" />
-                                        Suspeito
-                                      </span>
-                                    )}
-                                    <span className="text-xs font-mono text-muted-foreground">{accessInfo.lastAccess.ip}</span>
-                                  </div>
-                                  {accessInfo.lastAccess.city && (
-                                    <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                      <MapPin className="w-3 h-3" />
-                                      <span>{accessInfo.lastAccess.city}{accessInfo.lastAccess.region ? `, ${accessInfo.lastAccess.region}` : ''}</span>
-                                    </div>
+                                <div className="flex flex-col gap-2 max-h-32 overflow-y-auto">
+                                  {accessInfo.isSuspicious && (
+                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/20 text-red-500 w-fit" title={`${accessInfo.uniqueIps.length} IPs diferentes detectados - Possível compartilhamento`}>
+                                      <AlertOctagon className="w-3 h-3" />
+                                      Suspeito ({accessInfo.uniqueIps.length} IPs)
+                                    </span>
                                   )}
-                                  <span className="text-xs text-muted-foreground/60">
-                                    {accessInfo.uniqueIps.length} IP(s) únicos
-                                  </span>
+                                  {accessInfo.accessLocations.map((location, index) => (
+                                    <div key={`${location.ip}-${index}`} className="flex flex-col gap-0.5 pb-1 border-b border-border/30 last:border-b-0">
+                                      <span className="text-xs font-mono text-muted-foreground">{location.ip}</span>
+                                      {location.city && (
+                                        <div className="flex items-center gap-1 text-xs text-muted-foreground/80">
+                                          <MapPin className="w-3 h-3" />
+                                          <span>{location.city}{location.region ? `, ${location.region}` : ''}</span>
+                                        </div>
+                                      )}
+                                    </div>
+                                  ))}
                                 </div>
                               );
                             })()}
@@ -1742,29 +1748,28 @@ export default function Admin() {
                               <TableCell className="text-muted-foreground">{onlineUser.user_email}</TableCell>
                               <TableCell>
                                 {(() => {
-                                  if (!accessInfo || !accessInfo.lastAccess) {
+                                  if (!accessInfo || accessInfo.accessLocations.length === 0) {
                                     return <span className="text-xs text-muted-foreground">Sem dados</span>;
                                   }
                                   return (
-                                    <div className="flex flex-col gap-1">
-                                      <div className="flex items-center gap-1.5">
-                                        {accessInfo.isSuspicious && (
-                                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/20 text-red-500" title={`${accessInfo.uniqueIps.length} IPs diferentes detectados - Possível compartilhamento`}>
-                                            <AlertOctagon className="w-3 h-3" />
-                                            Suspeito
-                                          </span>
-                                        )}
-                                        <span className="text-xs font-mono text-muted-foreground">{accessInfo.lastAccess.ip}</span>
-                                      </div>
-                                      {accessInfo.lastAccess.city && (
-                                        <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                                          <MapPin className="w-3 h-3" />
-                                          <span>{accessInfo.lastAccess.city}{accessInfo.lastAccess.region ? `, ${accessInfo.lastAccess.region}` : ''}</span>
-                                        </div>
+                                    <div className="flex flex-col gap-2 max-h-32 overflow-y-auto">
+                                      {accessInfo.isSuspicious && (
+                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/20 text-red-500 w-fit" title={`${accessInfo.uniqueIps.length} IPs diferentes detectados - Possível compartilhamento`}>
+                                          <AlertOctagon className="w-3 h-3" />
+                                          Suspeito ({accessInfo.uniqueIps.length} IPs)
+                                        </span>
                                       )}
-                                      <span className="text-xs text-muted-foreground/60">
-                                        {accessInfo.uniqueIps.length} IP(s) únicos
-                                      </span>
+                                      {accessInfo.accessLocations.map((location, index) => (
+                                        <div key={`${location.ip}-${index}`} className="flex flex-col gap-0.5 pb-1 border-b border-border/30 last:border-b-0">
+                                          <span className="text-xs font-mono text-muted-foreground">{location.ip}</span>
+                                          {location.city && (
+                                            <div className="flex items-center gap-1 text-xs text-muted-foreground/80">
+                                              <MapPin className="w-3 h-3" />
+                                              <span>{location.city}{location.region ? `, ${location.region}` : ''}</span>
+                                            </div>
+                                          )}
+                                        </div>
+                                      ))}
                                     </div>
                                   );
                                 })()}
