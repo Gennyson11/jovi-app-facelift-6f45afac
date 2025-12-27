@@ -143,14 +143,17 @@ export default function Dashboard() {
     }
   }, [user, authLoading, navigate]);
 
-  // WhatsApp popup timer - shows every 5 minutes
+  // WhatsApp popup timer - shows on login and every 3 minutes
   useEffect(() => {
     if (!user) return;
     
-    // Show every 5 minutes (300000ms)
+    // Show immediately on login
+    setShowWhatsAppPopup(true);
+    
+    // Show every 3 minutes (180000ms)
     const interval = setInterval(() => {
       setShowWhatsAppPopup(true);
-    }, 300000);
+    }, 180000);
     
     return () => {
       clearInterval(interval);
