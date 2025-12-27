@@ -145,6 +145,7 @@ export default function Dashboard() {
 
   // WhatsApp popup timer - shows on login and every 3 minutes
   const whatsappTimerStartedRef = useRef(false);
+  const whatsappIntervalRef = useRef<NodeJS.Timeout | null>(null);
   
   useEffect(() => {
     if (!user || whatsappTimerStartedRef.current) return;
@@ -155,13 +156,15 @@ export default function Dashboard() {
     setShowWhatsAppPopup(true);
     
     // Show every 3 minutes (180000ms)
-    const interval = setInterval(() => {
+    whatsappIntervalRef.current = setInterval(() => {
       setShowWhatsAppPopup(true);
     }, 180000);
     
     return () => {
-      clearInterval(interval);
-      whatsappTimerStartedRef.current = false;
+      if (whatsappIntervalRef.current) {
+        clearInterval(whatsappIntervalRef.current);
+      }
+      // Don't reset the ref here - keep it true for the session
     };
   }, [user]);
 
