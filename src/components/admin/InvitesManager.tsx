@@ -33,6 +33,16 @@ interface Platform {
   category: string;
 }
 
+type PlatformCategory = 'ai_tools' | 'streamings' | 'software' | 'bonus_courses' | 'loja';
+
+const CATEGORY_LABELS: Record<PlatformCategory, string> = {
+  'ai_tools': 'Ferramentas IAs & Variadas',
+  'streamings': 'Streamings',
+  'software': 'Softwares',
+  'bonus_courses': 'Bônus: Cursos',
+  'loja': 'Loja'
+};
+
 interface UserProfile {
   id: string;
   user_id: string;
@@ -529,20 +539,57 @@ export default function InvitesManager() {
                 </div>
               </div>
               
-              <div className="grid grid-cols-2 md:grid-cols-3 gap-2 max-h-48 overflow-y-auto p-2 border rounded-lg bg-muted/50">
-                {platforms.map((platform) => (
-                  <div
-                    key={platform.id}
-                    className="flex items-center gap-2 p-2 rounded hover:bg-background cursor-pointer"
-                    onClick={() => togglePlatform(platform.id)}
-                  >
-                    <Checkbox
-                      checked={selectedPlatforms.includes(platform.id)}
-                      onCheckedChange={() => togglePlatform(platform.id)}
-                    />
-                    <span className="text-sm truncate">{platform.name}</span>
-                  </div>
-                ))}
+              <div className="border rounded-lg max-h-64 overflow-y-auto bg-muted/50">
+                {(['ai_tools', 'streamings', 'software', 'bonus_courses', 'loja'] as PlatformCategory[]).map(category => {
+                  const categoryPlatforms = platforms.filter(p => p.category === category);
+                  if (categoryPlatforms.length === 0) return null;
+                  
+                  const allSelected = categoryPlatforms.every(p => selectedPlatforms.includes(p.id));
+                  const someSelected = categoryPlatforms.some(p => selectedPlatforms.includes(p.id));
+                  
+                  const toggleCategory = () => {
+                    if (allSelected) {
+                      // Deselect all in category
+                      setSelectedPlatforms(prev => prev.filter(id => !categoryPlatforms.find(p => p.id === id)));
+                    } else {
+                      // Select all in category
+                      const newIds = categoryPlatforms.map(p => p.id);
+                      setSelectedPlatforms(prev => [...new Set([...prev, ...newIds])]);
+                    }
+                  };
+                  
+                  return (
+                    <div key={category}>
+                      <div 
+                        className="sticky top-0 bg-muted/90 backdrop-blur-sm px-3 py-2 border-b border-border flex items-center justify-between cursor-pointer hover:bg-muted"
+                        onClick={toggleCategory}
+                      >
+                        <span className="text-xs font-semibold text-primary uppercase tracking-wide">
+                          {CATEGORY_LABELS[category]} ({categoryPlatforms.length})
+                        </span>
+                        <Checkbox 
+                          checked={allSelected}
+                          className={someSelected && !allSelected ? 'opacity-50' : ''}
+                          onCheckedChange={toggleCategory}
+                        />
+                      </div>
+                      <div className="divide-y divide-border/50">
+                        {categoryPlatforms.map(platform => (
+                          <label 
+                            key={platform.id} 
+                            className="flex items-center gap-3 px-3 py-2 hover:bg-background/50 cursor-pointer"
+                          >
+                            <Checkbox
+                              checked={selectedPlatforms.includes(platform.id)}
+                              onCheckedChange={() => togglePlatform(platform.id)}
+                            />
+                            <span className="text-sm">{platform.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
               
               <p className="text-sm text-muted-foreground">
