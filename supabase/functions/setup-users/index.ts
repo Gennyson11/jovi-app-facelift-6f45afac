@@ -221,6 +221,57 @@ serve(async (req) => {
       );
     }
 
+    if (action === "delete_user") {
+      const { user_id: targetUserId } = await req.json().catch(() => ({}));
+      
+      if (!email && !targetUserId) {
+        return new Response(
+          JSON.stringify({ error: "Email or user_id is required" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      let authUserId = targetUserId;
+
+      // If email provided, get user_id from profiles
+      if (email && !authUserId) {
+        const { data: profileData, error: profileFetchError } = await supabaseAdmin
+          .from("profiles")
+          .select("user_id")
+          .eq("email", email)
+          .single();
+        
+        if (profileFetchError || !profileData) {
+          console.error("Profile not found:", profileFetchError);
+          return new Response(
+            JSON.stringify({ error: "User not found" }),
+            { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+        authUserId = profileData.user_id;
+      }
+
+      console.log("Deleting user with auth id:", authUserId, "by admin:", callerUser.email);
+
+      // Delete from auth.users (this will cascade to profiles due to trigger/foreign key)
+      const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(authUserId);
+      
+      if (deleteAuthError) {
+        console.error("Error deleting auth user:", deleteAuthError);
+        return new Response(
+          JSON.stringify({ error: deleteAuthError.message }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      console.log("Successfully deleted user:", email || authUserId);
+
+      return new Response(
+        JSON.stringify({ success: true, message: "User deleted successfully" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     if (action === "delete_users_without_access") {
       console.log("Deleting all users without access... Requested by:", callerUser.email);
       

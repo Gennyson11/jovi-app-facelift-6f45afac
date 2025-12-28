@@ -535,31 +535,39 @@ export default function Admin() {
     fetchData();
   };
 
-  // Delete user
-  const deleteUser = async (userId: string, userEmail: string) => {
-    const confirmed = window.confirm(`Tem certeza que deseja deletar o usuário "${userEmail}"? Esta ação não pode ser desfeita.`);
+  // Delete user - now calls edge function to delete from auth.users as well
+  const deleteUser = async (profileId: string, userEmail: string) => {
+    const confirmed = window.confirm(`Tem certeza que deseja deletar o usuário "${userEmail}"? Esta ação não pode ser desfeita e o usuário não poderá mais fazer login.`);
     if (!confirmed) return;
 
-    // First delete user platform access
-    await supabase.from('user_platform_access').delete().eq('user_id', userId);
-    
-    // Then delete the profile
-    const { error } = await supabase.from('profiles').delete().eq('id', userId);
-    
-    if (error) {
+    try {
+      // Call edge function to delete user from auth.users (will cascade to profiles)
+      const { data, error } = await supabase.functions.invoke('setup-users', {
+        body: {
+          action: 'delete_user',
+          email: userEmail
+        }
+      });
+
+      if (error) throw error;
+      
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+      
+      toast({
+        title: 'Sucesso',
+        description: 'Usuário deletado completamente do sistema'
+      });
+      fetchData();
+    } catch (err: any) {
+      console.error('Error deleting user:', err);
       toast({
         title: 'Erro',
-        description: 'Falha ao deletar usuário',
+        description: err.message || 'Falha ao deletar usuário',
         variant: 'destructive'
       });
-      return;
     }
-    
-    toast({
-      title: 'Sucesso',
-      description: 'Usuário deletado com sucesso'
-    });
-    fetchData();
   };
 
   // Open permissions dialog
