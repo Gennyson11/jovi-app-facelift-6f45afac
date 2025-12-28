@@ -606,6 +606,16 @@ export default function InvitesManager() {
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
+                        {invite.status === 'active' && (
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => openEditInviteDialog(invite)}
+                            title="Editar convite"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"
