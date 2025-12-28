@@ -173,6 +173,61 @@ serve(async (req) => {
       );
     }
 
+    if (action === "delete_users_without_access") {
+      console.log("Deleting all users without access...");
+      
+      // Get all profiles without access
+      const { data: profilesToDelete, error: fetchError } = await supabaseAdmin
+        .from("profiles")
+        .select("id, user_id, email")
+        .eq("has_access", false);
+
+      if (fetchError) {
+        throw fetchError;
+      }
+
+      if (!profilesToDelete || profilesToDelete.length === 0) {
+        return new Response(
+          JSON.stringify({ success: true, message: "No users without access to delete", deletedCount: 0 }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      console.log(`Found ${profilesToDelete.length} users to delete`);
+      
+      let deletedCount = 0;
+      const errors: string[] = [];
+
+      for (const profile of profilesToDelete) {
+        try {
+          // Delete from auth.users (this will cascade to profiles due to foreign key)
+          const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(profile.user_id);
+          
+          if (deleteAuthError) {
+            console.error(`Error deleting auth user ${profile.email}:`, deleteAuthError);
+            errors.push(`${profile.email}: ${deleteAuthError.message}`);
+          } else {
+            console.log(`Deleted user: ${profile.email}`);
+            deletedCount++;
+          }
+        } catch (err) {
+          console.error(`Error processing ${profile.email}:`, err);
+          errors.push(`${profile.email}: ${err}`);
+        }
+      }
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: `Deleted ${deletedCount} users`, 
+          deletedCount,
+          totalFound: profilesToDelete.length,
+          errors: errors.length > 0 ? errors : undefined
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     return new Response(
       JSON.stringify({ error: "Invalid action" }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
