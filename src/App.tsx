@@ -14,6 +14,7 @@ import Plans from "./pages/Plans";
 import Settings from "./pages/Settings";
 import Revendedores from "./pages/Revendedores";
 import Socios from "./pages/Socios";
+import Invite from "./pages/Invite";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
 import MaintenanceScreen from "./components/MaintenanceScreen";
 
@@ -58,6 +59,7 @@ const AppRoutes = () => (
       <Route path="/settings" element={<Settings />} />
       <Route path="/revendedores" element={<Revendedores />} />
       <Route path="/socios" element={<Socios />} />
+      <Route path="/convite/:code" element={<Invite />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </MaintenanceWrapper>

@@ -16,6 +16,7 @@ import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Ima
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { useMaintenance } from '@/hooks/useMaintenance';
+import InvitesManager from '@/components/admin/InvitesManager';
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
 type PlatformCategory = 'ai_tools' | 'streamings' | 'software' | 'bonus_courses' | 'loja';
@@ -1365,6 +1366,10 @@ export default function Admin() {
               <ShoppingCart className="w-4 h-4" />
               Loja ({products.length})
             </TabsTrigger>
+            <TabsTrigger value="invites" className="gap-2">
+              <Gift className="w-4 h-4" />
+              Convites
+            </TabsTrigger>
             <TabsTrigger value="partners" className="gap-2">
               <Users className="w-4 h-4" />
               Sócios
@@ -2022,6 +2027,11 @@ export default function Admin() {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Invites Tab */}
+          <TabsContent value="invites">
+            <InvitesManager />
           </TabsContent>
 
           {/* Partners Tab */}
