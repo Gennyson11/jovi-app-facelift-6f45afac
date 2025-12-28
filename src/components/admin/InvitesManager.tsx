@@ -97,6 +97,14 @@ export default function InvitesManager() {
   const [editUserAccessDays, setEditUserAccessDays] = useState(30);
   const [editUserCurrentExpiry, setEditUserCurrentExpiry] = useState<Date | null>(null);
   const [isSavingAccess, setIsSavingAccess] = useState(false);
+  
+  // Edit invite dialog
+  const [editInviteDialogOpen, setEditInviteDialogOpen] = useState(false);
+  const [editingInvite, setEditingInvite] = useState<Invite | null>(null);
+  const [editInvitePlatforms, setEditInvitePlatforms] = useState<string[]>([]);
+  const [editInviteAccessDays, setEditInviteAccessDays] = useState(15);
+  const [editInviteExpiryDays, setEditInviteExpiryDays] = useState(7);
+  const [isSavingInvite, setIsSavingInvite] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -363,6 +371,72 @@ export default function InvitesManager() {
 
   const deselectAllPlatforms = () => {
     setSelectedPlatforms([]);
+  };
+
+  const openEditInviteDialog = (invite: Invite) => {
+    setEditingInvite(invite);
+    setEditInvitePlatforms(invite.platform_ids);
+    setEditInviteAccessDays(invite.access_days);
+    setEditInviteExpiryDays(7);
+    setEditInviteDialogOpen(true);
+  };
+
+  const saveInviteChanges = async () => {
+    if (!editingInvite) return;
+    
+    if (editInvitePlatforms.length === 0) {
+      toast({
+        title: 'Erro',
+        description: 'Selecione pelo menos uma plataforma',
+        variant: 'destructive'
+      });
+      return;
+    }
+    
+    setIsSavingInvite(true);
+    
+    try {
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + editInviteExpiryDays);
+      
+      const { error } = await supabase
+        .from('invites')
+        .update({
+          platform_ids: editInvitePlatforms,
+          access_days: editInviteAccessDays,
+          expires_at: expiresAt.toISOString(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingInvite.id);
+      
+      if (error) throw error;
+      
+      toast({
+        title: 'Convite atualizado!',
+        description: 'As alterações foram salvas com sucesso.'
+      });
+      
+      setEditInviteDialogOpen(false);
+      setViewDialogOpen(false);
+      fetchData();
+    } catch (err: any) {
+      console.error('Error updating invite:', err);
+      toast({
+        title: 'Erro',
+        description: 'Falha ao atualizar convite',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSavingInvite(false);
+    }
+  };
+
+  const toggleEditInvitePlatform = (platformId: string) => {
+    setEditInvitePlatforms(prev => 
+      prev.includes(platformId) 
+        ? prev.filter(id => id !== platformId)
+        : [...prev, platformId]
+    );
   };
 
   const getStatusBadge = (invite: Invite) => {
@@ -822,13 +896,21 @@ export default function InvitesManager() {
               </div>
               
               {selectedInvite.status === 'active' && (
-                <div className="pt-2">
+                <div className="pt-2 flex gap-2">
+                  <Button 
+                    variant="outline"
+                    onClick={() => openEditInviteDialog(selectedInvite)}
+                    className="flex-1"
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Editar Convite
+                  </Button>
                   <Button 
                     onClick={() => copyInviteLink(selectedInvite.code)} 
-                    className="w-full"
+                    className="flex-1"
                   >
                     <Copy className="w-4 h-4 mr-2" />
-                    Copiar Link do Convite
+                    Copiar Link
                   </Button>
                 </div>
               )}
@@ -967,6 +1049,161 @@ export default function InvitesManager() {
             </Button>
             <Button onClick={saveUserAccess} disabled={isSavingAccess}>
               {isSavingAccess ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Alterações
+                </>
+              )}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Invite Dialog */}
+      <Dialog open={editInviteDialogOpen} onOpenChange={setEditInviteDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5 text-primary" />
+              Editar Convite
+            </DialogTitle>
+            <DialogDescription>
+              Código: {editingInvite?.code}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            {/* Access and Expiry */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Tempo de Acesso</Label>
+                <Select value={editInviteAccessDays.toString()} onValueChange={(v) => setEditInviteAccessDays(parseInt(v))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ACCESS_DAYS_OPTIONS.map(opt => (
+                      <SelectItem key={opt.value} value={opt.value.toString()}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  Quanto tempo o usuário terá acesso após usar o convite
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label>Nova Validade do Convite</Label>
+                <Select value={editInviteExpiryDays.toString()} onValueChange={(v) => setEditInviteExpiryDays(parseInt(v))}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {EXPIRY_OPTIONS.map(opt => (
+                      <SelectItem key={opt.days} value={opt.days.toString()}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">
+                  A validade será renovada a partir de agora
+                </p>
+              </div>
+            </div>
+            
+            {/* Platform Selection */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Plataformas Incluídas</Label>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setEditInvitePlatforms(platforms.map(p => p.id))}
+                  >
+                    Todas
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setEditInvitePlatforms([])}
+                  >
+                    Nenhuma
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="border rounded-lg max-h-64 overflow-y-auto bg-muted/50">
+                {(['ai_tools', 'streamings', 'software', 'bonus_courses', 'loja'] as PlatformCategory[]).map(category => {
+                  const categoryPlatforms = platforms.filter(p => p.category === category);
+                  if (categoryPlatforms.length === 0) return null;
+                  
+                  const allSelected = categoryPlatforms.every(p => editInvitePlatforms.includes(p.id));
+                  const someSelected = categoryPlatforms.some(p => editInvitePlatforms.includes(p.id));
+                  
+                  const toggleCategory = () => {
+                    if (allSelected) {
+                      setEditInvitePlatforms(prev => prev.filter(id => !categoryPlatforms.find(p => p.id === id)));
+                    } else {
+                      const newIds = categoryPlatforms.map(p => p.id);
+                      setEditInvitePlatforms(prev => [...new Set([...prev, ...newIds])]);
+                    }
+                  };
+                  
+                  return (
+                    <div key={category}>
+                      <div 
+                        className="sticky top-0 bg-muted/90 backdrop-blur-sm px-3 py-2 border-b border-border flex items-center justify-between cursor-pointer hover:bg-muted"
+                        onClick={toggleCategory}
+                      >
+                        <span className="text-xs font-semibold text-primary uppercase tracking-wide">
+                          {CATEGORY_LABELS[category]} ({categoryPlatforms.length})
+                        </span>
+                        <Checkbox 
+                          checked={allSelected}
+                          className={someSelected && !allSelected ? 'opacity-50' : ''}
+                          onCheckedChange={toggleCategory}
+                        />
+                      </div>
+                      <div className="divide-y divide-border/50">
+                        {categoryPlatforms.map(platform => (
+                          <label 
+                            key={platform.id} 
+                            className="flex items-center gap-3 px-3 py-2 hover:bg-background/50 cursor-pointer"
+                          >
+                            <Checkbox
+                              checked={editInvitePlatforms.includes(platform.id)}
+                              onCheckedChange={() => toggleEditInvitePlatform(platform.id)}
+                            />
+                            <span className="text-sm">{platform.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              <p className="text-sm text-muted-foreground">
+                {editInvitePlatforms.length} de {platforms.length} plataformas selecionadas
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditInviteDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={saveInviteChanges} disabled={isSavingInvite}>
+              {isSavingInvite ? (
                 <>
                   <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                   Salvando...
