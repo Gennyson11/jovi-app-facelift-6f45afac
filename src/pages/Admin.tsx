@@ -2404,8 +2404,8 @@ export default function Admin() {
                         if (!confirmed) return;
                         
                         try {
-                          const { data, error } = await supabase.functions.invoke('setup-users', {
-                            body: { action: 'delete_orphan_auth_users' }
+                          const { data, error } = await supabase.functions.invoke('cleanup-orphan-users', {
+                            body: { action: 'delete_orphans' }
                           });
                           
                           if (error) throw error;
@@ -2420,6 +2420,7 @@ export default function Admin() {
                           });
                           fetchData();
                         } catch (err: any) {
+                          console.error('Cleanup error:', err);
                           toast({
                             title: 'Erro',
                             description: err.message || 'Falha ao deletar usuários órfãos',
