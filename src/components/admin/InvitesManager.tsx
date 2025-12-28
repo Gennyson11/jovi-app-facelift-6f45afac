@@ -56,6 +56,8 @@ const ACCESS_DAYS_OPTIONS = [
   { label: '30 dias', value: 30 },
   { label: '60 dias', value: 60 },
   { label: '90 dias', value: 90 },
+  { label: '1 Ano', value: 365 },
+  { label: 'Vitalício', value: 99999 },
 ];
 
 const EXPIRY_OPTIONS = [
