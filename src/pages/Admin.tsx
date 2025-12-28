@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Users, UserCheck, UserX, Settings, CheckSquare, Clock, Calendar, Infinity, PlusCircle, MinusCircle, Megaphone, ToggleLeft, ToggleRight, Wifi, WifiOff, MousePointerClick, Gift, QrCode, Handshake, Search, ShoppingCart, Package, MapPin, AlertOctagon } from 'lucide-react';
+import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Users, UserCheck, UserX, Settings, CheckSquare, Clock, Calendar, Infinity, PlusCircle, MinusCircle, Megaphone, ToggleLeft, ToggleRight, Wifi, WifiOff, MousePointerClick, Gift, QrCode, Handshake, Search, ShoppingCart, Package, MapPin, AlertOctagon, UserPlus } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
@@ -209,6 +209,13 @@ export default function Admin() {
   const [blockReasonDialogOpen, setBlockReasonDialogOpen] = useState(false);
   const [blockingUser, setBlockingUser] = useState<UserProfile | null>(null);
   const [blockReason, setBlockReason] = useState('');
+
+  // User Registration (Cadastro)
+  const [registerName, setRegisterName] = useState('');
+  const [registerEmail, setRegisterEmail] = useState('');
+  const [registerPassword, setRegisterPassword] = useState('');
+  const [isRegistering, setIsRegistering] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
   
   const {
     user,
@@ -1341,6 +1348,10 @@ export default function Admin() {
               <Users className="w-4 h-4" />
               Sócios
             </TabsTrigger>
+            <TabsTrigger value="register" className="gap-2">
+              <UserPlus className="w-4 h-4" />
+              Cadastro
+            </TabsTrigger>
           </TabsList>
 
           {/* Platforms Tab */}
@@ -2092,6 +2103,163 @@ export default function Admin() {
                     ))}
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Register Tab */}
+          <TabsContent value="register">
+            <Card className="border-border">
+              <CardHeader>
+                <CardTitle className="text-foreground flex items-center gap-2">
+                  <UserPlus className="w-5 h-5" />
+                  Cadastrar Novo Cliente
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={async (e) => {
+                  e.preventDefault();
+                  
+                  if (!registerName.trim() || !registerEmail.trim() || !registerPassword.trim()) {
+                    toast({
+                      title: 'Erro',
+                      description: 'Preencha todos os campos',
+                      variant: 'destructive'
+                    });
+                    return;
+                  }
+
+                  if (registerPassword.length < 6) {
+                    toast({
+                      title: 'Erro',
+                      description: 'A senha deve ter no mínimo 6 caracteres',
+                      variant: 'destructive'
+                    });
+                    return;
+                  }
+
+                  setIsRegistering(true);
+                  
+                  try {
+                    const { data, error } = await supabase.functions.invoke('setup-users', {
+                      body: {
+                        action: 'create_user',
+                        email: registerEmail.trim().toLowerCase(),
+                        password: registerPassword,
+                        name: registerName.trim(),
+                        role: 'user',
+                        has_access: true
+                      }
+                    });
+
+                    if (error) throw error;
+                    
+                    if (data?.error) {
+                      throw new Error(data.error);
+                    }
+
+                    toast({
+                      title: 'Sucesso',
+                      description: `Usuário ${registerName} criado com sucesso!`
+                    });
+                    
+                    // Clear form
+                    setRegisterName('');
+                    setRegisterEmail('');
+                    setRegisterPassword('');
+                    
+                    // Refresh users list
+                    fetchData();
+                  } catch (err: any) {
+                    toast({
+                      title: 'Erro ao criar usuário',
+                      description: err.message || 'Tente novamente',
+                      variant: 'destructive'
+                    });
+                  } finally {
+                    setIsRegistering(false);
+                  }
+                }} className="max-w-md space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="register-name">Nome do Cliente *</Label>
+                    <Input
+                      id="register-name"
+                      value={registerName}
+                      onChange={(e) => setRegisterName(e.target.value)}
+                      placeholder="Nome completo"
+                      className="bg-background/50 border-border"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="register-email">Email *</Label>
+                    <Input
+                      id="register-email"
+                      type="email"
+                      value={registerEmail}
+                      onChange={(e) => setRegisterEmail(e.target.value)}
+                      placeholder="email@exemplo.com"
+                      className="bg-background/50 border-border"
+                      required
+                    />
+                  </div>
+                  
+                  <div className="space-y-2">
+                    <Label htmlFor="register-password">Senha *</Label>
+                    <div className="relative">
+                      <Input
+                        id="register-password"
+                        type={showRegisterPassword ? 'text' : 'password'}
+                        value={registerPassword}
+                        onChange={(e) => setRegisterPassword(e.target.value)}
+                        placeholder="Mínimo 6 caracteres"
+                        className="bg-background/50 border-border pr-10"
+                        required
+                        minLength={6}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        className="absolute right-0 top-0 h-full px-3"
+                        onClick={() => setShowRegisterPassword(!showRegisterPassword)}
+                      >
+                        {showRegisterPassword ? (
+                          <EyeOff className="w-4 h-4 text-muted-foreground" />
+                        ) : (
+                          <Eye className="w-4 h-4 text-muted-foreground" />
+                        )}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      A senha deve ter no mínimo 6 caracteres
+                    </p>
+                  </div>
+                  
+                  <Button type="submit" disabled={isRegistering} className="w-full">
+                    {isRegistering ? (
+                      <>
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        Criando...
+                      </>
+                    ) : (
+                      <>
+                        <UserPlus className="w-4 h-4 mr-2" />
+                        Criar Usuário
+                      </>
+                    )}
+                  </Button>
+                </form>
+                
+                <div className="mt-6 p-4 bg-muted/50 rounded-lg">
+                  <h4 className="font-medium text-foreground mb-2">Informações</h4>
+                  <ul className="text-sm text-muted-foreground space-y-1">
+                    <li>• O usuário será criado com acesso liberado</li>
+                    <li>• Após criar, configure as permissões de plataformas na aba Usuários</li>
+                    <li>• O usuário poderá fazer login imediatamente</li>
+                  </ul>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
