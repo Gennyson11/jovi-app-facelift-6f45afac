@@ -222,36 +222,31 @@ serve(async (req) => {
     }
 
     if (action === "delete_user") {
-      const { user_id: targetUserId } = await req.json().catch(() => ({}));
-      
-      if (!email && !targetUserId) {
+      // email is already parsed from req.json() on line 69
+      if (!email) {
         return new Response(
-          JSON.stringify({ error: "Email or user_id is required" }),
+          JSON.stringify({ error: "Email is required" }),
           { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
 
-      let authUserId = targetUserId;
-
-      // If email provided, get user_id from profiles
-      if (email && !authUserId) {
-        const { data: profileData, error: profileFetchError } = await supabaseAdmin
-          .from("profiles")
-          .select("user_id")
-          .eq("email", email)
-          .single();
-        
-        if (profileFetchError || !profileData) {
-          console.error("Profile not found:", profileFetchError);
-          return new Response(
-            JSON.stringify({ error: "User not found" }),
-            { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
-          );
-        }
-        authUserId = profileData.user_id;
+      // Get user_id from profiles using email
+      const { data: profileData, error: profileFetchError } = await supabaseAdmin
+        .from("profiles")
+        .select("user_id")
+        .eq("email", email)
+        .single();
+      
+      if (profileFetchError || !profileData) {
+        console.error("Profile not found:", profileFetchError);
+        return new Response(
+          JSON.stringify({ error: "User not found" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
       }
-
-      console.log("Deleting user with auth id:", authUserId, "by admin:", callerUser.email);
+      
+      const authUserId = profileData.user_id;
+      console.log("Deleting user with auth id:", authUserId, "email:", email, "by admin:", callerUser.email);
 
       // Delete from auth.users (this will cascade to profiles due to trigger/foreign key)
       const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(authUserId);
@@ -264,7 +259,7 @@ serve(async (req) => {
         );
       }
 
-      console.log("Successfully deleted user:", email || authUserId);
+      console.log("Successfully deleted user:", email, "auth id:", authUserId);
 
       return new Response(
         JSON.stringify({ success: true, message: "User deleted successfully" }),
