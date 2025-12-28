@@ -56,8 +56,6 @@ const ACCESS_DAYS_OPTIONS = [
   { label: '30 dias', value: 30 },
   { label: '60 dias', value: 60 },
   { label: '90 dias', value: 90 },
-  { label: '1 Ano', value: 365 },
-  { label: 'Vitalício', value: 99999 },
 ];
 
 const EXPIRY_OPTIONS = [
@@ -66,6 +64,8 @@ const EXPIRY_OPTIONS = [
   { label: '7 dias', days: 7 },
   { label: '15 dias', days: 15 },
   { label: '30 dias', days: 30 },
+  { label: '1 Ano', days: 365 },
+  { label: 'Vitalício', days: 36500 },
 ];
 
 export default function InvitesManager() {
