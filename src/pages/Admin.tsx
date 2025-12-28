@@ -1323,6 +1323,10 @@ export default function Admin() {
               <Image className="w-4 h-4" />
               Plataformas
             </TabsTrigger>
+            <TabsTrigger value="register" className="gap-2">
+              <UserPlus className="w-4 h-4" />
+              Cadastro
+            </TabsTrigger>
             <TabsTrigger value="users" className="gap-2">
               <Users className="w-4 h-4" />
               Usuários ({users.length})
@@ -1342,10 +1346,6 @@ export default function Admin() {
             <TabsTrigger value="partners" className="gap-2">
               <Users className="w-4 h-4" />
               Sócios
-            </TabsTrigger>
-            <TabsTrigger value="register" className="gap-2">
-              <UserPlus className="w-4 h-4" />
-              Cadastro
             </TabsTrigger>
           </TabsList>
 
