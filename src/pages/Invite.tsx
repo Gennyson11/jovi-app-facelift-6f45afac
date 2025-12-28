@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Gift, CheckCircle, Sparkles, Film, Music, Palette, Camera, Bot, Crown, Eye, EyeOff } from 'lucide-react';
+import { Loader2, Gift, CheckCircle, Sparkles, Film, Music, Palette, Camera, Bot, Crown, Eye, EyeOff, Lock } from 'lucide-react';
 
 interface InviteData {
   id: string;
@@ -56,7 +56,8 @@ export default function Invite() {
   
   const [loading, setLoading] = useState(true);
   const [invite, setInvite] = useState<InviteData | null>(null);
-  const [platforms, setPlatforms] = useState<Platform[]>([]);
+  const [includedPlatforms, setIncludedPlatforms] = useState<Platform[]>([]);
+  const [blockedPlatforms, setBlockedPlatforms] = useState<Platform[]>([]);
   const [error, setError] = useState<string | null>(null);
   
   // Registration form
@@ -117,16 +118,18 @@ export default function Invite() {
         setName(inviteData.recipient_name);
       }
       
-      // Fetch platforms included in invite
-      if (inviteData.platform_ids && inviteData.platform_ids.length > 0) {
-        const { data: platformsData } = await supabase
-          .from('streaming_platforms')
-          .select('id, name, icon_url, category')
-          .in('id', inviteData.platform_ids);
-        
-        if (platformsData) {
-          setPlatforms(platformsData as Platform[]);
-        }
+      // Fetch ALL platforms
+      const { data: allPlatformsData } = await supabase
+        .from('streaming_platforms')
+        .select('id, name, icon_url, category')
+        .order('name');
+      
+      if (allPlatformsData) {
+        const platformIds = inviteData.platform_ids || [];
+        const included = allPlatformsData.filter(p => platformIds.includes(p.id));
+        const blocked = allPlatformsData.filter(p => !platformIds.includes(p.id));
+        setIncludedPlatforms(included as Platform[]);
+        setBlockedPlatforms(blocked as Platform[]);
       }
     } catch (err: any) {
       console.error('Error fetching invite:', err);
@@ -295,46 +298,61 @@ export default function Invite() {
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                {platforms.length > 0 ? (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {platforms.map((platform) => (
-                      <div
-                        key={platform.id}
-                        className="flex items-center gap-2 p-3 rounded-lg bg-background/50 border border-border/50"
-                      >
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                          {getIconForPlatform(platform.name)}
+                {/* Included platforms */}
+                {includedPlatforms.length > 0 && (
+                  <div className="mb-6">
+                    <p className="text-sm text-green-500 font-medium mb-3 flex items-center gap-2">
+                      <CheckCircle className="w-4 h-4" />
+                      Liberados para você ({includedPlatforms.length})
+                    </p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+                      {includedPlatforms.map((platform) => (
+                        <div
+                          key={platform.id}
+                          className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/30"
+                        >
+                          <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-500">
+                            {getIconForPlatform(platform.name)}
+                          </div>
+                          <span className="text-sm font-medium text-foreground truncate">
+                            {platform.name}
+                          </span>
                         </div>
-                        <span className="text-sm font-medium text-foreground truncate">
-                          {platform.name}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                    {[
-                      'ChatGPT Plus', 'CapCut Pro', 'Canva Pro', 'PhotoRoom Pro',
-                      'Netflix', 'Disney+', 'HBO Max', 'Prime Video', 
-                      'YouTube Premium', 'Paramount+'
-                    ].map((service) => (
-                      <div
-                        key={service}
-                        className="flex items-center gap-2 p-3 rounded-lg bg-background/50 border border-border/50"
-                      >
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary">
-                          {getIconForPlatform(service)}
-                        </div>
-                        <span className="text-sm font-medium text-foreground truncate">
-                          {service}
-                        </span>
-                      </div>
-                    ))}
+                      ))}
+                    </div>
                   </div>
                 )}
-                <p className="text-xs text-muted-foreground mt-4">
-                  E muito mais serviços exclusivos!
-                </p>
+                
+                {/* Blocked platforms */}
+                {blockedPlatforms.length > 0 && (
+                  <div>
+                    <p className="text-sm text-muted-foreground font-medium mb-3 flex items-center gap-2">
+                      <Lock className="w-4 h-4" />
+                      Não incluídos neste convite ({blockedPlatforms.length})
+                    </p>
+                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
+                      {blockedPlatforms.map((platform) => (
+                        <div
+                          key={platform.id}
+                          className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 border border-border/30 opacity-50"
+                        >
+                          <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
+                            <Lock className="w-3 h-3" />
+                          </div>
+                          <span className="text-xs text-muted-foreground truncate">
+                            {platform.name}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                {includedPlatforms.length === 0 && blockedPlatforms.length === 0 && (
+                  <p className="text-center text-muted-foreground py-4">
+                    Carregando plataformas...
+                  </p>
+                )}
               </CardContent>
             </Card>
             
