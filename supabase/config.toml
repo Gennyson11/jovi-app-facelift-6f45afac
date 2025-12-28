@@ -17,3 +17,6 @@ verify_jwt = false
 
 [functions.log-user-access]
 verify_jwt = false
+
+[functions.cleanup-orphan-users]
+verify_jwt = true
