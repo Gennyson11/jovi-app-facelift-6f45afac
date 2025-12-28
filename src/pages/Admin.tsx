@@ -919,8 +919,6 @@ export default function Admin() {
       access_type: platformAccessType,
       category: platformCategory,
       cover_image_url: platformCoverUrl || null,
-      login: platformAccessType === 'credentials' && platformCredentials[0]?.login ? platformCredentials[0].login : null,
-      password: platformAccessType === 'credentials' && platformCredentials[0]?.password ? platformCredentials[0].password : null,
       website_url: platformWebsiteUrl || null
     };
     if (editingPlatform) {
