@@ -9,7 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Copy, Trash2, Loader2, Link, Gift, CheckCircle, Clock, XCircle, Search, Calendar, Users, Eye } from 'lucide-react';
+import { Plus, Copy, Trash2, Loader2, Link, Gift, CheckCircle, Clock, XCircle, Search, Calendar, Users, Eye, Edit, Save } from 'lucide-react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface Invite {
@@ -89,6 +89,14 @@ export default function InvitesManager() {
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [selectedInvite, setSelectedInvite] = useState<Invite | null>(null);
   const [usedByUser, setUsedByUser] = useState<UserProfile | null>(null);
+  
+  // Edit user access dialog
+  const [editAccessDialogOpen, setEditAccessDialogOpen] = useState(false);
+  const [editingUserProfile, setEditingUserProfile] = useState<UserProfile | null>(null);
+  const [editUserPlatforms, setEditUserPlatforms] = useState<string[]>([]);
+  const [editUserAccessDays, setEditUserAccessDays] = useState(30);
+  const [editUserCurrentExpiry, setEditUserCurrentExpiry] = useState<Date | null>(null);
+  const [isSavingAccess, setIsSavingAccess] = useState(false);
 
   useEffect(() => {
     fetchData();
@@ -228,6 +236,109 @@ export default function InvitesManager() {
     }
     
     setViewDialogOpen(true);
+  };
+
+  const openEditAccessDialog = async (userProfile: UserProfile) => {
+    setEditingUserProfile(userProfile);
+    
+    // Fetch user's current platform access
+    const { data: accessData } = await supabase
+      .from('user_platform_access')
+      .select('platform_id')
+      .eq('user_id', userProfile.id);
+    
+    if (accessData) {
+      setEditUserPlatforms(accessData.map(a => a.platform_id));
+    }
+    
+    // Fetch user's current access expiry
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('access_expires_at')
+      .eq('id', userProfile.id)
+      .maybeSingle();
+    
+    if (profileData?.access_expires_at) {
+      setEditUserCurrentExpiry(new Date(profileData.access_expires_at));
+    } else {
+      setEditUserCurrentExpiry(null);
+    }
+    
+    setEditUserAccessDays(30);
+    setEditAccessDialogOpen(true);
+  };
+
+  const saveUserAccess = async () => {
+    if (!editingUserProfile) return;
+    
+    setIsSavingAccess(true);
+    
+    try {
+      // Delete all current platform access
+      await supabase
+        .from('user_platform_access')
+        .delete()
+        .eq('user_id', editingUserProfile.id);
+      
+      // Insert new platform access
+      if (editUserPlatforms.length > 0) {
+        const accessRecords = editUserPlatforms.map(platformId => ({
+          user_id: editingUserProfile.id,
+          platform_id: platformId
+        }));
+        
+        const { error: insertError } = await supabase
+          .from('user_platform_access')
+          .insert(accessRecords);
+        
+        if (insertError) throw insertError;
+      }
+      
+      // Update access expiry if adding days
+      if (editUserAccessDays > 0) {
+        const baseDate = editUserCurrentExpiry && editUserCurrentExpiry > new Date() 
+          ? editUserCurrentExpiry 
+          : new Date();
+        const newExpiry = new Date(baseDate);
+        newExpiry.setDate(newExpiry.getDate() + editUserAccessDays);
+        
+        const { error: updateError } = await supabase
+          .from('profiles')
+          .update({ 
+            access_expires_at: newExpiry.toISOString(),
+            has_access: true
+          })
+          .eq('id', editingUserProfile.id);
+        
+        if (updateError) throw updateError;
+      }
+      
+      toast({
+        title: 'Acesso atualizado!',
+        description: `Plataformas e tempo de acesso de ${editingUserProfile.name || editingUserProfile.email} foram atualizados.`
+      });
+      
+      setEditAccessDialogOpen(false);
+      setViewDialogOpen(false);
+      fetchData();
+    } catch (err: any) {
+      console.error('Error updating user access:', err);
+      toast({
+        title: 'Erro',
+        description: 'Falha ao atualizar acesso do usuário',
+        variant: 'destructive'
+      });
+    } finally {
+      setIsSavingAccess(false);
+    }
+  };
+
+  const toggleEditPlatform = (platformId: string) => {
+    setEditUserPlatforms(prev => 
+      prev.includes(platformId) 
+        ? prev.filter(id => id !== platformId)
+        : [...prev, platformId]
+    );
   };
 
   const resetForm = () => {
@@ -660,12 +771,34 @@ export default function InvitesManager() {
                 </div>
               </div>
               
-              {selectedInvite.status === 'used' && (
+              {selectedInvite.status === 'used' && usedByUser && (
+                <div className="p-3 bg-green-500/10 rounded-lg">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm text-muted-foreground mb-1">Utilizado por</p>
+                      <p className="font-medium text-green-500">
+                        {usedByUser.name || usedByUser.email || 'Usuário desconhecido'}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Em {new Date(selectedInvite.used_at!).toLocaleString('pt-BR')}
+                      </p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => openEditAccessDialog(usedByUser)}
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Editar Acesso
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
+              {selectedInvite.status === 'used' && !usedByUser && (
                 <div className="p-3 bg-green-500/10 rounded-lg">
                   <p className="text-sm text-muted-foreground mb-1">Utilizado por</p>
-                  <p className="font-medium text-green-500">
-                    {usedByUser?.name || usedByUser?.email || 'Usuário desconhecido'}
-                  </p>
+                  <p className="font-medium text-green-500">Usuário desconhecido</p>
                   <p className="text-xs text-muted-foreground mt-1">
                     Em {new Date(selectedInvite.used_at!).toLocaleString('pt-BR')}
                   </p>
@@ -701,6 +834,151 @@ export default function InvitesManager() {
               )}
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit User Access Dialog */}
+      <Dialog open={editAccessDialogOpen} onOpenChange={setEditAccessDialogOpen}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Edit className="w-5 h-5 text-primary" />
+              Editar Acesso do Usuário
+            </DialogTitle>
+            <DialogDescription>
+              {editingUserProfile?.name || editingUserProfile?.email}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            {/* Current access info */}
+            {editUserCurrentExpiry && (
+              <div className="p-3 bg-muted rounded-lg">
+                <p className="text-sm text-muted-foreground">Acesso atual expira em:</p>
+                <p className="font-medium">
+                  {editUserCurrentExpiry.toLocaleDateString('pt-BR')} às {editUserCurrentExpiry.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                </p>
+              </div>
+            )}
+            
+            {/* Add more days */}
+            <div className="space-y-2">
+              <Label>Adicionar Dias de Acesso</Label>
+              <Select value={editUserAccessDays.toString()} onValueChange={(v) => setEditUserAccessDays(parseInt(v))}>
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="0">Não adicionar dias</SelectItem>
+                  {ACCESS_DAYS_OPTIONS.map(opt => (
+                    <SelectItem key={opt.value} value={opt.value.toString()}>
+                      + {opt.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Dias serão adicionados à data atual de expiração
+              </p>
+            </div>
+            
+            {/* Platform Selection */}
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <Label>Plataformas Liberadas</Label>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setEditUserPlatforms(platforms.map(p => p.id))}
+                  >
+                    Todas
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setEditUserPlatforms([])}
+                  >
+                    Nenhuma
+                  </Button>
+                </div>
+              </div>
+              
+              <div className="border rounded-lg max-h-64 overflow-y-auto bg-muted/50">
+                {(['ai_tools', 'streamings', 'software', 'bonus_courses', 'loja'] as PlatformCategory[]).map(category => {
+                  const categoryPlatforms = platforms.filter(p => p.category === category);
+                  if (categoryPlatforms.length === 0) return null;
+                  
+                  const allSelected = categoryPlatforms.every(p => editUserPlatforms.includes(p.id));
+                  const someSelected = categoryPlatforms.some(p => editUserPlatforms.includes(p.id));
+                  
+                  const toggleCategory = () => {
+                    if (allSelected) {
+                      setEditUserPlatforms(prev => prev.filter(id => !categoryPlatforms.find(p => p.id === id)));
+                    } else {
+                      const newIds = categoryPlatforms.map(p => p.id);
+                      setEditUserPlatforms(prev => [...new Set([...prev, ...newIds])]);
+                    }
+                  };
+                  
+                  return (
+                    <div key={category}>
+                      <div 
+                        className="sticky top-0 bg-muted/90 backdrop-blur-sm px-3 py-2 border-b border-border flex items-center justify-between cursor-pointer hover:bg-muted"
+                        onClick={toggleCategory}
+                      >
+                        <span className="text-xs font-semibold text-primary uppercase tracking-wide">
+                          {CATEGORY_LABELS[category]} ({categoryPlatforms.length})
+                        </span>
+                        <Checkbox 
+                          checked={allSelected}
+                          className={someSelected && !allSelected ? 'opacity-50' : ''}
+                          onCheckedChange={toggleCategory}
+                        />
+                      </div>
+                      <div className="divide-y divide-border/50">
+                        {categoryPlatforms.map(platform => (
+                          <label 
+                            key={platform.id} 
+                            className="flex items-center gap-3 px-3 py-2 hover:bg-background/50 cursor-pointer"
+                          >
+                            <Checkbox
+                              checked={editUserPlatforms.includes(platform.id)}
+                              onCheckedChange={() => toggleEditPlatform(platform.id)}
+                            />
+                            <span className="text-sm">{platform.name}</span>
+                          </label>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+              
+              <p className="text-sm text-muted-foreground">
+                {editUserPlatforms.length} de {platforms.length} plataformas selecionadas
+              </p>
+            </div>
+          </div>
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditAccessDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button onClick={saveUserAccess} disabled={isSavingAccess}>
+              {isSavingAccess ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Salvando...
+                </>
+              ) : (
+                <>
+                  <Save className="w-4 h-4 mr-2" />
+                  Salvar Alterações
+                </>
+              )}
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
