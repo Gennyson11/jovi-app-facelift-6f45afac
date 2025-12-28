@@ -12,8 +12,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Users, UserCheck, UserX, Settings, CheckSquare, Clock, Calendar, Infinity, PlusCircle, MinusCircle, Megaphone, ToggleLeft, ToggleRight, Wifi, WifiOff, MousePointerClick, Gift, QrCode, Handshake, Search, ShoppingCart, Package, MapPin, AlertOctagon, UserPlus } from 'lucide-react';
+import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Users, UserCheck, UserX, Settings, CheckSquare, Clock, Calendar, Infinity, PlusCircle, MinusCircle, Megaphone, ToggleLeft, ToggleRight, Wifi, WifiOff, MousePointerClick, Gift, QrCode, Handshake, Search, ShoppingCart, Package, MapPin, AlertOctagon, UserPlus, Construction } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { Switch } from '@/components/ui/switch';
+import { useMaintenance } from '@/hooks/useMaintenance';
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
 type PlatformCategory = 'ai_tools' | 'streamings' | 'software' | 'bonus_courses' | 'loja';
@@ -229,6 +231,18 @@ export default function Admin() {
     onlineUsers,
     onlineCount
   } = useOnlineUsers();
+  
+  // Maintenance mode
+  const { isMaintenanceMode, maintenanceMessage, toggleMaintenance } = useMaintenance();
+  const [maintenanceMessageInput, setMaintenanceMessageInput] = useState('');
+  const [savingMaintenance, setSavingMaintenance] = useState(false);
+  
+  // Sync maintenance message input when data loads
+  useEffect(() => {
+    if (maintenanceMessage) {
+      setMaintenanceMessageInput(maintenanceMessage);
+    }
+  }, [maintenanceMessage]);
 
   // Also track admin presence
   usePresence(user?.id, user?.email, 'Admin');
@@ -1347,6 +1361,10 @@ export default function Admin() {
               <Users className="w-4 h-4" />
               Sócios
             </TabsTrigger>
+            <TabsTrigger value="settings" className="gap-2">
+              <Settings className="w-4 h-4" />
+              Configurações
+            </TabsTrigger>
           </TabsList>
 
           {/* Platforms Tab */}
@@ -2253,6 +2271,107 @@ export default function Admin() {
                     <li>• Após criar, libere o acesso e configure as plataformas na aba <strong>Usuários</strong></li>
                     <li>• O usuário só poderá usar o sistema após você liberar o acesso</li>
                   </ul>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          {/* Settings Tab */}
+          <TabsContent value="settings">
+            <Card className="border-border">
+              <CardHeader>
+                <CardTitle className="text-foreground flex items-center gap-2">
+                  <Settings className="w-5 h-5" />
+                  Configurações do Site
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                {/* Maintenance Mode */}
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3">
+                    <Construction className="w-5 h-5 text-orange-500" />
+                    <h3 className="text-lg font-semibold text-foreground">Modo Manutenção</h3>
+                  </div>
+                  
+                  <div className="p-4 bg-muted/50 rounded-lg space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-1">
+                        <p className="font-medium text-foreground">Ativar Modo Manutenção</p>
+                        <p className="text-sm text-muted-foreground">
+                          Quando ativado, apenas administradores poderão acessar o site. Todos os outros usuários verão uma tela de manutenção.
+                        </p>
+                      </div>
+                      <Switch
+                        checked={isMaintenanceMode}
+                        onCheckedChange={async (checked) => {
+                          setSavingMaintenance(true);
+                          const result = await toggleMaintenance(checked, maintenanceMessageInput);
+                          setSavingMaintenance(false);
+                          if (result.success) {
+                            toast({
+                              title: checked ? 'Manutenção Ativada' : 'Manutenção Desativada',
+                              description: checked 
+                                ? 'O site agora está em modo manutenção. Apenas admins podem acessar.'
+                                : 'O site voltou ao funcionamento normal.',
+                            });
+                          } else {
+                            toast({
+                              title: 'Erro',
+                              description: 'Falha ao alterar modo manutenção',
+                              variant: 'destructive'
+                            });
+                          }
+                        }}
+                        disabled={savingMaintenance}
+                      />
+                    </div>
+
+                    <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${isMaintenanceMode ? 'bg-orange-500/10 text-orange-500' : 'bg-green-500/10 text-green-500'}`}>
+                      {isMaintenanceMode ? (
+                        <>
+                          <Construction className="w-4 h-4" />
+                          <span className="text-sm font-medium">Site em manutenção</span>
+                        </>
+                      ) : (
+                        <>
+                          <CheckCircle className="w-4 h-4" />
+                          <span className="text-sm font-medium">Site funcionando normalmente</span>
+                        </>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <Label htmlFor="maintenance-message">Mensagem de Manutenção</Label>
+                      <Textarea
+                        id="maintenance-message"
+                        value={maintenanceMessageInput}
+                        onChange={(e) => setMaintenanceMessageInput(e.target.value)}
+                        placeholder="Digite a mensagem que será exibida aos usuários..."
+                        className="min-h-[100px]"
+                      />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={async () => {
+                          setSavingMaintenance(true);
+                          const result = await toggleMaintenance(isMaintenanceMode, maintenanceMessageInput);
+                          setSavingMaintenance(false);
+                          if (result.success) {
+                            toast({
+                              title: 'Mensagem Atualizada',
+                              description: 'A mensagem de manutenção foi salva com sucesso.',
+                            });
+                          }
+                        }}
+                        disabled={savingMaintenance}
+                      >
+                        {savingMaintenance ? (
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                        ) : null}
+                        Salvar Mensagem
+                      </Button>
+                    </div>
+                  </div>
                 </div>
               </CardContent>
             </Card>
