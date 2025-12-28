@@ -4,10 +4,16 @@ project_id = "xuwnkzwfsprhmuxynlap"
 verify_jwt = false
 
 [functions.setup-users]
-verify_jwt = false
+verify_jwt = true
 
 [functions.generate-video]
 verify_jwt = false
 
 [functions.check-video-status]
+verify_jwt = false
+
+[functions.cleanup-expired-accounts]
+verify_jwt = false
+
+[functions.log-user-access]
 verify_jwt = false

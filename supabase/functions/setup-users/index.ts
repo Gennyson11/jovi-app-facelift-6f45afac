@@ -12,14 +12,62 @@ serve(async (req) => {
   }
 
   try {
+    // Create admin client for privileged operations
     const supabaseAdmin = createClient(
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
       { auth: { autoRefreshToken: false, persistSession: false } }
     );
 
+    // Create user client to verify the caller's identity
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      console.error("No authorization header provided");
+      return new Response(
+        JSON.stringify({ error: "Unauthorized - No authorization header" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    const supabaseUser = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      { 
+        auth: { autoRefreshToken: false, persistSession: false },
+        global: { headers: { Authorization: authHeader } }
+      }
+    );
+
+    // Verify the caller is authenticated
+    const { data: { user: callerUser }, error: userError } = await supabaseUser.auth.getUser();
+    if (userError || !callerUser) {
+      console.error("Authentication failed:", userError?.message);
+      return new Response(
+        JSON.stringify({ error: "Unauthorized - Invalid token" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Verify the caller has admin role
+    const { data: roleData, error: roleError } = await supabaseAdmin
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", callerUser.id)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (roleError || !roleData) {
+      console.error("Admin check failed for user:", callerUser.id, "- Not an admin or role check failed");
+      return new Response(
+        JSON.stringify({ error: "Forbidden - Admin access required" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log("Admin verified:", callerUser.email);
+
     const { action, email, password, role, partner_id, name, has_access, access_expires_at } = await req.json();
-    console.log("Setup action:", action, "email:", email, "partner_id:", partner_id);
+    console.log("Setup action:", action, "email:", email, "partner_id:", partner_id, "by admin:", callerUser.email);
 
     if (action === "create_user") {
       // Create user
@@ -165,7 +213,7 @@ serve(async (req) => {
         throw updateError;
       }
 
-      console.log("Password updated for user:", email);
+      console.log("Password updated for user:", email, "by admin:", callerUser.email);
 
       return new Response(
         JSON.stringify({ success: true, message: "Password updated successfully", userId }),
@@ -174,7 +222,7 @@ serve(async (req) => {
     }
 
     if (action === "delete_users_without_access") {
-      console.log("Deleting all users without access...");
+      console.log("Deleting all users without access... Requested by:", callerUser.email);
       
       // Get all profiles without access
       const { data: profilesToDelete, error: fetchError } = await supabaseAdmin
