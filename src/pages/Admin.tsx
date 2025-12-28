@@ -2148,7 +2148,7 @@ export default function Admin() {
                         password: registerPassword,
                         name: registerName.trim(),
                         role: 'user',
-                        has_access: true
+                        has_access: false
                       }
                     });
 
@@ -2255,9 +2255,9 @@ export default function Admin() {
                 <div className="mt-6 p-4 bg-muted/50 rounded-lg">
                   <h4 className="font-medium text-foreground mb-2">Informações</h4>
                   <ul className="text-sm text-muted-foreground space-y-1">
-                    <li>• O usuário será criado com acesso liberado</li>
-                    <li>• Após criar, configure as permissões de plataformas na aba Usuários</li>
-                    <li>• O usuário poderá fazer login imediatamente</li>
+                    <li>• O usuário será criado <strong>sem acesso</strong> às plataformas</li>
+                    <li>• Após criar, libere o acesso e configure as plataformas na aba <strong>Usuários</strong></li>
+                    <li>• O usuário só poderá usar o sistema após você liberar o acesso</li>
                   </ul>
                 </div>
               </CardContent>
