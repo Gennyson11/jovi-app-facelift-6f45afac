@@ -322,6 +322,91 @@ serve(async (req) => {
       );
     }
 
+    if (action === "delete_auth_user_by_id") {
+      // Delete a user directly from auth by their auth user_id
+      const { user_id: targetAuthId } = await req.json().catch(() => ({ user_id: null }));
+      
+      // Since we already parsed the body, we need to get user_id from the initial parse
+      // Actually, we can't re-parse. Let's check if it was passed in the original body
+      // The original body parsing happened on line 69, so user_id would need to be passed there
+      // For now, let's use a different approach - pass it as a separate field
+      
+      console.log("delete_auth_user_by_id called - this action is deprecated, use delete_orphan_auth_users instead");
+      
+      return new Response(
+        JSON.stringify({ error: "Use delete_orphan_auth_users action instead" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (action === "delete_orphan_auth_users") {
+      console.log("Finding and deleting orphan auth users... Requested by:", callerUser.email);
+      
+      // Get all auth users
+      const { data: { users: authUsers }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
+      
+      if (listError) {
+        throw listError;
+      }
+
+      if (!authUsers || authUsers.length === 0) {
+        return new Response(
+          JSON.stringify({ success: true, message: "No auth users found", deletedCount: 0 }),
+          { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Get all profile user_ids
+      const { data: profiles, error: profilesError } = await supabaseAdmin
+        .from("profiles")
+        .select("user_id");
+
+      if (profilesError) {
+        throw profilesError;
+      }
+
+      const profileUserIds = new Set(profiles?.map(p => p.user_id) || []);
+      
+      // Find orphan users (in auth but not in profiles)
+      const orphanUsers = authUsers.filter(u => !profileUserIds.has(u.id));
+      
+      console.log(`Found ${orphanUsers.length} orphan auth users to delete`);
+      
+      let deletedCount = 0;
+      const errors: string[] = [];
+      const deletedEmails: string[] = [];
+
+      for (const user of orphanUsers) {
+        try {
+          const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(user.id);
+          
+          if (deleteAuthError) {
+            console.error(`Error deleting orphan auth user ${user.email}:`, deleteAuthError);
+            errors.push(`${user.email}: ${deleteAuthError.message}`);
+          } else {
+            console.log(`Deleted orphan user: ${user.email}`);
+            deletedEmails.push(user.email || user.id);
+            deletedCount++;
+          }
+        } catch (err) {
+          console.error(`Error processing orphan ${user.email}:`, err);
+          errors.push(`${user.email}: ${err}`);
+        }
+      }
+
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: `Deleted ${deletedCount} orphan auth users`, 
+          deletedCount,
+          totalFound: orphanUsers.length,
+          deletedEmails,
+          errors: errors.length > 0 ? errors : undefined
+        }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     return new Response(
       JSON.stringify({ error: "Invalid action" }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }

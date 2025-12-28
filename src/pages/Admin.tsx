@@ -2381,6 +2381,58 @@ export default function Admin() {
                     </div>
                   </div>
                 </div>
+
+                {/* Cleanup Orphan Users */}
+                <div className="space-y-4 pt-6 border-t border-border">
+                  <div className="flex items-center gap-3">
+                    <Trash2 className="w-5 h-5 text-red-500" />
+                    <h3 className="text-lg font-semibold text-foreground">Limpeza de Usuários</h3>
+                  </div>
+                  
+                  <div className="p-4 bg-muted/50 rounded-lg space-y-4">
+                    <div className="space-y-2">
+                      <p className="font-medium text-foreground">Deletar Usuários Órfãos</p>
+                      <p className="text-sm text-muted-foreground">
+                        Remove usuários que existem no sistema de autenticação mas não têm perfil associado. 
+                        Isso pode acontecer quando perfis são deletados manualmente sem remover o usuário de auth.
+                      </p>
+                    </div>
+                    <Button
+                      variant="destructive"
+                      onClick={async () => {
+                        const confirmed = window.confirm('Tem certeza que deseja deletar todos os usuários órfãos? Esta ação não pode ser desfeita.');
+                        if (!confirmed) return;
+                        
+                        try {
+                          const { data, error } = await supabase.functions.invoke('setup-users', {
+                            body: { action: 'delete_orphan_auth_users' }
+                          });
+                          
+                          if (error) throw error;
+                          
+                          if (data?.error) {
+                            throw new Error(data.error);
+                          }
+                          
+                          toast({
+                            title: 'Limpeza Concluída',
+                            description: `${data.deletedCount} usuário(s) órfão(s) deletado(s).${data.deletedEmails?.length > 0 ? ' Emails: ' + data.deletedEmails.join(', ') : ''}`,
+                          });
+                          fetchData();
+                        } catch (err: any) {
+                          toast({
+                            title: 'Erro',
+                            description: err.message || 'Falha ao deletar usuários órfãos',
+                            variant: 'destructive'
+                          });
+                        }
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Limpar Usuários Órfãos
+                    </Button>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </TabsContent>
