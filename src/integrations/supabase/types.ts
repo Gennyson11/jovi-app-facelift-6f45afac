@@ -157,6 +157,39 @@ export type Database = {
         }
         Relationships: []
       }
+      security_audit_log: {
+        Row: {
+          action: string
+          created_at: string | null
+          details: Json | null
+          id: string
+          ip_address: string | null
+          record_id: string | null
+          table_name: string | null
+          user_id: string
+        }
+        Insert: {
+          action: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          record_id?: string | null
+          table_name?: string | null
+          user_id: string
+        }
+        Update: {
+          action?: string
+          created_at?: string | null
+          details?: Json | null
+          id?: string
+          ip_address?: string | null
+          record_id?: string | null
+          table_name?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       streaming_credentials: {
         Row: {
           created_at: string
@@ -200,9 +233,7 @@ export type Database = {
           created_at: string
           icon_url: string | null
           id: string
-          login: string | null
           name: string
-          password: string | null
           status: Database["public"]["Enums"]["streaming_status"]
           updated_at: string
           website_url: string | null
@@ -214,9 +245,7 @@ export type Database = {
           created_at?: string
           icon_url?: string | null
           id?: string
-          login?: string | null
           name: string
-          password?: string | null
           status?: Database["public"]["Enums"]["streaming_status"]
           updated_at?: string
           website_url?: string | null
@@ -228,9 +257,7 @@ export type Database = {
           created_at?: string
           icon_url?: string | null
           id?: string
-          login?: string | null
           name?: string
-          password?: string | null
           status?: Database["public"]["Enums"]["streaming_status"]
           updated_at?: string
           website_url?: string | null
@@ -325,6 +352,13 @@ export type Database = {
             foreignKeyName: "user_platform_access_user_id_fkey"
             columns: ["user_id"]
             isOneToOne: false
+            referencedRelation: "partner_client_view"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_platform_access_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
@@ -353,7 +387,45 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      partner_client_view: {
+        Row: {
+          access_expires_at: string | null
+          created_at: string | null
+          has_access: boolean | null
+          id: string | null
+          masked_email: string | null
+          masked_whatsapp: string | null
+          name: string | null
+          partner_id: string | null
+          updated_at: string | null
+          user_id: string | null
+        }
+        Insert: {
+          access_expires_at?: string | null
+          created_at?: string | null
+          has_access?: boolean | null
+          id?: string | null
+          masked_email?: never
+          masked_whatsapp?: never
+          name?: string | null
+          partner_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          access_expires_at?: string | null
+          created_at?: string | null
+          has_access?: boolean | null
+          id?: string | null
+          masked_email?: never
+          masked_whatsapp?: never
+          name?: string | null
+          partner_id?: string | null
+          updated_at?: string | null
+          user_id?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       check_and_reset_coins: { Args: { p_user_id: string }; Returns: number }
@@ -371,6 +443,19 @@ export type Database = {
           _user_id: string
         }
         Returns: boolean
+      }
+      increment_platform_click: {
+        Args: { p_platform_id: string }
+        Returns: undefined
+      }
+      log_security_action: {
+        Args: {
+          p_action: string
+          p_details?: Json
+          p_record_id?: string
+          p_table_name?: string
+        }
+        Returns: undefined
       }
     }
     Enums: {
