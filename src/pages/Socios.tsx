@@ -14,10 +14,11 @@ import { LogOut, Plus, Loader2, UserCheck, UserX, Clock, Calendar, Infinity, Use
 interface ClientProfile {
   id: string;
   user_id: string;
-  email: string;
+  masked_email: string | null;
+  masked_whatsapp: string | null;
   name: string | null;
-  has_access: boolean;
-  created_at: string;
+  has_access: boolean | null;
+  created_at: string | null;
   access_expires_at: string | null;
 }
 
@@ -96,8 +97,9 @@ export default function Socios() {
   const fetchClients = async () => {
     if (!user) return;
     
+    // Usar a view partner_client_view que mascara dados sensíveis
     const { data, error } = await supabase
-      .from('profiles')
+      .from('partner_client_view')
       .select('*')
       .eq('partner_id', user.id)
       .order('created_at', { ascending: false });
@@ -110,7 +112,7 @@ export default function Socios() {
         variant: 'destructive'
       });
     } else {
-      setClients(data || []);
+      setClients((data || []) as ClientProfile[]);
     }
     
     setLoading(false);
@@ -230,6 +232,11 @@ export default function Socios() {
     return { text: `${daysRemaining}d restantes`, color: 'bg-green-500/10 text-green-500', icon: Calendar };
   };
 
+  const formatDate = (dateStr: string | null) => {
+    if (!dateStr) return '-';
+    return new Date(dateStr).toLocaleDateString('pt-BR');
+  };
+
   const handleSignOut = async () => {
     await signOut();
     navigate('/login');
@@ -345,22 +352,21 @@ export default function Socios() {
                   {clients.map(client => {
                     const status = getAccessStatus(client);
                     const StatusIcon = status.icon;
-                    const expirationDate = client.access_expires_at 
-                      ? new Date(client.access_expires_at).toLocaleDateString('pt-BR')
-                      : 'Vitalício';
                     return (
                       <TableRow key={client.id}>
                         <TableCell className="font-medium">
                           {client.name || '-'}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {client.email}
+                          {client.masked_email || '-'}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {new Date(client.created_at).toLocaleDateString('pt-BR')}
+                          {formatDate(client.created_at)}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
-                          {expirationDate}
+                          {client.access_expires_at 
+                            ? formatDate(client.access_expires_at)
+                            : 'Vitalício'}
                         </TableCell>
                         <TableCell>
                           <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${status.color}`}>
