@@ -32,8 +32,6 @@ interface Platform {
   status: StreamingStatus;
   access_type: AccessType;
   category: PlatformCategory;
-  login: string | null;
-  password: string | null;
   website_url: string | null;
 }
 interface UserProfile {
@@ -857,9 +855,6 @@ export default function Admin() {
       
       if (credentials && credentials.length > 0) {
         setPlatformCredentials(credentials.map(c => ({ login: c.login, password: c.password })));
-      } else if (platform.login || platform.password) {
-        // Fallback to old single credential if exists
-        setPlatformCredentials([{ login: platform.login || '', password: platform.password || '' }]);
       } else {
         setPlatformCredentials([{ login: '', password: '' }]);
       }
@@ -1419,13 +1414,12 @@ export default function Admin() {
                           </TableCell>
                           <TableCell className="text-sm">
                             {platform.access_type === 'credentials' ? <div className="space-y-1">
-                                <p className="text-muted-foreground">{platform.login || '-'}</p>
-                                {platform.password && <div className="flex items-center gap-1 font-mono text-xs">
-                                    {showPasswords[platform.id] ? platform.password : '••••••••'}
-                                    <Button variant="ghost" size="icon" className="h-5 w-5" onClick={() => togglePasswordVisibility(platform.id)}>
-                                      {showPasswords[platform.id] ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
-                                    </Button>
-                                  </div>}
+                                <p className="text-muted-foreground text-xs">
+                                  <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-primary/10 rounded text-primary">
+                                    <KeyRound className="w-3 h-3" />
+                                    Ver no editor
+                                  </span>
+                                </p>
                               </div> : platform.website_url ? <a href={platform.website_url} target="_blank" rel="noopener noreferrer" className="text-primary hover:underline inline-flex items-center gap-1">
                                   <ExternalLink className="w-3 h-3" />
                                   Abrir

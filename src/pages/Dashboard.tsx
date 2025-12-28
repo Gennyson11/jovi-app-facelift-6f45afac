@@ -57,8 +57,6 @@ interface Platform {
   status: StreamingStatus;
   access_type: AccessType;
   category: PlatformCategory;
-  login: string | null;
-  password: string | null;
   website_url: string | null;
 }
 interface UserProfile {
@@ -255,30 +253,17 @@ export default function Dashboard() {
     if (isAccessExpired()) return false;
     return userPlatformAccess.includes(platformId);
   };
-  // Increment click count for a platform
+  // Increment click count for a platform (using secure server-side function)
   const incrementClickCount = async (platformId: string) => {
-    // First check if record exists
-    const {
-      data: existing
-    } = await supabase.from('platform_clicks').select('click_count').eq('platform_id', platformId).maybeSingle();
-    if (existing) {
-      // Update existing record
-      await supabase.from('platform_clicks').update({
-        click_count: existing.click_count + 1
-      }).eq('platform_id', platformId);
+    // Use the secure database function to increment clicks
+    const { error } = await supabase.rpc('increment_platform_click', { 
+      p_platform_id: platformId 
+    });
+    
+    if (!error) {
       setPlatformClicks(prev => ({
         ...prev,
         [platformId]: (prev[platformId] || 0) + 1
-      }));
-    } else {
-      // Insert new record
-      await supabase.from('platform_clicks').insert({
-        platform_id: platformId,
-        click_count: 1
-      });
-      setPlatformClicks(prev => ({
-        ...prev,
-        [platformId]: 1
       }));
     }
   };
@@ -306,12 +291,6 @@ export default function Dashboard() {
       } = await supabase.from('streaming_credentials').select('login, password').eq('platform_id', platform.id);
       if (credentials && credentials.length > 0) {
         setPlatformCredentials(credentials);
-      } else if (platform.login && platform.password) {
-        // Fallback to old single credential
-        setPlatformCredentials([{
-          login: platform.login,
-          password: platform.password
-        }]);
       } else {
         setPlatformCredentials([]);
       }
@@ -745,7 +724,8 @@ export default function Dashboard() {
               {/* Platforms Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {categoryPlatforms.map(platform => {
-                const hasPlatformAccess = platform.access_type === 'link_only' ? !!platform.website_url : !!(platform.login && platform.password);
+                // For link_only platforms, check if website_url exists. For credentials, assume it's configured
+                const hasPlatformAccess = platform.access_type === 'link_only' ? !!platform.website_url : true;
                 const isMaintenance = platform.status === 'maintenance';
                 const isBlocked = !hasPlatformSpecificAccess(platform.id);
                 return <div key={platform.id} className={`group cursor-pointer transition-all duration-300 ${!hasPlatformAccess || isMaintenance || isBlocked ? 'opacity-60' : ''}`} onClick={() => {
