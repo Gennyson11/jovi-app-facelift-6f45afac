@@ -26,27 +26,22 @@ interface Platform {
   category: string;
 }
 
-const BENEFIT_ICONS: Record<string, React.ReactNode> = {
-  'ChatGPT': <Bot className="w-5 h-5" />,
-  'Canva': <Palette className="w-5 h-5" />,
-  'CapCut': <Film className="w-5 h-5" />,
-  'PhotoRoom': <Camera className="w-5 h-5" />,
-  'Netflix': <Film className="w-5 h-5" />,
-  'Disney': <Sparkles className="w-5 h-5" />,
-  'HBO': <Film className="w-5 h-5" />,
-  'Prime': <Film className="w-5 h-5" />,
-  'YouTube': <Music className="w-5 h-5" />,
-  'Paramount': <Film className="w-5 h-5" />,
-  'default': <Crown className="w-5 h-5" />
+type PlatformCategory = 'ai_tools' | 'streamings' | 'software' | 'bonus_courses' | 'loja';
+
+const CATEGORY_LABELS: Record<PlatformCategory, string> = {
+  'ai_tools': 'Ferramentas IAs & Variadas',
+  'streamings': 'Streamings',
+  'software': 'Softwares',
+  'bonus_courses': 'Bônus: Cursos',
+  'loja': 'Loja'
 };
 
-const getIconForPlatform = (name: string) => {
-  for (const key of Object.keys(BENEFIT_ICONS)) {
-    if (name.toLowerCase().includes(key.toLowerCase())) {
-      return BENEFIT_ICONS[key];
-    }
-  }
-  return BENEFIT_ICONS['default'];
+const CATEGORY_ICONS: Record<PlatformCategory, React.ReactNode> = {
+  'ai_tools': <Bot className="w-4 h-4" />,
+  'streamings': <Film className="w-4 h-4" />,
+  'software': <Palette className="w-4 h-4" />,
+  'bonus_courses': <Crown className="w-4 h-4" />,
+  'loja': <Sparkles className="w-4 h-4" />
 };
 
 export default function Invite() {
@@ -297,53 +292,77 @@ export default function Invite() {
                   Serviços Incluídos
                 </CardTitle>
               </CardHeader>
-              <CardContent>
-                {/* Included platforms */}
+              <CardContent className="space-y-4">
+                {/* Included platforms grouped by category */}
                 {includedPlatforms.length > 0 && (
-                  <div className="mb-6">
+                  <div>
                     <p className="text-sm text-green-500 font-medium mb-3 flex items-center gap-2">
                       <CheckCircle className="w-4 h-4" />
                       Liberados para você ({includedPlatforms.length})
                     </p>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
-                      {includedPlatforms.map((platform) => (
-                        <div
-                          key={platform.id}
-                          className="flex items-center gap-2 p-3 rounded-lg bg-green-500/10 border border-green-500/30"
-                        >
-                          <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center text-green-500">
-                            {getIconForPlatform(platform.name)}
+                    <div className="space-y-3">
+                      {(['ai_tools', 'streamings', 'software', 'bonus_courses', 'loja'] as PlatformCategory[]).map(category => {
+                        const categoryPlatforms = includedPlatforms.filter(p => p.category === category);
+                        if (categoryPlatforms.length === 0) return null;
+                        
+                        return (
+                          <div key={category} className="rounded-lg border border-green-500/30 bg-green-500/5 overflow-hidden">
+                            <div className="px-3 py-2 bg-green-500/10 flex items-center gap-2">
+                              <span className="text-green-500">{CATEGORY_ICONS[category]}</span>
+                              <span className="text-xs font-semibold text-green-600 uppercase tracking-wide">
+                                {CATEGORY_LABELS[category]}
+                              </span>
+                            </div>
+                            <div className="p-2 flex flex-wrap gap-2">
+                              {categoryPlatforms.map(platform => (
+                                <span 
+                                  key={platform.id}
+                                  className="px-3 py-1.5 text-sm bg-green-500/10 text-foreground rounded-full border border-green-500/20"
+                                >
+                                  {platform.name}
+                                </span>
+                              ))}
+                            </div>
                           </div>
-                          <span className="text-sm font-medium text-foreground truncate">
-                            {platform.name}
-                          </span>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}
                 
-                {/* Blocked platforms */}
+                {/* Blocked platforms grouped by category */}
                 {blockedPlatforms.length > 0 && (
                   <div>
                     <p className="text-sm text-muted-foreground font-medium mb-3 flex items-center gap-2">
                       <Lock className="w-4 h-4" />
                       Não incluídos neste convite ({blockedPlatforms.length})
                     </p>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                      {blockedPlatforms.map((platform) => (
-                        <div
-                          key={platform.id}
-                          className="flex items-center gap-2 p-2 rounded-lg bg-muted/30 border border-border/30 opacity-50"
-                        >
-                          <div className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-muted-foreground">
-                            <Lock className="w-3 h-3" />
+                    <div className="space-y-2">
+                      {(['ai_tools', 'streamings', 'software', 'bonus_courses', 'loja'] as PlatformCategory[]).map(category => {
+                        const categoryPlatforms = blockedPlatforms.filter(p => p.category === category);
+                        if (categoryPlatforms.length === 0) return null;
+                        
+                        return (
+                          <div key={category} className="rounded-lg border border-border/30 bg-muted/20 overflow-hidden opacity-60">
+                            <div className="px-3 py-1.5 bg-muted/30 flex items-center gap-2">
+                              <span className="text-muted-foreground">{CATEGORY_ICONS[category]}</span>
+                              <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+                                {CATEGORY_LABELS[category]}
+                              </span>
+                            </div>
+                            <div className="p-2 flex flex-wrap gap-1.5">
+                              {categoryPlatforms.map(platform => (
+                                <span 
+                                  key={platform.id}
+                                  className="px-2 py-1 text-xs bg-muted/30 text-muted-foreground rounded-full"
+                                >
+                                  {platform.name}
+                                </span>
+                              ))}
+                            </div>
                           </div>
-                          <span className="text-xs text-muted-foreground truncate">
-                            {platform.name}
-                          </span>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   </div>
                 )}
