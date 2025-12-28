@@ -14,6 +14,54 @@ export type Database = {
   }
   public: {
     Tables: {
+      invites: {
+        Row: {
+          access_days: number
+          code: string
+          created_at: string
+          created_by: string
+          expires_at: string
+          id: string
+          platform_ids: string[]
+          recipient_email: string | null
+          recipient_name: string | null
+          status: string
+          updated_at: string
+          used_at: string | null
+          used_by: string | null
+        }
+        Insert: {
+          access_days?: number
+          code: string
+          created_at?: string
+          created_by: string
+          expires_at: string
+          id?: string
+          platform_ids?: string[]
+          recipient_email?: string | null
+          recipient_name?: string | null
+          status?: string
+          updated_at?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Update: {
+          access_days?: number
+          code?: string
+          created_at?: string
+          created_by?: string
+          expires_at?: string
+          id?: string
+          platform_ids?: string[]
+          recipient_email?: string | null
+          recipient_name?: string | null
+          status?: string
+          updated_at?: string
+          used_at?: string | null
+          used_by?: string | null
+        }
+        Relationships: []
+      }
       news: {
         Row: {
           content: string
@@ -461,6 +509,7 @@ export type Database = {
           success: boolean
         }[]
       }
+      generate_invite_code: { Args: never; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
@@ -480,6 +529,10 @@ export type Database = {
           p_table_name?: string
         }
         Returns: undefined
+      }
+      use_invite: {
+        Args: { p_invite_code: string; p_user_id: string }
+        Returns: Json
       }
     }
     Enums: {
