@@ -17,6 +17,10 @@ const seoTools = [
   "ADS PARO", "SEM RUSH", "DROPTOOL", "E MUITO MAIS"
 ];
 
+const streamingTools = [
+  "NETFLIX", "HBO MAX", "DISNEY+", "PARAMOUNT+", "PRIME VIDEO"
+];
+
 const ToolsList = ({ tools }: { tools: string[] }) => (
   <ul className="space-y-3">
     {tools.map((tool) => (
@@ -36,7 +40,7 @@ const ToolsSection = () => {
     <section className="py-12 md:py-20 px-4 relative">
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="rounded-xl border border-primary/20 bg-card/30 p-6 md:p-8 lg:p-12">
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
             {/* AI Tools */}
             <div>
               <h3 className="text-base md:text-lg font-display font-bold text-primary mb-6 md:mb-8">
@@ -54,11 +58,19 @@ const ToolsSection = () => {
             </div>
 
             {/* SEO Tools */}
-            <div className="sm:col-span-2 md:col-span-1">
+            <div>
               <h3 className="text-base md:text-lg font-display font-bold text-primary mb-6 md:mb-8">
                 SEO/MINERAÇÃO
               </h3>
               <ToolsList tools={seoTools} />
+            </div>
+
+            {/* Streaming Tools */}
+            <div>
+              <h3 className="text-base md:text-lg font-display font-bold text-primary mb-6 md:mb-8">
+                STREAMINGS
+              </h3>
+              <ToolsList tools={streamingTools} />
             </div>
           </div>
         </div>
