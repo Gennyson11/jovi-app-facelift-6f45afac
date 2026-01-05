@@ -48,26 +48,29 @@ serve(async (req) => {
       );
     }
 
-    // Verify the caller has admin role
+    // Verify the caller has admin OR socio role
     const { data: roleData, error: roleError } = await supabaseAdmin
       .from("user_roles")
       .select("role")
       .eq("user_id", callerUser.id)
-      .eq("role", "admin")
-      .maybeSingle();
+      .in("role", ["admin", "socio"]);
 
-    if (roleError || !roleData) {
-      console.error("Admin check failed for user:", callerUser.id, "- Not an admin or role check failed");
+    if (roleError || !roleData || roleData.length === 0) {
+      console.error("Permission check failed for user:", callerUser.id, "- Not an admin or socio");
       return new Response(
-        JSON.stringify({ error: "Forbidden - Admin access required" }),
+        JSON.stringify({ error: "Forbidden - Admin or Socio access required" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log("Admin verified:", callerUser.email);
+    const userRoles = roleData.map(r => r.role);
+    const isAdmin = userRoles.includes("admin");
+    const isSocio = userRoles.includes("socio");
+
+    console.log("User verified:", callerUser.email, "roles:", userRoles);
 
     const { action, email, password, role, partner_id, name, has_access, access_expires_at } = await req.json();
-    console.log("Setup action:", action, "email:", email, "partner_id:", partner_id, "by admin:", callerUser.email);
+    console.log("Setup action:", action, "email:", email, "partner_id:", partner_id, "by user:", callerUser.email, "isAdmin:", isAdmin, "isSocio:", isSocio);
 
     if (action === "create_user") {
       // Create user
@@ -189,6 +192,14 @@ serve(async (req) => {
     }
 
     if (action === "update_password") {
+      // Only admins can update passwords
+      if (!isAdmin) {
+        return new Response(
+          JSON.stringify({ error: "Forbidden - Only admins can update passwords" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
       // Get user_id from profiles table by email
       const { data: profileData, error: profileFetchError } = await supabaseAdmin
         .from("profiles")
@@ -222,6 +233,13 @@ serve(async (req) => {
     }
 
     if (action === "delete_user") {
+      // Only admins can delete users
+      if (!isAdmin) {
+        return new Response(
+          JSON.stringify({ error: "Forbidden - Only admins can delete users" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
       // email is already parsed from req.json() on line 69
       if (!email) {
         return new Response(
@@ -268,6 +286,13 @@ serve(async (req) => {
     }
 
     if (action === "delete_users_without_access") {
+      // Only admins can delete users
+      if (!isAdmin) {
+        return new Response(
+          JSON.stringify({ error: "Forbidden - Only admins can delete users" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
       console.log("Deleting all users without access... Requested by:", callerUser.email);
       
       // Get all profiles without access
@@ -340,6 +365,13 @@ serve(async (req) => {
     }
 
     if (action === "delete_orphan_auth_users") {
+      // Only admins can delete users
+      if (!isAdmin) {
+        return new Response(
+          JSON.stringify({ error: "Forbidden - Only admins can delete users" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
       console.log("Finding and deleting orphan auth users... Requested by:", callerUser.email);
       
       // Get all auth users
