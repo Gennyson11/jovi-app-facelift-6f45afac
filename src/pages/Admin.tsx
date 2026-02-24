@@ -1485,6 +1485,8 @@ export default function Admin() {
                   </div>
                 </CardContent>
               </Card>
+            </div>
+
             <Card className="border-border">
               <CardHeader className="flex flex-row items-center justify-between gap-4">
                 <CardTitle className="text-foreground">Gerenciar Usuários</CardTitle>
