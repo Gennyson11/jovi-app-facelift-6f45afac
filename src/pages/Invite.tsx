@@ -218,7 +218,10 @@ export default function Invite() {
           </div>
           <CardTitle className="text-xl">Você foi convidado!</CardTitle>
           <CardDescription>
-            {invite.access_days} dias de acesso gratuito
+            {invite.access_days < 24 
+              ? `${invite.access_days} hora${invite.access_days > 1 ? 's' : ''} de acesso gratuito`
+              : `${Math.floor(invite.access_days / 24)} dia${Math.floor(invite.access_days / 24) > 1 ? 's' : ''} de acesso gratuito`
+            }
           </CardDescription>
         </CardHeader>
         <CardContent>
