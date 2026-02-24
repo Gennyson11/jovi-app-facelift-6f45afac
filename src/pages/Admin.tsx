@@ -101,20 +101,12 @@ interface UserAccessLog {
   created_at: string;
 }
 
-interface AccessLocation {
+interface LastAccessInfo {
   ip: string;
   city: string | null;
   region: string | null;
   country: string | null;
   created_at: string;
-}
-
-interface UserAccessSummary {
-  user_id: string;
-  uniqueIps: string[];
-  accessLocations: AccessLocation[];
-  lastAccess: AccessLocation | null;
-  isSuspicious: boolean;
 }
 
 // Access duration options
@@ -153,7 +145,7 @@ export default function Admin() {
   const [news, setNews] = useState<News[]>([]);
   const [platformClicks, setPlatformClicks] = useState<Record<string, number>>({});
   const [socios, setSocios] = useState<SocioUser[]>([]);
-  const [userAccessSummary, setUserAccessSummary] = useState<Record<string, UserAccessSummary>>({});
+  const [userLastAccess, setUserLastAccess] = useState<Record<string, LastAccessInfo>>({});
   const [loading, setLoading] = useState(true);
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
   const [userSearchQuery, setUserSearchQuery] = useState('');
@@ -279,13 +271,7 @@ export default function Admin() {
     }
   }, [user?.id, isAdmin]);
 
-  // Refs for realtime callback to avoid dependency loop
-  const userAccessSummaryRef = useRef(userAccessSummary);
-  const usersRef = useRef(users);
-  useEffect(() => { userAccessSummaryRef.current = userAccessSummary; }, [userAccessSummary]);
-  useEffect(() => { usersRef.current = users; }, [users]);
-
-  // Real-time listener for new access logs to detect suspicious users
+  // Real-time listener for new access logs
   useEffect(() => {
     if (!isAdmin) return;
 
@@ -299,28 +285,17 @@ export default function Admin() {
           table: 'user_access_logs'
         },
         async (payload) => {
-          console.log('New access log detected:', payload);
-          const newLog = payload.new as { user_id: string; ip_address: string; city: string | null };
-          
-          const currentSummary = userAccessSummaryRef.current[newLog.user_id];
-          
-          if (currentSummary) {
-            const newUniqueIps = currentSummary.uniqueIps.includes(newLog.ip_address)
-              ? currentSummary.uniqueIps
-              : [...currentSummary.uniqueIps, newLog.ip_address];
-            
-            if (newUniqueIps.length > 2 && !currentSummary.isSuspicious) {
-              const userProfile = usersRef.current.find(u => u.user_id === newLog.user_id);
-              toast({
-                title: '⚠️ Usuário Suspeito Detectado!',
-                description: `${userProfile?.name || userProfile?.email || 'Usuário'} acessou de ${newUniqueIps.length} IPs diferentes${newLog.city ? ` (último: ${newLog.city})` : ''}`,
-                variant: 'destructive',
-                duration: 10000,
-              });
+          const newLog = payload.new as UserAccessLog;
+          setUserLastAccess(prev => ({
+            ...prev,
+            [newLog.user_id]: {
+              ip: newLog.ip_address,
+              city: newLog.city,
+              region: newLog.region,
+              country: newLog.country,
+              created_at: newLog.created_at
             }
-          }
-          
-          fetchData();
+          }));
         }
       )
       .subscribe();
@@ -328,7 +303,7 @@ export default function Admin() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [isAdmin, toast]);
+  }, [isAdmin]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -420,48 +395,25 @@ export default function Admin() {
       setSocios(sociosList);
     }
     
-    // Process access logs to create summary per user
+    // Process access logs - keep only last access per user
     if (accessLogsRes.data) {
-      const summaryMap: Record<string, UserAccessSummary> = {};
+      const lastAccessMap: Record<string, LastAccessInfo> = {};
       const logs = accessLogsRes.data as UserAccessLog[];
       
       logs.forEach(log => {
-        if (!summaryMap[log.user_id]) {
-          summaryMap[log.user_id] = {
-            user_id: log.user_id,
-            uniqueIps: [],
-            accessLocations: [],
-            lastAccess: null,
-            isSuspicious: false
+        // Logs are sorted by created_at desc, so first occurrence is the latest
+        if (!lastAccessMap[log.user_id]) {
+          lastAccessMap[log.user_id] = {
+            ip: log.ip_address,
+            city: log.city,
+            region: log.region,
+            country: log.country,
+            created_at: log.created_at
           };
         }
-        
-        const locationEntry: AccessLocation = {
-          ip: log.ip_address,
-          city: log.city,
-          region: log.region,
-          country: log.country,
-          created_at: log.created_at
-        };
-        
-        // Add unique IPs and their locations
-        if (!summaryMap[log.user_id].uniqueIps.includes(log.ip_address)) {
-          summaryMap[log.user_id].uniqueIps.push(log.ip_address);
-          summaryMap[log.user_id].accessLocations.push(locationEntry);
-        }
-        
-        // Update last access (logs are sorted by created_at desc)
-        if (!summaryMap[log.user_id].lastAccess) {
-          summaryMap[log.user_id].lastAccess = locationEntry;
-        }
       });
       
-      // Mark users with more than 2 unique IPs as suspicious
-      Object.keys(summaryMap).forEach(userId => {
-        summaryMap[userId].isSuspicious = summaryMap[userId].uniqueIps.length > 2;
-      });
-      
-      setUserAccessSummary(summaryMap);
+      setUserLastAccess(lastAccessMap);
     }
     
     setLoading(false);
@@ -1314,10 +1266,6 @@ export default function Admin() {
   }
   const usersWithAccess = users.filter(u => u.has_access).length;
   const usersWithoutAccess = users.filter(u => !u.has_access).length;
-  const suspiciousUsersCount = Object.values(userAccessSummary).filter(s => s.isSuspicious).length;
-  
-  // Get suspicious users details for the card
-  const suspiciousUsers = users.filter(u => userAccessSummary[u.user_id]?.isSuspicious);
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
@@ -1537,68 +1485,7 @@ export default function Admin() {
                   </div>
                 </CardContent>
               </Card>
-              <Card className={`border-border ${suspiciousUsersCount > 0 ? 'border-red-500/50 bg-red-500/5' : ''}`}>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${suspiciousUsersCount > 0 ? 'bg-red-500/20 animate-pulse' : 'bg-orange-500/10'}`}>
-                      <AlertOctagon className={`w-6 h-6 ${suspiciousUsersCount > 0 ? 'text-red-500' : 'text-orange-500'}`} />
-                    </div>
-                    <div>
-                      <p className={`text-2xl font-bold ${suspiciousUsersCount > 0 ? 'text-red-500' : 'text-foreground'}`}>{suspiciousUsersCount}</p>
-                      <p className="text-sm text-muted-foreground">Suspeitos (3+ IPs)</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
             </div>
-
-            {/* Suspicious Users Alert Card */}
-            {suspiciousUsersCount > 0 && (
-              <Card className="border-red-500/50 bg-red-500/5 mb-6">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-red-500 flex items-center gap-2 text-lg">
-                    <AlertOctagon className="w-5 h-5" />
-                    Usuários Suspeitos - Possível Compartilhamento de Conta
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {suspiciousUsers.map(u => {
-                      const accessInfo = userAccessSummary[u.user_id];
-                      return (
-                        <div key={u.id} className="flex items-center justify-between p-3 rounded-lg bg-background/50 border border-border">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center">
-                              <AlertOctagon className="w-4 h-4 text-red-500" />
-                            </div>
-                            <div>
-                              <p className="font-medium text-foreground">{u.name || u.email}</p>
-                              <p className="text-xs text-muted-foreground">{u.email}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-right">
-                              <p className="text-sm font-medium text-red-500">{accessInfo?.uniqueIps.length} IPs diferentes</p>
-                              <p className="text-xs text-muted-foreground">
-                                Último: {accessInfo?.lastAccess?.city || accessInfo?.lastAccess?.ip || 'N/A'}
-                              </p>
-                            </div>
-                            <Button 
-                              variant="destructive" 
-                              size="sm"
-                              onClick={() => openBlockDialog(u)}
-                            >
-                              <UserX className="w-4 h-4 mr-1" />
-                              Bloquear
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
 
             <Card className="border-border">
               <CardHeader className="flex flex-row items-center justify-between gap-4">
@@ -1650,29 +1537,19 @@ export default function Admin() {
                           </TableCell>
                           <TableCell>
                             {(() => {
-                              const accessInfo = userAccessSummary[userProfile.user_id];
-                              if (!accessInfo || accessInfo.accessLocations.length === 0) {
+                              const lastAccess = userLastAccess[userProfile.user_id];
+                              if (!lastAccess) {
                                 return <span className="text-xs text-muted-foreground">Sem dados</span>;
                               }
                               return (
-                                <div className="flex flex-col gap-2 max-h-32 overflow-y-auto">
-                                  {accessInfo.isSuspicious && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/20 text-red-500 w-fit" title={`${accessInfo.uniqueIps.length} IPs diferentes detectados - Possível compartilhamento`}>
-                                      <AlertOctagon className="w-3 h-3" />
-                                      Suspeito ({accessInfo.uniqueIps.length} IPs)
-                                    </span>
-                                  )}
-                                  {accessInfo.accessLocations.map((location, index) => (
-                                    <div key={`${location.ip}-${index}`} className="flex flex-col gap-0.5 pb-1 border-b border-border/30 last:border-b-0">
-                                      <span className="text-xs font-mono text-muted-foreground">{location.ip}</span>
-                                      {location.city && (
-                                        <div className="flex items-center gap-1 text-xs text-muted-foreground/80">
-                                          <MapPin className="w-3 h-3" />
-                                          <span>{location.city}{location.region ? `, ${location.region}` : ''}</span>
-                                        </div>
-                                      )}
+                                <div className="flex flex-col gap-0.5">
+                                  <span className="text-xs font-mono text-muted-foreground">{lastAccess.ip}</span>
+                                  {lastAccess.city && (
+                                    <div className="flex items-center gap-1 text-xs text-muted-foreground/80">
+                                      <MapPin className="w-3 h-3" />
+                                      <span>{lastAccess.city}{lastAccess.region ? `, ${lastAccess.region}` : ''}</span>
                                     </div>
-                                  ))}
+                                  )}
                                 </div>
                               );
                             })()}
@@ -1819,7 +1696,7 @@ export default function Admin() {
                       </TableHeader>
                       <TableBody>
                         {onlineUsers.map(onlineUser => {
-                          const accessInfo = userAccessSummary[onlineUser.user_id];
+                          const lastAccess = userLastAccess[onlineUser.user_id];
                           return (
                             <TableRow key={onlineUser.user_id}>
                               <TableCell>
@@ -1831,32 +1708,19 @@ export default function Admin() {
                               <TableCell className="font-medium">{onlineUser.user_name}</TableCell>
                               <TableCell className="text-muted-foreground">{onlineUser.user_email}</TableCell>
                               <TableCell>
-                                {(() => {
-                                  if (!accessInfo || accessInfo.accessLocations.length === 0) {
-                                    return <span className="text-xs text-muted-foreground">Sem dados</span>;
-                                  }
-                                  return (
-                                    <div className="flex flex-col gap-2 max-h-32 overflow-y-auto">
-                                      {accessInfo.isSuspicious && (
-                                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/20 text-red-500 w-fit" title={`${accessInfo.uniqueIps.length} IPs diferentes detectados - Possível compartilhamento`}>
-                                          <AlertOctagon className="w-3 h-3" />
-                                          Suspeito ({accessInfo.uniqueIps.length} IPs)
-                                        </span>
-                                      )}
-                                      {accessInfo.accessLocations.map((location, index) => (
-                                        <div key={`${location.ip}-${index}`} className="flex flex-col gap-0.5 pb-1 border-b border-border/30 last:border-b-0">
-                                          <span className="text-xs font-mono text-muted-foreground">{location.ip}</span>
-                                          {location.city && (
-                                            <div className="flex items-center gap-1 text-xs text-muted-foreground/80">
-                                              <MapPin className="w-3 h-3" />
-                                              <span>{location.city}{location.region ? `, ${location.region}` : ''}</span>
-                                            </div>
-                                          )}
-                                        </div>
-                                      ))}
-                                    </div>
-                                  );
-                                })()}
+                                {!lastAccess ? (
+                                  <span className="text-xs text-muted-foreground">Sem dados</span>
+                                ) : (
+                                  <div className="flex flex-col gap-0.5">
+                                    <span className="text-xs font-mono text-muted-foreground">{lastAccess.ip}</span>
+                                    {lastAccess.city && (
+                                      <div className="flex items-center gap-1 text-xs text-muted-foreground/80">
+                                        <MapPin className="w-3 h-3" />
+                                        <span>{lastAccess.city}{lastAccess.region ? `, ${lastAccess.region}` : ''}</span>
+                                      </div>
+                                    )}
+                                  </div>
+                                )}
                               </TableCell>
                               <TableCell className="text-muted-foreground text-sm">
                                 {new Date(onlineUser.online_at).toLocaleString('pt-BR', {
