@@ -395,48 +395,25 @@ export default function Admin() {
       setSocios(sociosList);
     }
     
-    // Process access logs to create summary per user
+    // Process access logs - keep only last access per user
     if (accessLogsRes.data) {
-      const summaryMap: Record<string, UserAccessSummary> = {};
+      const lastAccessMap: Record<string, LastAccessInfo> = {};
       const logs = accessLogsRes.data as UserAccessLog[];
       
       logs.forEach(log => {
-        if (!summaryMap[log.user_id]) {
-          summaryMap[log.user_id] = {
-            user_id: log.user_id,
-            uniqueIps: [],
-            accessLocations: [],
-            lastAccess: null,
-            isSuspicious: false
+        // Logs are sorted by created_at desc, so first occurrence is the latest
+        if (!lastAccessMap[log.user_id]) {
+          lastAccessMap[log.user_id] = {
+            ip: log.ip_address,
+            city: log.city,
+            region: log.region,
+            country: log.country,
+            created_at: log.created_at
           };
         }
-        
-        const locationEntry: AccessLocation = {
-          ip: log.ip_address,
-          city: log.city,
-          region: log.region,
-          country: log.country,
-          created_at: log.created_at
-        };
-        
-        // Add unique IPs and their locations
-        if (!summaryMap[log.user_id].uniqueIps.includes(log.ip_address)) {
-          summaryMap[log.user_id].uniqueIps.push(log.ip_address);
-          summaryMap[log.user_id].accessLocations.push(locationEntry);
-        }
-        
-        // Update last access (logs are sorted by created_at desc)
-        if (!summaryMap[log.user_id].lastAccess) {
-          summaryMap[log.user_id].lastAccess = locationEntry;
-        }
       });
       
-      // Mark users with more than 2 unique IPs as suspicious
-      Object.keys(summaryMap).forEach(userId => {
-        summaryMap[userId].isSuspicious = summaryMap[userId].uniqueIps.length > 2;
-      });
-      
-      setUserAccessSummary(summaryMap);
+      setUserLastAccess(lastAccessMap);
     }
     
     setLoading(false);
