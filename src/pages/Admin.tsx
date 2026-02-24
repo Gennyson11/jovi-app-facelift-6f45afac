@@ -271,13 +271,7 @@ export default function Admin() {
     }
   }, [user?.id, isAdmin]);
 
-  // Refs for realtime callback to avoid dependency loop
-  const userAccessSummaryRef = useRef(userAccessSummary);
-  const usersRef = useRef(users);
-  useEffect(() => { userAccessSummaryRef.current = userAccessSummary; }, [userAccessSummary]);
-  useEffect(() => { usersRef.current = users; }, [users]);
-
-  // Real-time listener for new access logs to detect suspicious users
+  // Real-time listener for new access logs
   useEffect(() => {
     if (!isAdmin) return;
 
@@ -291,28 +285,17 @@ export default function Admin() {
           table: 'user_access_logs'
         },
         async (payload) => {
-          console.log('New access log detected:', payload);
-          const newLog = payload.new as { user_id: string; ip_address: string; city: string | null };
-          
-          const currentSummary = userAccessSummaryRef.current[newLog.user_id];
-          
-          if (currentSummary) {
-            const newUniqueIps = currentSummary.uniqueIps.includes(newLog.ip_address)
-              ? currentSummary.uniqueIps
-              : [...currentSummary.uniqueIps, newLog.ip_address];
-            
-            if (newUniqueIps.length > 2 && !currentSummary.isSuspicious) {
-              const userProfile = usersRef.current.find(u => u.user_id === newLog.user_id);
-              toast({
-                title: '⚠️ Usuário Suspeito Detectado!',
-                description: `${userProfile?.name || userProfile?.email || 'Usuário'} acessou de ${newUniqueIps.length} IPs diferentes${newLog.city ? ` (último: ${newLog.city})` : ''}`,
-                variant: 'destructive',
-                duration: 10000,
-              });
+          const newLog = payload.new as UserAccessLog;
+          setUserLastAccess(prev => ({
+            ...prev,
+            [newLog.user_id]: {
+              ip: newLog.ip_address,
+              city: newLog.city,
+              region: newLog.region,
+              country: newLog.country,
+              created_at: newLog.created_at
             }
-          }
-          
-          fetchData();
+          }));
         }
       )
       .subscribe();
@@ -320,7 +303,7 @@ export default function Admin() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [isAdmin, toast]);
+  }, [isAdmin]);
 
   const fetchData = async () => {
     setLoading(true);
