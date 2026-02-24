@@ -286,7 +286,7 @@ export default function InvitesManager() {
       setEditUserCurrentExpiry(null);
     }
     
-    setEditUserAccessDays(30);
+    setEditUserAccessDays(720);
     setEditAccessDialogOpen(true);
   };
 
