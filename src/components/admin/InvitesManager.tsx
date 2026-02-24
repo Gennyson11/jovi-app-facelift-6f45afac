@@ -50,13 +50,27 @@ interface UserProfile {
   name: string | null;
 }
 
-const ACCESS_DAYS_OPTIONS = [
-  { label: '7 dias', value: 7 },
-  { label: '15 dias', value: 15 },
-  { label: '30 dias', value: 30 },
-  { label: '60 dias', value: 60 },
-  { label: '90 dias', value: 90 },
+const ACCESS_TIME_OPTIONS = [
+  { label: '1 hora', value: 1 },
+  { label: '2 horas', value: 2 },
+  { label: '6 horas', value: 6 },
+  { label: '12 horas', value: 12 },
+  { label: '1 dia', value: 24 },
+  { label: '2 dias', value: 48 },
+  { label: '3 dias', value: 72 },
+  { label: '7 dias', value: 168 },
+  { label: '15 dias', value: 360 },
+  { label: '30 dias', value: 720 },
+  { label: '60 dias', value: 1440 },
+  { label: '90 dias', value: 2160 },
 ];
+
+// Helper to format hours into readable text
+const formatAccessTime = (hours: number): string => {
+  if (hours < 24) return `${hours} hora${hours > 1 ? 's' : ''}`;
+  const days = Math.floor(hours / 24);
+  return `${days} dia${days > 1 ? 's' : ''}`;
+};
 
 const EXPIRY_OPTIONS = [
   { label: '1 dia', days: 1 },
@@ -80,7 +94,7 @@ export default function InvitesManager() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [recipientName, setRecipientName] = useState('');
   const [recipientEmail, setRecipientEmail] = useState('');
-  const [accessDays, setAccessDays] = useState(15);
+  const [accessDays, setAccessDays] = useState(360);
   const [expiryDays, setExpiryDays] = useState(7);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [isCreating, setIsCreating] = useState(false);
@@ -94,7 +108,7 @@ export default function InvitesManager() {
   const [editAccessDialogOpen, setEditAccessDialogOpen] = useState(false);
   const [editingUserProfile, setEditingUserProfile] = useState<UserProfile | null>(null);
   const [editUserPlatforms, setEditUserPlatforms] = useState<string[]>([]);
-  const [editUserAccessDays, setEditUserAccessDays] = useState(30);
+  const [editUserAccessDays, setEditUserAccessDays] = useState(720);
   const [editUserCurrentExpiry, setEditUserCurrentExpiry] = useState<Date | null>(null);
   const [isSavingAccess, setIsSavingAccess] = useState(false);
   
@@ -102,7 +116,7 @@ export default function InvitesManager() {
   const [editInviteDialogOpen, setEditInviteDialogOpen] = useState(false);
   const [editingInvite, setEditingInvite] = useState<Invite | null>(null);
   const [editInvitePlatforms, setEditInvitePlatforms] = useState<string[]>([]);
-  const [editInviteAccessDays, setEditInviteAccessDays] = useState(15);
+  const [editInviteAccessDays, setEditInviteAccessDays] = useState(360);
   const [editInviteExpiryDays, setEditInviteExpiryDays] = useState(7);
   const [isSavingInvite, setIsSavingInvite] = useState(false);
 
@@ -272,7 +286,7 @@ export default function InvitesManager() {
       setEditUserCurrentExpiry(null);
     }
     
-    setEditUserAccessDays(30);
+    setEditUserAccessDays(720);
     setEditAccessDialogOpen(true);
   };
 
@@ -302,13 +316,13 @@ export default function InvitesManager() {
         if (insertError) throw insertError;
       }
       
-      // Update access expiry if adding days
+      // Update access expiry if adding hours
       if (editUserAccessDays > 0) {
         const baseDate = editUserCurrentExpiry && editUserCurrentExpiry > new Date() 
           ? editUserCurrentExpiry 
           : new Date();
         const newExpiry = new Date(baseDate);
-        newExpiry.setDate(newExpiry.getDate() + editUserAccessDays);
+        newExpiry.setTime(newExpiry.getTime() + editUserAccessDays * 60 * 60 * 1000);
         
         const { error: updateError } = await supabase
           .from('profiles')
@@ -352,7 +366,7 @@ export default function InvitesManager() {
   const resetForm = () => {
     setRecipientName('');
     setRecipientEmail('');
-    setAccessDays(15);
+    setAccessDays(360);
     setExpiryDays(7);
     setSelectedPlatforms(platforms.map(p => p.id));
   };
@@ -586,7 +600,7 @@ export default function InvitesManager() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm">{invite.access_days} dias</span>
+                      <span className="text-sm">{formatAccessTime(invite.access_days)}</span>
                     </TableCell>
                     <TableCell>
                       <span className="text-sm">
@@ -690,7 +704,7 @@ export default function InvitesManager() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {ACCESS_DAYS_OPTIONS.map(opt => (
+                    {ACCESS_TIME_OPTIONS.map(opt => (
                       <SelectItem key={opt.value} value={opt.value.toString()}>
                         {opt.label}
                       </SelectItem>
@@ -839,7 +853,7 @@ export default function InvitesManager() {
                 </div>
                 <div>
                   <p className="text-muted-foreground">Tempo de Acesso</p>
-                  <p className="font-medium">{selectedInvite.access_days} dias</p>
+                  <p className="font-medium">{formatAccessTime(selectedInvite.access_days)}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Criado em</p>
@@ -955,14 +969,14 @@ export default function InvitesManager() {
             
             {/* Add more days */}
             <div className="space-y-2">
-              <Label>Adicionar Dias de Acesso</Label>
+              <Label>Adicionar Tempo de Acesso</Label>
               <Select value={editUserAccessDays.toString()} onValueChange={(v) => setEditUserAccessDays(parseInt(v))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="0">Não adicionar dias</SelectItem>
-                  {ACCESS_DAYS_OPTIONS.map(opt => (
+                  <SelectItem value="0">Não adicionar tempo</SelectItem>
+                  {ACCESS_TIME_OPTIONS.map(opt => (
                     <SelectItem key={opt.value} value={opt.value.toString()}>
                       + {opt.label}
                     </SelectItem>
@@ -1097,7 +1111,7 @@ export default function InvitesManager() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {ACCESS_DAYS_OPTIONS.map(opt => (
+                    {ACCESS_TIME_OPTIONS.map(opt => (
                       <SelectItem key={opt.value} value={opt.value.toString()}>
                         {opt.label}
                       </SelectItem>
