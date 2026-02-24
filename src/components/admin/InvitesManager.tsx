@@ -108,7 +108,7 @@ export default function InvitesManager() {
   const [editAccessDialogOpen, setEditAccessDialogOpen] = useState(false);
   const [editingUserProfile, setEditingUserProfile] = useState<UserProfile | null>(null);
   const [editUserPlatforms, setEditUserPlatforms] = useState<string[]>([]);
-  const [editUserAccessDays, setEditUserAccessDays] = useState(30);
+  const [editUserAccessDays, setEditUserAccessDays] = useState(720);
   const [editUserCurrentExpiry, setEditUserCurrentExpiry] = useState<Date | null>(null);
   const [isSavingAccess, setIsSavingAccess] = useState(false);
   
