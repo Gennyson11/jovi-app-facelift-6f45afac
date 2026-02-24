@@ -969,14 +969,14 @@ export default function InvitesManager() {
             
             {/* Add more days */}
             <div className="space-y-2">
-              <Label>Adicionar Dias de Acesso</Label>
+              <Label>Adicionar Tempo de Acesso</Label>
               <Select value={editUserAccessDays.toString()} onValueChange={(v) => setEditUserAccessDays(parseInt(v))}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="0">Não adicionar dias</SelectItem>
-                  {ACCESS_DAYS_OPTIONS.map(opt => (
+                  <SelectItem value="0">Não adicionar tempo</SelectItem>
+                  {ACCESS_TIME_OPTIONS.map(opt => (
                     <SelectItem key={opt.value} value={opt.value.toString()}>
                       + {opt.label}
                     </SelectItem>
