@@ -50,12 +50,19 @@ interface UserProfile {
   name: string | null;
 }
 
-const ACCESS_DAYS_OPTIONS = [
-  { label: '7 dias', value: 7 },
-  { label: '15 dias', value: 15 },
-  { label: '30 dias', value: 30 },
-  { label: '60 dias', value: 60 },
-  { label: '90 dias', value: 90 },
+const ACCESS_TIME_OPTIONS = [
+  { label: '1 hora', value: 1 },
+  { label: '2 horas', value: 2 },
+  { label: '6 horas', value: 6 },
+  { label: '12 horas', value: 12 },
+  { label: '1 dia', value: 24 },
+  { label: '2 dias', value: 48 },
+  { label: '3 dias', value: 72 },
+  { label: '7 dias', value: 168 },
+  { label: '15 dias', value: 360 },
+  { label: '30 dias', value: 720 },
+  { label: '60 dias', value: 1440 },
+  { label: '90 dias', value: 2160 },
 ];
 
 const EXPIRY_OPTIONS = [
