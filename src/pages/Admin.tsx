@@ -275,6 +275,12 @@ export default function Admin() {
     }
   }, [user?.id, isAdmin]);
 
+  // Refs for realtime callback to avoid dependency loop
+  const userAccessSummaryRef = useRef(userAccessSummary);
+  const usersRef = useRef(users);
+  useEffect(() => { userAccessSummaryRef.current = userAccessSummary; }, [userAccessSummary]);
+  useEffect(() => { usersRef.current = users; }, [users]);
+
   // Real-time listener for new access logs to detect suspicious users
   useEffect(() => {
     if (!isAdmin) return;
@@ -292,17 +298,15 @@ export default function Admin() {
           console.log('New access log detected:', payload);
           const newLog = payload.new as { user_id: string; ip_address: string; city: string | null };
           
-          // Check if this user now has more than 2 unique IPs
-          const currentSummary = userAccessSummary[newLog.user_id];
+          const currentSummary = userAccessSummaryRef.current[newLog.user_id];
           
           if (currentSummary) {
             const newUniqueIps = currentSummary.uniqueIps.includes(newLog.ip_address)
               ? currentSummary.uniqueIps
               : [...currentSummary.uniqueIps, newLog.ip_address];
             
-            // If just became suspicious (crossing the threshold)
             if (newUniqueIps.length > 2 && !currentSummary.isSuspicious) {
-              const userProfile = users.find(u => u.user_id === newLog.user_id);
+              const userProfile = usersRef.current.find(u => u.user_id === newLog.user_id);
               toast({
                 title: '⚠️ Usuário Suspeito Detectado!',
                 description: `${userProfile?.name || userProfile?.email || 'Usuário'} acessou de ${newUniqueIps.length} IPs diferentes${newLog.city ? ` (último: ${newLog.city})` : ''}`,
@@ -310,12 +314,8 @@ export default function Admin() {
                 duration: 10000,
               });
             }
-          } else {
-            // New user in the summary, just got their first log
-            // Refresh data to update the summary
           }
           
-          // Refresh data to update the summary
           fetchData();
         }
       )
@@ -324,7 +324,7 @@ export default function Admin() {
     return () => {
       supabase.removeChannel(channel);
     };
-  }, [isAdmin, userAccessSummary, users, toast]);
+  }, [isAdmin, toast]);
 
   const fetchData = async () => {
     setLoading(true);
