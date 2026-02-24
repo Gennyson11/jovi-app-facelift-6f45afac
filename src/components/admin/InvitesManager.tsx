@@ -704,7 +704,7 @@ export default function InvitesManager() {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    {ACCESS_DAYS_OPTIONS.map(opt => (
+                    {ACCESS_TIME_OPTIONS.map(opt => (
                       <SelectItem key={opt.value} value={opt.value.toString()}>
                         {opt.label}
                       </SelectItem>
