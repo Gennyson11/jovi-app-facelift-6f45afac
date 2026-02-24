@@ -221,6 +221,7 @@ export default function Admin() {
   const {
     user,
     isAdmin,
+    role,
     signOut,
     loading: authLoading
   } = useAuth();
