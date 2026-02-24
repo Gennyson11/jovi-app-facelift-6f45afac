@@ -65,6 +65,13 @@ const ACCESS_TIME_OPTIONS = [
   { label: '90 dias', value: 2160 },
 ];
 
+// Helper to format hours into readable text
+const formatAccessTime = (hours: number): string => {
+  if (hours < 24) return `${hours} hora${hours > 1 ? 's' : ''}`;
+  const days = Math.floor(hours / 24);
+  return `${days} dia${days > 1 ? 's' : ''}`;
+};
+
 const EXPIRY_OPTIONS = [
   { label: '1 dia', days: 1 },
   { label: '3 dias', days: 3 },
