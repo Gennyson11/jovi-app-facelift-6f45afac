@@ -252,7 +252,7 @@ export default function Admin() {
   const hasFetchedRef = useRef(false);
   const currentUserIdRef = useRef<string | null>(null);
 
-  const { role } = useAuth();
+  
 
   useEffect(() => {
     if (!authLoading) {
