@@ -600,7 +600,7 @@ export default function InvitesManager() {
                       )}
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm">{invite.access_days} dias</span>
+                      <span className="text-sm">{formatAccessTime(invite.access_days)}</span>
                     </TableCell>
                     <TableCell>
                       <span className="text-sm">
