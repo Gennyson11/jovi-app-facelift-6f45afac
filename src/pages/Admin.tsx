@@ -1266,10 +1266,6 @@ export default function Admin() {
   }
   const usersWithAccess = users.filter(u => u.has_access).length;
   const usersWithoutAccess = users.filter(u => !u.has_access).length;
-  const suspiciousUsersCount = Object.values(userAccessSummary).filter(s => s.isSuspicious).length;
-  
-  // Get suspicious users details for the card
-  const suspiciousUsers = users.filter(u => userAccessSummary[u.user_id]?.isSuspicious);
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
