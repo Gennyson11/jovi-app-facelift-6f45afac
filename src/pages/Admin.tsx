@@ -1535,29 +1535,19 @@ export default function Admin() {
                           </TableCell>
                           <TableCell>
                             {(() => {
-                              const accessInfo = userAccessSummary[userProfile.user_id];
-                              if (!accessInfo || accessInfo.accessLocations.length === 0) {
+                              const lastAccess = userLastAccess[userProfile.user_id];
+                              if (!lastAccess) {
                                 return <span className="text-xs text-muted-foreground">Sem dados</span>;
                               }
                               return (
-                                <div className="flex flex-col gap-2 max-h-32 overflow-y-auto">
-                                  {accessInfo.isSuspicious && (
-                                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-red-500/20 text-red-500 w-fit" title={`${accessInfo.uniqueIps.length} IPs diferentes detectados - Possível compartilhamento`}>
-                                      <AlertOctagon className="w-3 h-3" />
-                                      Suspeito ({accessInfo.uniqueIps.length} IPs)
-                                    </span>
-                                  )}
-                                  {accessInfo.accessLocations.map((location, index) => (
-                                    <div key={`${location.ip}-${index}`} className="flex flex-col gap-0.5 pb-1 border-b border-border/30 last:border-b-0">
-                                      <span className="text-xs font-mono text-muted-foreground">{location.ip}</span>
-                                      {location.city && (
-                                        <div className="flex items-center gap-1 text-xs text-muted-foreground/80">
-                                          <MapPin className="w-3 h-3" />
-                                          <span>{location.city}{location.region ? `, ${location.region}` : ''}</span>
-                                        </div>
-                                      )}
+                                <div className="flex flex-col gap-0.5">
+                                  <span className="text-xs font-mono text-muted-foreground">{lastAccess.ip}</span>
+                                  {lastAccess.city && (
+                                    <div className="flex items-center gap-1 text-xs text-muted-foreground/80">
+                                      <MapPin className="w-3 h-3" />
+                                      <span>{lastAccess.city}{lastAccess.region ? `, ${lastAccess.region}` : ''}</span>
                                     </div>
-                                  ))}
+                                  )}
                                 </div>
                               );
                             })()}
