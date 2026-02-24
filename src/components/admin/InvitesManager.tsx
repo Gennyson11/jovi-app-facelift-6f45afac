@@ -853,7 +853,7 @@ export default function InvitesManager() {
                 </div>
                 <div>
                   <p className="text-muted-foreground">Tempo de Acesso</p>
-                  <p className="font-medium">{selectedInvite.access_days} dias</p>
+                  <p className="font-medium">{formatAccessTime(selectedInvite.access_days)}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">Criado em</p>
