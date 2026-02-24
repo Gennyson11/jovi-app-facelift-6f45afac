@@ -1485,69 +1485,6 @@ export default function Admin() {
                   </div>
                 </CardContent>
               </Card>
-              <Card className={`border-border ${suspiciousUsersCount > 0 ? 'border-red-500/50 bg-red-500/5' : ''}`}>
-                <CardContent className="pt-6">
-                  <div className="flex items-center gap-4">
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center ${suspiciousUsersCount > 0 ? 'bg-red-500/20 animate-pulse' : 'bg-orange-500/10'}`}>
-                      <AlertOctagon className={`w-6 h-6 ${suspiciousUsersCount > 0 ? 'text-red-500' : 'text-orange-500'}`} />
-                    </div>
-                    <div>
-                      <p className={`text-2xl font-bold ${suspiciousUsersCount > 0 ? 'text-red-500' : 'text-foreground'}`}>{suspiciousUsersCount}</p>
-                      <p className="text-sm text-muted-foreground">Suspeitos (3+ IPs)</p>
-                    </div>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-
-            {/* Suspicious Users Alert Card */}
-            {suspiciousUsersCount > 0 && (
-              <Card className="border-red-500/50 bg-red-500/5 mb-6">
-                <CardHeader className="pb-3">
-                  <CardTitle className="text-red-500 flex items-center gap-2 text-lg">
-                    <AlertOctagon className="w-5 h-5" />
-                    Usuários Suspeitos - Possível Compartilhamento de Conta
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-2">
-                    {suspiciousUsers.map(u => {
-                      const accessInfo = userAccessSummary[u.user_id];
-                      return (
-                        <div key={u.id} className="flex items-center justify-between p-3 rounded-lg bg-background/50 border border-border">
-                          <div className="flex items-center gap-3">
-                            <div className="w-8 h-8 rounded-full bg-red-500/20 flex items-center justify-center">
-                              <AlertOctagon className="w-4 h-4 text-red-500" />
-                            </div>
-                            <div>
-                              <p className="font-medium text-foreground">{u.name || u.email}</p>
-                              <p className="text-xs text-muted-foreground">{u.email}</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-right">
-                              <p className="text-sm font-medium text-red-500">{accessInfo?.uniqueIps.length} IPs diferentes</p>
-                              <p className="text-xs text-muted-foreground">
-                                Último: {accessInfo?.lastAccess?.city || accessInfo?.lastAccess?.ip || 'N/A'}
-                              </p>
-                            </div>
-                            <Button 
-                              variant="destructive" 
-                              size="sm"
-                              onClick={() => openBlockDialog(u)}
-                            >
-                              <UserX className="w-4 h-4 mr-1" />
-                              Bloquear
-                            </Button>
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
             <Card className="border-border">
               <CardHeader className="flex flex-row items-center justify-between gap-4">
                 <CardTitle className="text-foreground">Gerenciar Usuários</CardTitle>
