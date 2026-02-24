@@ -252,15 +252,18 @@ export default function Admin() {
   const hasFetchedRef = useRef(false);
   const currentUserIdRef = useRef<string | null>(null);
 
+  const { role } = useAuth();
+
   useEffect(() => {
     if (!authLoading) {
       if (!user) {
         navigate('/login');
-      } else if (!isAdmin) {
+      } else if (role !== null && !isAdmin) {
+        // Only redirect if role has been loaded (not null)
         navigate('/dashboard');
       }
     }
-  }, [user, isAdmin, authLoading, navigate]);
+  }, [user, isAdmin, authLoading, navigate, role]);
 
   useEffect(() => {
     // Only fetch data if user exists, is admin, and we haven't fetched for this user yet
