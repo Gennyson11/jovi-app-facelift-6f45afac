@@ -101,20 +101,12 @@ interface UserAccessLog {
   created_at: string;
 }
 
-interface AccessLocation {
+interface LastAccessInfo {
   ip: string;
   city: string | null;
   region: string | null;
   country: string | null;
   created_at: string;
-}
-
-interface UserAccessSummary {
-  user_id: string;
-  uniqueIps: string[];
-  accessLocations: AccessLocation[];
-  lastAccess: AccessLocation | null;
-  isSuspicious: boolean;
 }
 
 // Access duration options
