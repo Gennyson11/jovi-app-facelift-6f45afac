@@ -116,7 +116,7 @@ export default function InvitesManager() {
   const [editInviteDialogOpen, setEditInviteDialogOpen] = useState(false);
   const [editingInvite, setEditingInvite] = useState<Invite | null>(null);
   const [editInvitePlatforms, setEditInvitePlatforms] = useState<string[]>([]);
-  const [editInviteAccessDays, setEditInviteAccessDays] = useState(15);
+  const [editInviteAccessDays, setEditInviteAccessDays] = useState(360);
   const [editInviteExpiryDays, setEditInviteExpiryDays] = useState(7);
   const [isSavingInvite, setIsSavingInvite] = useState(false);
 
