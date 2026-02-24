@@ -316,13 +316,13 @@ export default function InvitesManager() {
         if (insertError) throw insertError;
       }
       
-      // Update access expiry if adding days
+      // Update access expiry if adding hours
       if (editUserAccessDays > 0) {
         const baseDate = editUserCurrentExpiry && editUserCurrentExpiry > new Date() 
           ? editUserCurrentExpiry 
           : new Date();
         const newExpiry = new Date(baseDate);
-        newExpiry.setDate(newExpiry.getDate() + editUserAccessDays);
+        newExpiry.setTime(newExpiry.getTime() + editUserAccessDays * 60 * 60 * 1000);
         
         const { error: updateError } = await supabase
           .from('profiles')
