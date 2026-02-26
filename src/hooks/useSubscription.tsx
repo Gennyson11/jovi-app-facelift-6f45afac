@@ -5,16 +5,16 @@ import { useAuth } from '@/hooks/useAuth';
 export const PLANS = {
   monthly: {
     name: 'Mensal',
-    price: 30,
+    price: 37,
     checkout_url: 'https://pay.cakto.com.br/z4jkfp5_580328',
     interval: '/mês',
   },
   quarterly: {
     name: 'Trimestral',
-    price: 85,
+    price: 97,
     checkout_url: 'https://pay.cakto.com.br/scp6yiy_590727',
     interval: '/trimestre',
-    perMonth: 'R$28,33/mês',
+    perMonth: 'R$32/mês',
   },
   annual: {
     name: 'Anual',
