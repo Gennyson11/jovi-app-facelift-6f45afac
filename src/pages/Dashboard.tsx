@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { usePresence } from '@/hooks/usePresence';
+import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -12,6 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import JoviAIChat from '@/components/JoviAIChat';
 import { Veo3Chat } from '@/components/Veo3Chat';
+import SubscriptionPlans from '@/components/SubscriptionPlans';
 import whatsappBanner from '@/assets/whatsapp-banner.png';
 
 type StreamingStatus = 'online' | 'maintenance';
@@ -125,9 +127,11 @@ export default function Dashboard() {
     isAdmin
   } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const {
     toast
   } = useToast();
+  const { subscribed, priceId: currentPriceId, subscriptionEnd, loading: subLoading, createCheckout, openCustomerPortal, checkSubscription } = useSubscription();
 
   // Track user presence for real-time monitoring
   usePresence(user?.id, user?.email, user?.email?.split('@')[0] || null);
@@ -135,6 +139,14 @@ export default function Dashboard() {
   // Ref to track if data has been fetched for the current user
   const hasFetchedRef = useRef(false);
   const currentUserIdRef = useRef<string | null>(null);
+  // Handle checkout success redirect
+  useEffect(() => {
+    if (searchParams.get('checkout') === 'success') {
+      toast({ title: '🎉 Pagamento realizado!', description: 'Sua assinatura foi ativada com sucesso.' });
+      checkSubscription();
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/login');
@@ -388,6 +400,15 @@ export default function Dashboard() {
               >
                 Falar com Suporte via WhatsApp
               </Button>
+            </div>
+          ) : !subscribed ? (
+            <div className="mb-6">
+              <SubscriptionPlans
+                onCheckout={createCheckout}
+                currentPriceId={currentPriceId}
+                subscriptionEnd={subscriptionEnd}
+                onManageSubscription={openCustomerPortal}
+              />
             </div>
           ) : (
             <div className="mb-6 p-6 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-center">
