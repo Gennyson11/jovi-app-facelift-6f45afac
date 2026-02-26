@@ -6,20 +6,20 @@ export const PLANS = {
   monthly: {
     name: 'Mensal',
     price: 30,
-    price_id: 'price_1T59F6C9Swi888lI7WngVygc',
+    checkout_url: 'https://pay.cakto.com.br/z4jkfp5_580328',
     interval: '/mês',
   },
   quarterly: {
     name: 'Trimestral',
     price: 85,
-    price_id: 'price_1T59NeC9Swi888lIdF4yAWJV',
+    checkout_url: 'https://pay.cakto.com.br/scp6yiy_590727',
     interval: '/trimestre',
     perMonth: 'R$28,33/mês',
   },
   annual: {
     name: 'Anual',
     price: 297,
-    price_id: 'price_1T59O9C9Swi888lI61yhDDIX',
+    checkout_url: 'https://pay.cakto.com.br/rjwpjtb_686697',
     interval: '/ano',
     perMonth: 'R$24,75/mês',
   },
@@ -27,44 +27,52 @@ export const PLANS = {
 
 interface SubscriptionState {
   subscribed: boolean;
-  priceId: string | null;
-  subscriptionEnd: string | null;
+  accessExpiresAt: string | null;
   loading: boolean;
 }
 
 export function useSubscription() {
-  const { user, session } = useAuth();
+  const { user } = useAuth();
   const [state, setState] = useState<SubscriptionState>({
     subscribed: false,
-    priceId: null,
-    subscriptionEnd: null,
+    accessExpiresAt: null,
     loading: true,
   });
 
   const checkSubscription = useCallback(async () => {
-    if (!session?.access_token) {
+    if (!user?.id) {
       setState(s => ({ ...s, loading: false }));
       return;
     }
 
     try {
-      const { data, error } = await supabase.functions.invoke('check-subscription', {
-        headers: { Authorization: `Bearer ${session.access_token}` },
-      });
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('has_access, access_expires_at')
+        .eq('user_id', user.id)
+        .maybeSingle();
 
       if (error) throw error;
 
+      const hasAccess = profile?.has_access ?? false;
+      const expiresAt = profile?.access_expires_at ?? null;
+      
+      // Check if access is still valid
+      let isActive = hasAccess;
+      if (hasAccess && expiresAt) {
+        isActive = new Date(expiresAt) > new Date();
+      }
+
       setState({
-        subscribed: data?.subscribed ?? false,
-        priceId: data?.price_id ?? null,
-        subscriptionEnd: data?.subscription_end ?? null,
+        subscribed: isActive,
+        accessExpiresAt: expiresAt,
         loading: false,
       });
     } catch (err) {
       console.error('Error checking subscription:', err);
       setState(s => ({ ...s, loading: false }));
     }
-  }, [session?.access_token]);
+  }, [user?.id]);
 
   useEffect(() => {
     checkSubscription();
@@ -74,42 +82,13 @@ export function useSubscription() {
     return () => clearInterval(interval);
   }, [checkSubscription]);
 
-  const createCheckout = async (priceId: string) => {
-    if (!session?.access_token) return;
-
-    const { data, error } = await supabase.functions.invoke('create-checkout', {
-      headers: { Authorization: `Bearer ${session.access_token}` },
-      body: { priceId },
-    });
-
-    if (error) throw error;
-    if (data?.url) {
-      window.open(data.url, '_blank');
-    }
+  const openCheckout = (checkoutUrl: string) => {
+    window.open(checkoutUrl, '_blank');
   };
-
-  const openCustomerPortal = async () => {
-    if (!session?.access_token) return;
-
-    const { data, error } = await supabase.functions.invoke('customer-portal', {
-      headers: { Authorization: `Bearer ${session.access_token}` },
-    });
-
-    if (error) throw error;
-    if (data?.url) {
-      window.open(data.url, '_blank');
-    }
-  };
-
-  const currentPlan = state.priceId
-    ? Object.values(PLANS).find(p => p.price_id === state.priceId)
-    : null;
 
   return {
     ...state,
-    currentPlan,
     checkSubscription,
-    createCheckout,
-    openCustomerPortal,
+    openCheckout,
   };
 }
