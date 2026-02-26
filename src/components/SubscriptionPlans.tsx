@@ -112,7 +112,7 @@ export default function SubscriptionPlans({ onCheckout, currentPriceId, subscrip
                   </span>
                   <span className="text-lg text-foreground">{plan.interval}</span>
                 </p>
-                {plan.perMonth && (
+                {'perMonth' in plan && plan.perMonth && (
                   <p className="text-primary text-sm font-semibold">{plan.perMonth}</p>
                 )}
               </div>
