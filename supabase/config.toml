@@ -21,11 +21,5 @@ verify_jwt = false
 [functions.cleanup-orphan-users]
 verify_jwt = true
 
-[functions.check-subscription]
-verify_jwt = false
-
-[functions.create-checkout]
-verify_jwt = false
-
-[functions.customer-portal]
+[functions.cakto-webhook]
 verify_jwt = false

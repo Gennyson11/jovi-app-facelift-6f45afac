@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { usePresence } from '@/hooks/usePresence';
-import { useSubscription, PLANS } from '@/hooks/useSubscription';
+import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -131,7 +131,7 @@ export default function Dashboard() {
   const {
     toast
   } = useToast();
-  const { subscribed, priceId: currentPriceId, subscriptionEnd, loading: subLoading, createCheckout, openCustomerPortal, checkSubscription } = useSubscription();
+  const { subscribed, accessExpiresAt, loading: subLoading, checkSubscription } = useSubscription();
 
   // Track user presence for real-time monitoring
   usePresence(user?.id, user?.email, user?.email?.split('@')[0] || null);
@@ -387,10 +387,7 @@ export default function Dashboard() {
               <p className="text-red-500/80 text-sm">Seu período de acesso terminou. Assine um plano para continuar.</p>
             </div>
             <SubscriptionPlans
-              onCheckout={createCheckout}
-              currentPriceId={currentPriceId}
-              subscriptionEnd={subscriptionEnd}
-              onManageSubscription={openCustomerPortal}
+              subscriptionEnd={accessExpiresAt}
             />
           </div>
         )}
@@ -420,10 +417,7 @@ export default function Dashboard() {
           ) : !subscribed ? (
             <div className="mb-6">
               <SubscriptionPlans
-                onCheckout={createCheckout}
-                currentPriceId={currentPriceId}
-                subscriptionEnd={subscriptionEnd}
-                onManageSubscription={openCustomerPortal}
+                subscriptionEnd={accessExpiresAt}
               />
             </div>
           ) : (
@@ -458,18 +452,6 @@ export default function Dashboard() {
                     const diffMs = expiresAt.getTime() - now.getTime();
                     if (diffMs <= 0) return 'Expirado';
 
-                    // For active Stripe subscribers, show fixed days based on plan
-                    if (subscribed && currentPriceId) {
-                      if (currentPriceId === PLANS.monthly.price_id) {
-                        const hours = Math.floor(diffMs % (1000 * 60 * 60 * 24) / (1000 * 60 * 60));
-                        return `30d ${hours}h restantes`;
-                      }
-                      if (currentPriceId === PLANS.quarterly.price_id) {
-                        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                        const hours = Math.floor(diffMs % (1000 * 60 * 60 * 24) / (1000 * 60 * 60));
-                        return `${days}d ${hours}h restantes`;
-                      }
-                    }
 
                     const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
                     const hours = Math.floor(diffMs % (1000 * 60 * 60 * 24) / (1000 * 60 * 60));
