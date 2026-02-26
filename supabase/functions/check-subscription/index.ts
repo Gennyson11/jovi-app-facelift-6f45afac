@@ -22,6 +22,13 @@ serve(async (req) => {
     Deno.env.get("SUPABASE_ANON_KEY") ?? "",
   );
 
+  // Service role client for updating profiles
+  const supabaseAdmin = createClient(
+    Deno.env.get("SUPABASE_URL") ?? "",
+    Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "",
+    { auth: { persistSession: false } }
+  );
+
   try {
     logStep("Function started");
 
@@ -66,12 +73,26 @@ serve(async (req) => {
       const subscription = subscriptions.data[0];
       const item = subscription.items.data[0];
       priceId = item.price.id;
-      // In API 2025-08-27.basil, current_period_end moved to item level
       const periodEnd = item.current_period_end ?? subscription.current_period_end;
       if (periodEnd) {
         subscriptionEnd = new Date(periodEnd * 1000).toISOString();
       }
       logStep("Active subscription found", { subscriptionId: subscription.id, priceId, endDate: subscriptionEnd });
+
+      // Sync profile: update has_access and access_expires_at in the database
+      const { error: updateError } = await supabaseAdmin
+        .from('profiles')
+        .update({
+          has_access: true,
+          access_expires_at: subscriptionEnd,
+        })
+        .eq('user_id', user.id);
+
+      if (updateError) {
+        logStep("Error updating profile", { error: updateError.message });
+      } else {
+        logStep("Profile synced with Stripe subscription");
+      }
     } else {
       logStep("No active subscription found");
     }
