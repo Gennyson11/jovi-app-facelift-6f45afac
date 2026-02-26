@@ -460,7 +460,6 @@ export default function Dashboard() {
 
                     // For active Stripe subscribers, show fixed days based on plan
                     if (subscribed && currentPriceId) {
-                      const { PLANS } = require('@/hooks/useSubscription');
                       if (currentPriceId === PLANS.monthly.price_id) {
                         const hours = Math.floor(diffMs % (1000 * 60 * 60 * 24) / (1000 * 60 * 60));
                         return `30d ${hours}h restantes`;
