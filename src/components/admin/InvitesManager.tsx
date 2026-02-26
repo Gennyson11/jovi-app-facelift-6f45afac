@@ -327,7 +327,7 @@ export default function InvitesManager() {
           ? editUserCurrentExpiry 
           : new Date();
         const newExpiry = new Date(baseDate);
-        newExpiry.setTime(newExpiry.getTime() + editUserAccessDays * 60 * 60 * 1000);
+        newExpiry.setTime(newExpiry.getTime() + editUserAccessDays * 60 * 1000);
         
         const { error: updateError } = await supabase
           .from('profiles')
