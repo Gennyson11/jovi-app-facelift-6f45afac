@@ -150,14 +150,14 @@ export default function Invite() {
       
       if (useError) throw useError;
       
-      const result = useResult as { success: boolean; error?: string; access_hours?: number };
+      const result = useResult as { success: boolean; error?: string; access_minutes?: number };
       
       if (!result.success) {
         throw new Error(result.error || 'Falha ao utilizar convite');
       }
       
-      const hours = result.access_hours || 0;
-      const timeText = hours < 24 ? `${hours} hora${hours > 1 ? 's' : ''}` : `${Math.floor(hours / 24)} dia${Math.floor(hours / 24) > 1 ? 's' : ''}`;
+      const minutes = result.access_minutes || 0;
+      const timeText = minutes < 60 ? `${minutes} minuto${minutes > 1 ? 's' : ''}` : minutes < 1440 ? `${Math.floor(minutes / 60)} hora${Math.floor(minutes / 60) > 1 ? 's' : ''}` : `${Math.floor(minutes / 1440)} dia${Math.floor(minutes / 1440) > 1 ? 's' : ''}`;
       
       toast({
         title: 'Cadastro realizado!',
@@ -218,9 +218,11 @@ export default function Invite() {
           </div>
           <CardTitle className="text-xl">Você foi convidado!</CardTitle>
           <CardDescription>
-            {invite.access_days < 24 
-              ? `${invite.access_days} hora${invite.access_days > 1 ? 's' : ''} de acesso gratuito`
-              : `${Math.floor(invite.access_days / 24)} dia${Math.floor(invite.access_days / 24) > 1 ? 's' : ''} de acesso gratuito`
+            {invite.access_days < 60 
+              ? `${invite.access_days} minuto${invite.access_days > 1 ? 's' : ''} de acesso gratuito`
+              : invite.access_days < 1440
+                ? `${Math.floor(invite.access_days / 60)} hora${Math.floor(invite.access_days / 60) > 1 ? 's' : ''} de acesso gratuito`
+                : `${Math.floor(invite.access_days / 1440)} dia${Math.floor(invite.access_days / 1440) > 1 ? 's' : ''} de acesso gratuito`
             }
           </CardDescription>
         </CardHeader>
