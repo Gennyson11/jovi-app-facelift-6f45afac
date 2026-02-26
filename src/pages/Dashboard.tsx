@@ -131,7 +131,7 @@ export default function Dashboard() {
   const {
     toast
   } = useToast();
-  const { subscribed, priceId: currentPriceId, subscriptionEnd, loading: subLoading, createCheckout, openCustomerPortal, checkSubscription } = useSubscription();
+  const { subscribed, accessExpiresAt, loading: subLoading, checkSubscription } = useSubscription();
 
   // Track user presence for real-time monitoring
   usePresence(user?.id, user?.email, user?.email?.split('@')[0] || null);
