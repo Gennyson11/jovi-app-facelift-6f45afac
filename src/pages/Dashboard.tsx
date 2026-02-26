@@ -127,9 +127,11 @@ export default function Dashboard() {
     isAdmin
   } = useAuth();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const {
     toast
   } = useToast();
+  const { subscribed, priceId: currentPriceId, subscriptionEnd, loading: subLoading, createCheckout, openCustomerPortal, checkSubscription } = useSubscription();
 
   // Track user presence for real-time monitoring
   usePresence(user?.id, user?.email, user?.email?.split('@')[0] || null);
