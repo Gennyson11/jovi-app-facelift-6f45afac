@@ -51,24 +51,29 @@ interface UserProfile {
 }
 
 const ACCESS_TIME_OPTIONS = [
-  { label: '1 hora', value: 1 },
-  { label: '2 horas', value: 2 },
-  { label: '6 horas', value: 6 },
-  { label: '12 horas', value: 12 },
-  { label: '1 dia', value: 24 },
-  { label: '2 dias', value: 48 },
-  { label: '3 dias', value: 72 },
-  { label: '7 dias', value: 168 },
-  { label: '15 dias', value: 360 },
-  { label: '30 dias', value: 720 },
-  { label: '60 dias', value: 1440 },
-  { label: '90 dias', value: 2160 },
+  { label: '1 minuto', value: 1 },
+  { label: '1 hora', value: 60 },
+  { label: '2 horas', value: 120 },
+  { label: '6 horas', value: 360 },
+  { label: '12 horas', value: 720 },
+  { label: '1 dia', value: 1440 },
+  { label: '2 dias', value: 2880 },
+  { label: '3 dias', value: 4320 },
+  { label: '7 dias', value: 10080 },
+  { label: '15 dias', value: 21600 },
+  { label: '30 dias', value: 43200 },
+  { label: '60 dias', value: 86400 },
+  { label: '90 dias', value: 129600 },
 ];
 
-// Helper to format hours into readable text
-const formatAccessTime = (hours: number): string => {
-  if (hours < 24) return `${hours} hora${hours > 1 ? 's' : ''}`;
-  const days = Math.floor(hours / 24);
+// Helper to format minutes into readable text
+const formatAccessTime = (minutes: number): string => {
+  if (minutes < 60) return `${minutes} minuto${minutes > 1 ? 's' : ''}`;
+  if (minutes < 1440) {
+    const hours = Math.floor(minutes / 60);
+    return `${hours} hora${hours > 1 ? 's' : ''}`;
+  }
+  const days = Math.floor(minutes / 1440);
   return `${days} dia${days > 1 ? 's' : ''}`;
 };
 
