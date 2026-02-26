@@ -3,7 +3,7 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { usePresence } from '@/hooks/usePresence';
-import { useSubscription } from '@/hooks/useSubscription';
+import { useSubscription, PLANS } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -457,6 +457,20 @@ export default function Dashboard() {
                     const now = new Date();
                     const diffMs = expiresAt.getTime() - now.getTime();
                     if (diffMs <= 0) return 'Expirado';
+
+                    // For active Stripe subscribers, show fixed days based on plan
+                    if (subscribed && currentPriceId) {
+                      if (currentPriceId === PLANS.monthly.price_id) {
+                        const hours = Math.floor(diffMs % (1000 * 60 * 60 * 24) / (1000 * 60 * 60));
+                        return `30d ${hours}h restantes`;
+                      }
+                      if (currentPriceId === PLANS.quarterly.price_id) {
+                        const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+                        const hours = Math.floor(diffMs % (1000 * 60 * 60 * 24) / (1000 * 60 * 60));
+                        return `${days}d ${hours}h restantes`;
+                      }
+                    }
+
                     const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
                     const hours = Math.floor(diffMs % (1000 * 60 * 60 * 24) / (1000 * 60 * 60));
                     if (days > 0) {
