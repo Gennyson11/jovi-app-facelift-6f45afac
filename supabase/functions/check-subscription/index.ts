@@ -64,8 +64,13 @@ serve(async (req) => {
 
     if (hasActiveSub) {
       const subscription = subscriptions.data[0];
-      subscriptionEnd = new Date(subscription.current_period_end * 1000).toISOString();
-      priceId = subscription.items.data[0].price.id;
+      const item = subscription.items.data[0];
+      priceId = item.price.id;
+      // In API 2025-08-27.basil, current_period_end moved to item level
+      const periodEnd = item.current_period_end ?? subscription.current_period_end;
+      if (periodEnd) {
+        subscriptionEnd = new Date(periodEnd * 1000).toISOString();
+      }
       logStep("Active subscription found", { subscriptionId: subscription.id, priceId, endDate: subscriptionEnd });
     } else {
       logStep("No active subscription found");
