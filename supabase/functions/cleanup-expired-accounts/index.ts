@@ -6,7 +6,6 @@ const corsHeaders = {
 }
 
 Deno.serve(async (req) => {
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
   }
@@ -14,7 +13,6 @@ Deno.serve(async (req) => {
   try {
     console.log('Starting cleanup of expired accounts...')
 
-    // Create Supabase client with service role for admin operations
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -26,11 +24,13 @@ Deno.serve(async (req) => {
       }
     )
 
-    // Find all profiles with expired access
     const now = new Date().toISOString()
+
+    // Only revoke access (has_access = false), do NOT delete accounts
     const { data: expiredProfiles, error: fetchError } = await supabaseAdmin
       .from('profiles')
       .select('id, user_id, email, name, access_expires_at')
+      .eq('has_access', true)
       .not('access_expires_at', 'is', null)
       .lt('access_expires_at', now)
 
@@ -45,46 +45,45 @@ Deno.serve(async (req) => {
         JSON.stringify({ 
           success: true, 
           message: 'No expired accounts found',
-          deleted_count: 0 
+          revoked_count: 0 
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    console.log(`Found ${expiredProfiles.length} expired accounts to delete`)
+    console.log(`Found ${expiredProfiles.length} expired accounts to revoke access`)
 
-    const deletedAccounts: string[] = []
+    const revokedAccounts: string[] = []
     const errors: string[] = []
 
-    // Delete each expired user from auth (this will cascade delete the profile)
     for (const profile of expiredProfiles) {
       try {
-        console.log(`Deleting user: ${profile.email} (expired at: ${profile.access_expires_at})`)
+        console.log(`Revoking access for user: ${profile.email} (expired at: ${profile.access_expires_at})`)
         
-        // Delete the user from auth.users - this will cascade to profiles due to foreign key
-        const { error: deleteError } = await supabaseAdmin.auth.admin.deleteUser(
-          profile.user_id
-        )
+        const { error: updateError } = await supabaseAdmin
+          .from('profiles')
+          .update({ has_access: false, updated_at: now })
+          .eq('id', profile.id)
 
-        if (deleteError) {
-          console.error(`Error deleting user ${profile.email}:`, deleteError)
-          errors.push(`${profile.email}: ${deleteError.message}`)
+        if (updateError) {
+          console.error(`Error revoking access for ${profile.email}:`, updateError)
+          errors.push(`${profile.email}: ${updateError.message}`)
         } else {
-          console.log(`Successfully deleted user: ${profile.email}`)
-          deletedAccounts.push(profile.email)
+          console.log(`Successfully revoked access for: ${profile.email}`)
+          revokedAccounts.push(profile.email)
         }
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-        console.error(`Exception deleting user ${profile.email}:`, err)
+        console.error(`Exception revoking access for ${profile.email}:`, err)
         errors.push(`${profile.email}: ${errorMessage}`)
       }
     }
 
     const result = {
       success: true,
-      message: `Cleanup completed. Deleted ${deletedAccounts.length} accounts.`,
-      deleted_count: deletedAccounts.length,
-      deleted_emails: deletedAccounts,
+      message: `Cleanup completed. Revoked access for ${revokedAccounts.length} accounts.`,
+      revoked_count: revokedAccounts.length,
+      revoked_emails: revokedAccounts,
       errors: errors.length > 0 ? errors : undefined
     }
 
