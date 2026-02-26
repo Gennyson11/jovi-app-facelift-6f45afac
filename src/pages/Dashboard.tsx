@@ -189,6 +189,19 @@ export default function Dashboard() {
       fetchData();
     }
   }, [user?.id]);
+
+  // Re-fetch profile when subscription status changes (profile gets synced by edge function)
+  useEffect(() => {
+    if (!subLoading && subscribed && user?.id) {
+      const refetchProfile = async () => {
+        const { data: profileData } = await supabase.from('profiles').select('*').eq('user_id', user.id).maybeSingle();
+        if (profileData) {
+          setUserProfile(profileData as UserProfile);
+        }
+      };
+      refetchProfile();
+    }
+  }, [subscribed, subLoading, user?.id]);
   const fetchData = async () => {
     setLoading(true);
 
