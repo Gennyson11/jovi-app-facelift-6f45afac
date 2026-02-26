@@ -417,10 +417,7 @@ export default function Dashboard() {
           ) : !subscribed ? (
             <div className="mb-6">
               <SubscriptionPlans
-                onCheckout={createCheckout}
-                currentPriceId={currentPriceId}
-                subscriptionEnd={subscriptionEnd}
-                onManageSubscription={openCustomerPortal}
+                subscriptionEnd={accessExpiresAt}
               />
             </div>
           ) : (
