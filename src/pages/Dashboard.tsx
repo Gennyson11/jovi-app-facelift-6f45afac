@@ -387,10 +387,7 @@ export default function Dashboard() {
               <p className="text-red-500/80 text-sm">Seu período de acesso terminou. Assine um plano para continuar.</p>
             </div>
             <SubscriptionPlans
-              onCheckout={createCheckout}
-              currentPriceId={currentPriceId}
-              subscriptionEnd={subscriptionEnd}
-              onManageSubscription={openCustomerPortal}
+              subscriptionEnd={accessExpiresAt}
             />
           </div>
         )}
