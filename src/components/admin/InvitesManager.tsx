@@ -99,7 +99,7 @@ export default function InvitesManager() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [recipientName, setRecipientName] = useState('');
   const [recipientEmail, setRecipientEmail] = useState('');
-  const [accessDays, setAccessDays] = useState(360);
+  const [accessDays, setAccessDays] = useState(21600);
   const [expiryDays, setExpiryDays] = useState(7);
   const [selectedPlatforms, setSelectedPlatforms] = useState<string[]>([]);
   const [isCreating, setIsCreating] = useState(false);
