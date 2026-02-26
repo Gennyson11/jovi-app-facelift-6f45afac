@@ -371,7 +371,7 @@ export default function InvitesManager() {
   const resetForm = () => {
     setRecipientName('');
     setRecipientEmail('');
-    setAccessDays(360);
+    setAccessDays(21600);
     setExpiryDays(7);
     setSelectedPlatforms(platforms.map(p => p.id));
   };
