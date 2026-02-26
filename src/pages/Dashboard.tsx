@@ -383,7 +383,7 @@ export default function Dashboard() {
         )}
 
         {/* Access Blocked Banner */}
-        {!userProfile?.has_access && (
+        {!hasAccess && !accessExpired && (
           userProfile?.block_reason ? (
             <div className="mb-6 p-6 rounded-lg bg-destructive/10 border-2 border-destructive/50 text-center">
               <ShieldX className="w-14 h-14 text-destructive mx-auto mb-4" />
