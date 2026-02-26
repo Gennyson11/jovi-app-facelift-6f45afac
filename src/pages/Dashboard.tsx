@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
 import { usePresence } from '@/hooks/usePresence';
+import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
@@ -12,6 +13,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import JoviAIChat from '@/components/JoviAIChat';
 import { Veo3Chat } from '@/components/Veo3Chat';
+import SubscriptionPlans from '@/components/SubscriptionPlans';
 import whatsappBanner from '@/assets/whatsapp-banner.png';
 
 type StreamingStatus = 'online' | 'maintenance';
