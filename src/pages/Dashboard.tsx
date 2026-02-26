@@ -401,6 +401,15 @@ export default function Dashboard() {
                 Falar com Suporte via WhatsApp
               </Button>
             </div>
+          ) : !subscribed ? (
+            <div className="mb-6">
+              <SubscriptionPlans
+                onCheckout={createCheckout}
+                currentPriceId={currentPriceId}
+                subscriptionEnd={subscriptionEnd}
+                onManageSubscription={openCustomerPortal}
+              />
+            </div>
           ) : (
             <div className="mb-6 p-6 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-center">
               <Lock className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
