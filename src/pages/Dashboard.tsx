@@ -366,18 +366,21 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-8">
         {/* Access Expired Banner */}
-        {accessExpired && <div className="mb-6 p-6 rounded-lg bg-red-500/10 border border-red-500/30 text-center">
-            <Lock className="w-12 h-12 text-red-500 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-red-500 mb-2">
-              Acesso Expirado
-            </h3>
-            <p className="text-red-500/80 mb-4">
-              Seu período de acesso terminou. Renove para continuar acessando as plataformas.
-            </p>
-            <Button onClick={() => window.open('https://bit.ly/whatsapp-suportejt', '_blank')} className="bg-green-500 hover:bg-green-600 text-white">
-              Renovar Acesso via WhatsApp
-            </Button>
-          </div>}
+        {accessExpired && (
+          <div className="mb-6">
+            <div className="mb-4 p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-center">
+              <Lock className="w-10 h-10 text-red-500 mx-auto mb-2" />
+              <h3 className="text-lg font-bold text-red-500 mb-1">Acesso Expirado</h3>
+              <p className="text-red-500/80 text-sm">Seu período de acesso terminou. Assine um plano para continuar.</p>
+            </div>
+            <SubscriptionPlans
+              onCheckout={createCheckout}
+              currentPriceId={currentPriceId}
+              subscriptionEnd={subscriptionEnd}
+              onManageSubscription={openCustomerPortal}
+            />
+          </div>
+        )}
 
         {/* Access Blocked Banner */}
         {!userProfile?.has_access && (
