@@ -139,6 +139,14 @@ export default function Dashboard() {
   // Ref to track if data has been fetched for the current user
   const hasFetchedRef = useRef(false);
   const currentUserIdRef = useRef<string | null>(null);
+  // Handle checkout success redirect
+  useEffect(() => {
+    if (searchParams.get('checkout') === 'success') {
+      toast({ title: '🎉 Pagamento realizado!', description: 'Sua assinatura foi ativada com sucesso.' });
+      checkSubscription();
+    }
+  }, [searchParams]);
+
   useEffect(() => {
     if (!authLoading && !user) {
       navigate('/login');
