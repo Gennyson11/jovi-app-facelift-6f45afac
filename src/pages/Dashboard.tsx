@@ -315,8 +315,8 @@ export default function Dashboard() {
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>;
   }
-  const hasAccess = isAdmin || userProfile?.has_access && !isAccessExpired();
-  const accessExpired = userProfile?.has_access && isAccessExpired();
+  const hasAccess = isAdmin || subscribed || (userProfile?.has_access && !isAccessExpired());
+  const accessExpired = !subscribed && userProfile?.has_access && isAccessExpired();
 
   // Get remaining days text
   const getRemainingDaysText = () => {
