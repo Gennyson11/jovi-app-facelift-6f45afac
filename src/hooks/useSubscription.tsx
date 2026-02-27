@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 export const PLANS = {
   monthly: {
     name: 'Mensal',
-    price: 37,
+    price: 30,
     checkout_url: 'https://pay.cakto.com.br/z4jkfp5_580328',
     interval: '/mês',
   },
