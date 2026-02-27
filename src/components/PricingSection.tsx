@@ -104,8 +104,8 @@ const PricingSection = () => {
               
               {/* Current Price */}
               <p className="my-4">
-                <span className="text-5xl md:text-6xl font-display font-bold text-primary">R$85</span>
-                <span className="text-xl text-foreground">/3 meses</span>
+              <span className="text-5xl md:text-6xl font-display font-bold text-primary">R$97</span>
+                <span className="text-xl text-foreground">/trimestre</span>
               </p>
               
               {/* Per month breakdown */}
