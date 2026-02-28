@@ -71,7 +71,7 @@ const HeroSection = ({
           Tenha <span className="text-accent font-semibold">+50 ferramentas premium</span> de IA e Marketing Digital
         </p>
         <p className="text-sm sm:text-base md:text-lg lg:text-xl text-foreground mb-2 sm:mb-4 px-1 sm:px-2">
-          em um só acesso, pagando apenas <span className="text-primary font-semibold">R$37,00/mês</span>
+          em um só acesso, pagando apenas <span className="text-primary font-semibold">R$30,00/mês</span>
         </p>
         <p className="text-muted-foreground text-[10px] sm:text-xs md:text-sm flex items-center justify-center gap-1 sm:gap-2 mb-4 sm:mb-6 md:mb-8 px-1 sm:px-2">
           <span className="text-primary animate-pulse">✨</span>
