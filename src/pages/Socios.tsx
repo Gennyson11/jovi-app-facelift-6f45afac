@@ -41,6 +41,8 @@ export default function Socios() {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<number>(30);
   const [savingClient, setSavingClient] = useState(false);
+  const [socioWhatsapp, setSocioWhatsapp] = useState('');
+  const [savingWhatsapp, setSavingWhatsapp] = useState(false);
 
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
