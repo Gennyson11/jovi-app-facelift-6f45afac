@@ -354,6 +354,29 @@ export default function Socios() {
           </Card>
         </div>
 
+        {/* WhatsApp Contact Card */}
+        <Card className="border-border mb-8">
+          <CardHeader>
+            <CardTitle className="text-foreground text-base">Seu WhatsApp de Contato</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-3">
+              Este número será exibido para seus clientes quando o acesso expirar.
+            </p>
+            <div className="flex gap-2">
+              <Input
+                value={socioWhatsapp}
+                onChange={e => setSocioWhatsapp(e.target.value)}
+                placeholder="(11) 99999-9999"
+                className="bg-background/50 border-border max-w-xs"
+              />
+              <Button onClick={saveSocioWhatsapp} disabled={savingWhatsapp}>
+                {savingWhatsapp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+
         {/* Clients Table */}
         <Card className="border-border">
           <CardHeader className="flex flex-row items-center justify-between">
