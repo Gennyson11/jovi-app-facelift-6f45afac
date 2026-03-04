@@ -120,7 +120,7 @@ export default function Dashboard() {
   const [isSocio, setIsSocio] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [showWhatsAppPopup, setShowWhatsAppPopup] = useState(false);
-  const [partnerInfo, setPartnerInfo] = useState<{ name: string | null; whatsapp: string | null } | null>(null);
+  const [partnerInfo, setPartnerInfo] = useState<{name: string | null;whatsapp: string | null;} | null>(null);
   const {
     user,
     signOut,
@@ -157,20 +157,20 @@ export default function Dashboard() {
   // WhatsApp popup timer - shows on login and every 3 minutes
   const whatsappTimerStartedRef = useRef(false);
   const whatsappIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  
+
   useEffect(() => {
     if (!user || whatsappTimerStartedRef.current) return;
-    
+
     whatsappTimerStartedRef.current = true;
-    
+
     // Show immediately on login
     setShowWhatsAppPopup(true);
-    
+
     // Show every 3 minutes (180000ms)
     whatsappIntervalRef.current = setInterval(() => {
       setShowWhatsAppPopup(true);
     }, 180000);
-    
+
     return () => {
       if (whatsappIntervalRef.current) {
         clearInterval(whatsappIntervalRef.current);
@@ -233,22 +233,22 @@ export default function Dashboard() {
         data: accessData
       } = await supabase.from('user_platform_access').select('platform_id').eq('user_id', profileData.id);
       if (accessData) {
-        setUserPlatformAccess(accessData.map(a => a.platform_id));
+        setUserPlatformAccess(accessData.map((a) => a.platform_id));
       }
-      
+
       // Check if user has socio role
-      const { data: socioRole } = await supabase
-        .from('user_roles')
-        .select('role')
-        .eq('user_id', user?.id)
-        .eq('role', 'socio')
-        .maybeSingle();
+      const { data: socioRole } = await supabase.
+      from('user_roles').
+      select('role').
+      eq('user_id', user?.id).
+      eq('role', 'socio').
+      maybeSingle();
       setIsSocio(!!socioRole);
 
       // If user was added by a partner, fetch partner info via secure function
       if (profileData.partner_id) {
-        const { data: partnerData } = await supabase
-          .rpc('get_partner_contact', { p_user_id: user?.id });
+        const { data: partnerData } = await supabase.
+        rpc('get_partner_contact', { p_user_id: user?.id });
         if (partnerData && partnerData.length > 0) {
           setPartnerInfo({ name: partnerData[0].partner_name, whatsapp: partnerData[0].partner_whatsapp });
         }
@@ -257,9 +257,9 @@ export default function Dashboard() {
     setLoading(false);
   };
   const dismissNewsItem = (newsId: string) => {
-    setDismissedNews(prev => [...prev, newsId]);
+    setDismissedNews((prev) => [...prev, newsId]);
   };
-  const visibleNews = news.filter(n => !dismissedNews.includes(n.id));
+  const visibleNews = news.filter((n) => !dismissedNews.includes(n.id));
   const handleLogout = async () => {
     await signOut();
     navigate('/login');
@@ -291,12 +291,12 @@ export default function Dashboard() {
   // Increment click count for a platform (using secure server-side function)
   const incrementClickCount = async (platformId: string) => {
     // Use the secure database function to increment clicks
-    const { error } = await supabase.rpc('increment_platform_click', { 
-      p_platform_id: platformId 
+    const { error } = await supabase.rpc('increment_platform_click', {
+      p_platform_id: platformId
     });
-    
+
     if (!error) {
-      setPlatformClicks(prev => ({
+      setPlatformClicks((prev) => ({
         ...prev,
         [platformId]: (prev[platformId] || 0) + 1
       }));
@@ -338,7 +338,7 @@ export default function Dashboard() {
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>;
   }
-  const hasAccess = isAdmin || subscribed || (userProfile?.has_access && !isAccessExpired());
+  const hasAccess = isAdmin || subscribed || userProfile?.has_access && !isAccessExpired();
   const accessExpired = !subscribed && userProfile?.has_access && isAccessExpired();
 
   // Get remaining days text
@@ -354,8 +354,8 @@ export default function Dashboard() {
   };
 
   // Filter platforms by active category
-  const filteredPlatforms = activeCategory ? platforms.filter(p => p.category === activeCategory) : platforms;
-  const filteredCategoryOrder = activeCategory ? CATEGORY_ORDER.filter(cat => cat === activeCategory) : CATEGORY_ORDER;
+  const filteredPlatforms = activeCategory ? platforms.filter((p) => p.category === activeCategory) : platforms;
+  const filteredCategoryOrder = activeCategory ? CATEGORY_ORDER.filter((cat) => cat === activeCategory) : CATEGORY_ORDER;
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex w-full">
       {/* Sidebar */}
       <DashboardSidebar userProfile={userProfile} onLogout={handleLogout} activeCategory={activeCategory} onCategorySelect={setActiveCategory} isSocio={isSocio} />
@@ -389,10 +389,10 @@ export default function Dashboard() {
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-8">
         {/* Access Expired Banner */}
-        {accessExpired && (
-          <div className="mb-6">
-            {userProfile?.partner_id && partnerInfo ? (
-              <div className="p-8 md:p-12 rounded-2xl bg-gradient-to-br from-card via-card to-primary/5 border border-border text-center">
+        {accessExpired &&
+        <div className="mb-6">
+            {userProfile?.partner_id && partnerInfo ?
+          <div className="p-8 md:p-12 rounded-2xl bg-gradient-to-br from-card via-card to-primary/5 border border-border text-center">
                 <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
                   <Lock className="w-8 h-8 text-red-500" />
                 </div>
@@ -406,20 +406,20 @@ export default function Dashboard() {
                     <span className="text-2xl">👤</span>
                   </div>
                   <p className="text-lg font-bold text-foreground mb-1">{partnerInfo.name || 'Seu revendedor'}</p>
-                  <p className="text-sm text-muted-foreground mb-4">Revendedor autorizado</p>
-                  {partnerInfo.whatsapp && (
-                    <Button 
-                      size="lg"
-                      className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-5 text-base rounded-xl shadow-lg shadow-green-500/20"
-                      onClick={() => window.open(`https://wa.me/55${partnerInfo.whatsapp?.replace(/\D/g, '')}`, '_blank')}
-                    >
+                  <p className="text-sm text-muted-foreground mb-4">Vendedor Autorizado</p>
+                  {partnerInfo.whatsapp &&
+              <Button
+                size="lg"
+                className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-5 text-base rounded-xl shadow-lg shadow-green-500/20"
+                onClick={() => window.open(`https://wa.me/55${partnerInfo.whatsapp?.replace(/\D/g, '')}`, '_blank')}>
+                
                       💬 Falar no WhatsApp
                     </Button>
-                  )}
+              }
                 </div>
-              </div>
-            ) : (
-              <>
+              </div> :
+
+          <>
                 <div className="mb-4 p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-center">
                   <Lock className="w-10 h-10 text-red-500 mx-auto mb-2" />
                   <h3 className="text-lg font-bold text-red-500 mb-1">Acesso Expirado</h3>
@@ -427,14 +427,14 @@ export default function Dashboard() {
                 </div>
                 <SubscriptionPlans subscriptionEnd={accessExpiresAt} />
               </>
-            )}
+          }
           </div>
-        )}
+        }
 
         {/* Access Blocked Banner */}
         {!hasAccess && !accessExpired && (
-          userProfile?.block_reason ? (
-            <div className="mb-6 p-6 rounded-lg bg-destructive/10 border-2 border-destructive/50 text-center">
+        userProfile?.block_reason ?
+        <div className="mb-6 p-6 rounded-lg bg-destructive/10 border-2 border-destructive/50 text-center">
               <ShieldX className="w-14 h-14 text-destructive mx-auto mb-4" />
               <h3 className="text-xl font-bold text-destructive mb-3">
                 🚫 Acesso Bloqueado
@@ -446,21 +446,21 @@ export default function Dashboard() {
               <p className="text-muted-foreground text-sm mb-4">
                 Entre em contato com o administrador para mais informações ou para solicitar a liberação do seu acesso.
               </p>
-              <Button 
-                onClick={() => window.open('https://bit.ly/whatsapp-suportejt', '_blank')} 
-                className="bg-green-500 hover:bg-green-600 text-white"
-              >
+              <Button
+            onClick={() => window.open('https://bit.ly/whatsapp-suportejt', '_blank')}
+            className="bg-green-500 hover:bg-green-600 text-white">
+            
                 Falar com Suporte via WhatsApp
               </Button>
-            </div>
-          ) : !subscribed ? (
-            <div className="mb-6">
+            </div> :
+        !subscribed ?
+        <div className="mb-6">
               <SubscriptionPlans
-                subscriptionEnd={accessExpiresAt}
-              />
-            </div>
-          ) : (
-            <div className="mb-6 p-6 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-center">
+            subscriptionEnd={accessExpiresAt} />
+          
+            </div> :
+
+        <div className="mb-6 p-6 rounded-lg bg-yellow-500/10 border border-yellow-500/30 text-center">
               <Lock className="w-12 h-12 text-yellow-500 mx-auto mb-3" />
               <h3 className="text-lg font-bold text-yellow-500 mb-2">
                 Acesso Pendente
@@ -468,9 +468,9 @@ export default function Dashboard() {
               <p className="text-yellow-500/80">
                 Seu cadastro foi recebido! Aguarde a liberação do acesso pelo administrador.
               </p>
-            </div>
-          )
-        )}
+            </div>)
+
+        }
 
         {/* Account Validity Card */}
         {hasAccess && userProfile && <div className="mb-6 p-4 rounded-xl bg-card border border-border">
@@ -533,7 +533,7 @@ export default function Dashboard() {
 
         {/* News/Announcements Section */}
         {visibleNews.length > 0 && <div className="mb-6 space-y-3">
-            {visibleNews.map(newsItem => <div key={newsItem.id} className="relative rounded-xl overflow-hidden border-2 border-orange-500/50 bg-gradient-to-r from-orange-500/20 via-amber-500/15 to-orange-500/20 shadow-lg shadow-orange-500/20">
+            {visibleNews.map((newsItem) => <div key={newsItem.id} className="relative rounded-xl overflow-hidden border-2 border-orange-500/50 bg-gradient-to-r from-orange-500/20 via-amber-500/15 to-orange-500/20 shadow-lg shadow-orange-500/20">
                 <div className="p-4">
                   <div className="flex items-start gap-4">
                     <div className="flex-shrink-0 w-14 h-14 rounded-full bg-gradient-to-br from-orange-500 to-amber-600 flex items-center justify-center shadow-lg shadow-orange-500/40 animate-pulse">
@@ -564,8 +564,8 @@ export default function Dashboard() {
           </div>}
 
         {/* Sorteios/Coupon Section */}
-        {activeCategory === 'sorteios' && (
-          <div className="space-y-8">
+        {activeCategory === 'sorteios' &&
+        <div className="space-y-8">
             {/* Header */}
             <div>
               <h2 className="text-2xl font-bold text-foreground">Resgatar Cupom</h2>
@@ -585,9 +585,9 @@ export default function Dashboard() {
                   </div>
                   <div className="flex w-full max-w-md gap-3">
                     <Input
-                      placeholder="DIGITE-SEU-CÓDIGO"
-                      className="flex-1 bg-background/50 border-border text-center uppercase tracking-widest"
-                    />
+                    placeholder="DIGITE-SEU-CÓDIGO"
+                    className="flex-1 bg-background/50 border-border text-center uppercase tracking-widest" />
+                  
                     <Button className="px-6">
                       Resgatar
                     </Button>
@@ -650,7 +650,7 @@ export default function Dashboard() {
               </Card>
             </div>
           </div>
-        )}
+        }
 
         {/* Jovi.ia Section */}
         {activeCategory === 'jovi_ia' && <JoviAIChat />}
@@ -659,8 +659,8 @@ export default function Dashboard() {
         {activeCategory === 'veo3' && <Veo3Chat />}
 
         {/* Loja Section */}
-        {activeCategory === 'loja' && (
-          <div className="mb-10">
+        {activeCategory === 'loja' &&
+        <div className="mb-10">
             {/* Category Header */}
             <div className="flex items-center gap-3 mb-6">
               <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-500 to-yellow-500 flex items-center justify-center shadow-lg">
@@ -677,21 +677,21 @@ export default function Dashboard() {
             </div>
 
             {/* Products Grid */}
-            {products.length > 0 ? (
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map(product => {
-                  return (
-                    <div key={product.id} className="group">
+            {products.length > 0 ?
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {products.map((product) => {
+              return (
+                <div key={product.id} className="group">
                       <div className="bg-card border border-border rounded-xl overflow-hidden transition-all duration-300 hover:border-primary/50 hover:shadow-xl hover:shadow-primary/10">
                         {/* Product Image */}
                         <div className="relative aspect-video bg-gradient-to-br from-secondary to-background">
-                          {product.image_url ? (
-                            <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" />
-                          ) : (
-                            <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900">
+                          {product.image_url ?
+                      <img src={product.image_url} alt={product.name} className="w-full h-full object-cover" /> :
+
+                      <div className="w-full h-full flex items-center justify-center bg-gradient-to-br from-zinc-800 to-zinc-900">
                               <span className="text-5xl">📦</span>
                             </div>
-                          )}
+                      }
                         </div>
 
                         {/* Product Info */}
@@ -706,9 +706,9 @@ export default function Dashboard() {
                             <div className="flex items-center gap-1">
                               <span className="text-foreground text-sm font-semibold">4.9</span>
                               <div className="flex">
-                                {[...Array(5)].map((_, i) => (
-                                  <span key={i} className="text-yellow-400 text-xs">★</span>
-                                ))}
+                                {[...Array(5)].map((_, i) =>
+                            <span key={i} className="text-yellow-400 text-xs">★</span>
+                            )}
                               </div>
                             </div>
                             <span className="text-green-500 text-xs font-medium">Entrega Automática</span>
@@ -724,21 +724,21 @@ export default function Dashboard() {
                           
                           {/* Buy Button */}
                           <div className="flex gap-2">
-                            <button 
-                              className="flex-1 py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
-                              disabled={product.stock === 0}
-                              onClick={() => {
-                                window.open('https://bit.ly/whatsapp-suportejt', '_blank');
-                              }}
-                            >
+                            <button
+                          className="flex-1 py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                          disabled={product.stock === 0}
+                          onClick={() => {
+                            window.open('https://bit.ly/whatsapp-suportejt', '_blank');
+                          }}>
+                          
                               {product.stock === 0 ? 'Indisponível' : 'COMPRAR'}
                             </button>
-                            <button 
-                              className="py-3 px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
-                              onClick={() => {
-                                window.open('https://bit.ly/whatsapp-suportejt', '_blank');
-                              }}
-                            >
+                            <button
+                          className="py-3 px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
+                          onClick={() => {
+                            window.open('https://bit.ly/whatsapp-suportejt', '_blank');
+                          }}>
+                          
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z" />
                               </svg>
@@ -746,12 +746,12 @@ export default function Dashboard() {
                           </div>
 
                           {/* Ver mais detalhes */}
-                          <button 
-                            className="w-full text-center text-muted-foreground text-sm hover:text-foreground transition-colors flex items-center justify-center gap-1"
-                            onClick={() => {
-                              window.open('https://bit.ly/whatsapp-suportejt', '_blank');
-                            }}
-                          >
+                          <button
+                        className="w-full text-center text-muted-foreground text-sm hover:text-foreground transition-colors flex items-center justify-center gap-1"
+                        onClick={() => {
+                          window.open('https://bit.ly/whatsapp-suportejt', '_blank');
+                        }}>
+                        
                             Ver mais detalhes
                             <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -759,22 +759,22 @@ export default function Dashboard() {
                           </button>
                         </div>
                       </div>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
-              <div className="text-center py-12">
+                    </div>);
+
+            })}
+              </div> :
+
+          <div className="text-center py-12">
                 <span className="text-4xl mb-4 block">🛒</span>
                 <p className="text-muted-foreground">Nenhum produto disponível no momento</p>
               </div>
-            )}
+          }
           </div>
-        )}
+        }
 
         {/* Categories */}
-        {activeCategory !== 'sorteios' && activeCategory !== 'jovi_ia' && activeCategory !== 'veo3' && activeCategory !== 'loja' && filteredCategoryOrder.map(categoryKey => {
-          const categoryPlatforms = filteredPlatforms.filter(p => p.category === categoryKey);
+        {activeCategory !== 'sorteios' && activeCategory !== 'jovi_ia' && activeCategory !== 'veo3' && activeCategory !== 'loja' && filteredCategoryOrder.map((categoryKey) => {
+          const categoryPlatforms = filteredPlatforms.filter((p) => p.category === categoryKey);
           if (categoryPlatforms.length === 0) return null;
           const config = CATEGORY_CONFIG[categoryKey];
           return <div key={categoryKey} className="mb-10">
@@ -795,7 +795,7 @@ export default function Dashboard() {
 
               {/* Platforms Grid */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {categoryPlatforms.map(platform => {
+                {categoryPlatforms.map((platform) => {
                 // For link_only platforms, check if website_url exists. For credentials, assume it's configured
                 const hasPlatformAccess = platform.access_type === 'link_only' ? !!platform.website_url : true;
                 const isMaintenance = platform.status === 'maintenance';
@@ -939,7 +939,7 @@ export default function Dashboard() {
                       <div className="flex-1 bg-background/50 border border-border rounded-md px-3 py-2 text-foreground font-mono cursor-pointer hover:bg-background/70 transition-colors text-sm" onClick={() => copyToClipboard(cred.password, 'Senha')}>
                         {showPassword[index] ? cred.password : '••••••••'}
                       </div>
-                      <Button variant="outline" size="icon" onClick={() => setShowPassword(prev => ({
+                      <Button variant="outline" size="icon" onClick={() => setShowPassword((prev) => ({
                   ...prev,
                   [index]: !prev[index]
                 }))}>
@@ -966,31 +966,31 @@ export default function Dashboard() {
       {/* WhatsApp Group Popup */}
       <Dialog open={showWhatsAppPopup} onOpenChange={setShowWhatsAppPopup}>
         <DialogContent className="sm:max-w-lg p-0 overflow-hidden">
-          <img 
-            src={whatsappBanner} 
-            alt="JoviTools no WhatsApp" 
-            className="w-full h-auto"
-          />
+          <img
+          src={whatsappBanner}
+          alt="JoviTools no WhatsApp"
+          className="w-full h-auto" />
+        
           <div className="p-4 space-y-4">
             <p className="text-muted-foreground text-center">
               📢 Receba em primeira mão nossas novidades, atualizações e promoções exclusivas!
             </p>
             <div className="flex flex-col gap-3">
               <Button
-                onClick={() => {
-                  window.open('https://chat.whatsapp.com/JcD6FVAr1euLsQGlKtoSjf', '_blank');
-                  setShowWhatsAppPopup(false);
-                }}
-                className="w-full bg-green-500 hover:bg-green-600 text-white"
-              >
+              onClick={() => {
+                window.open('https://chat.whatsapp.com/JcD6FVAr1euLsQGlKtoSjf', '_blank');
+                setShowWhatsAppPopup(false);
+              }}
+              className="w-full bg-green-500 hover:bg-green-600 text-white">
+              
                 <ExternalLink className="w-4 h-4 mr-2" />
                 Entrar na Comunidade
               </Button>
               <Button
-                variant="outline"
-                onClick={() => setShowWhatsAppPopup(false)}
-                className="w-full"
-              >
+              variant="outline"
+              onClick={() => setShowWhatsAppPopup(false)}
+              className="w-full">
+              
                 Agora não
               </Button>
             </div>
