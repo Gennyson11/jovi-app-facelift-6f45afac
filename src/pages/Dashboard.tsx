@@ -398,7 +398,7 @@ export default function Dashboard() {
                 </div>
                 <h3 className="text-2xl font-display font-bold text-foreground mb-2">Acesso Expirado</h3>
                 <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-                  Seu período de acesso terminou. Entre em contato com seu revendedor para renovar sua assinatura.
+                  Seu período de acesso terminou. Entre em contato com seu vendedor para renovar sua assinatura.
                 </p>
                 
                 <div className="max-w-sm mx-auto p-6 rounded-xl bg-background/50 border border-border/50 backdrop-blur-sm">
