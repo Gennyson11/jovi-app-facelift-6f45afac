@@ -2,14 +2,11 @@ import { Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const benefits = [
-  "Acesso a mais de +50 ferramentas premium",
-  "Inteligências Artificiais de última geração",
-  "Ferramentas de espionagem e mineração",
-  "Design e edição profissional ilimitados",
-  "SEO e análise de mercado",
-  "Suporte prioritário",
-  "Atualizações constantes",
-  "Acesso imediato"
+  "Acesso a +12 Ferramentas Premium",
+  "CapCut Pro Privado (somente você)",
+  "Canva no Seu Email (acesso individual)",
+  "Brindes Exclusivos",
+  "Métodos Bônus Inclusos"
 ];
 
 const PricingSection = () => {
