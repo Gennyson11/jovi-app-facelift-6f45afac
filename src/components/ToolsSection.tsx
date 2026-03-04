@@ -7,15 +7,6 @@ const aiTools = [
   "SUPER GROK", "DREAM FACE PRO", "HEYGEN"
 ];
 
-const editingTools = [
-  "VEED IO", "CAPCUT PRO", "ENVATO ELEMENTS", "FREELAHUB", "FREEPIK",
-  "PACK EDITOR", "EPIDEMIC SOUND", "JOVIFLIX (CONTEÚDOS MAIS DE 1000 FILMES)",
-  "METODOS ÚNICOS", "ZDM PRIME (ECONOMIZA MAIS DE R$ 20K EM CURSOS PAGOS)"
-];
-
-const seoTools = [
-  "ADS PARO", "SEM RUSH", "DROPTOOL", "E MUITO MAIS"
-];
 
 const streamingTools = [
   "NETFLIX", "HBO MAX", "DISNEY+", "PARAMOUNT+", "PRIME VIDEO"
@@ -40,7 +31,7 @@ const ToolsSection = () => {
     <section className="py-12 md:py-20 px-4 relative">
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="rounded-xl border border-primary/20 bg-card/30 p-6 md:p-8 lg:p-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-8 md:gap-12">
             {/* AI Tools */}
             <div>
               <h3 className="text-base md:text-lg font-display font-bold text-primary mb-6 md:mb-8">
@@ -49,21 +40,6 @@ const ToolsSection = () => {
               <ToolsList tools={aiTools} />
             </div>
 
-            {/* Editing Tools */}
-            <div>
-              <h3 className="text-base md:text-lg font-display font-bold text-primary mb-6 md:mb-8">
-                EDIÇÕES / DISTRAÇÕES
-              </h3>
-              <ToolsList tools={editingTools} />
-            </div>
-
-            {/* SEO Tools */}
-            <div>
-              <h3 className="text-base md:text-lg font-display font-bold text-primary mb-6 md:mb-8">
-                SEO/MINERAÇÃO
-              </h3>
-              <ToolsList tools={seoTools} />
-            </div>
 
             {/* Streaming Tools */}
             <div>
