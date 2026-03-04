@@ -244,6 +244,18 @@ export default function Dashboard() {
         .eq('role', 'socio')
         .maybeSingle();
       setIsSocio(!!socioRole);
+
+      // If user was added by a partner, fetch partner info
+      if (profileData.partner_id) {
+        const { data: partnerData } = await supabase
+          .from('profiles')
+          .select('name, whatsapp')
+          .eq('user_id', profileData.partner_id)
+          .maybeSingle();
+        if (partnerData) {
+          setPartnerInfo({ name: partnerData.name, whatsapp: partnerData.whatsapp });
+        }
+      }
     }
     setLoading(false);
   };
