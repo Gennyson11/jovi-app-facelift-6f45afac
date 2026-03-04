@@ -97,6 +97,31 @@ export default function Socios() {
     fetchClients();
   };
 
+  const fetchSocioWhatsapp = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('profiles')
+      .select('whatsapp')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (data?.whatsapp) setSocioWhatsapp(data.whatsapp);
+  };
+
+  const saveSocioWhatsapp = async () => {
+    if (!user) return;
+    setSavingWhatsapp(true);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ whatsapp: socioWhatsapp })
+      .eq('user_id', user.id);
+    setSavingWhatsapp(false);
+    if (error) {
+      toast({ title: 'Erro', description: 'Falha ao salvar WhatsApp', variant: 'destructive' });
+    } else {
+      toast({ title: 'Sucesso', description: 'WhatsApp de contato salvo!' });
+    }
+  };
+
   const fetchClients = async () => {
     if (!user) return;
     
