@@ -245,15 +245,12 @@ export default function Dashboard() {
         .maybeSingle();
       setIsSocio(!!socioRole);
 
-      // If user was added by a partner, fetch partner info
+      // If user was added by a partner, fetch partner info via secure function
       if (profileData.partner_id) {
         const { data: partnerData } = await supabase
-          .from('profiles')
-          .select('name, whatsapp')
-          .eq('user_id', profileData.partner_id)
-          .maybeSingle();
-        if (partnerData) {
-          setPartnerInfo({ name: partnerData.name, whatsapp: partnerData.whatsapp });
+          .rpc('get_partner_contact', { p_user_id: user?.id });
+        if (partnerData && partnerData.length > 0) {
+          setPartnerInfo({ name: partnerData[0].partner_name, whatsapp: partnerData[0].partner_whatsapp });
         }
       }
     }
