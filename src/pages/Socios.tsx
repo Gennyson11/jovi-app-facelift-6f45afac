@@ -41,6 +41,8 @@ export default function Socios() {
   const [showPassword, setShowPassword] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<number>(30);
   const [savingClient, setSavingClient] = useState(false);
+  const [socioWhatsapp, setSocioWhatsapp] = useState('');
+  const [savingWhatsapp, setSavingWhatsapp] = useState(false);
 
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -91,7 +93,33 @@ export default function Socios() {
     }
     
     setIsSocio(true);
+    fetchSocioWhatsapp();
     fetchClients();
+  };
+
+  const fetchSocioWhatsapp = async () => {
+    if (!user) return;
+    const { data } = await supabase
+      .from('profiles')
+      .select('whatsapp')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    if (data?.whatsapp) setSocioWhatsapp(data.whatsapp);
+  };
+
+  const saveSocioWhatsapp = async () => {
+    if (!user) return;
+    setSavingWhatsapp(true);
+    const { error } = await supabase
+      .from('profiles')
+      .update({ whatsapp: socioWhatsapp })
+      .eq('user_id', user.id);
+    setSavingWhatsapp(false);
+    if (error) {
+      toast({ title: 'Erro', description: 'Falha ao salvar WhatsApp', variant: 'destructive' });
+    } else {
+      toast({ title: 'Sucesso', description: 'WhatsApp de contato salvo!' });
+    }
   };
 
   const fetchClients = async () => {
@@ -325,6 +353,29 @@ export default function Socios() {
             </CardContent>
           </Card>
         </div>
+
+        {/* WhatsApp Contact Card */}
+        <Card className="border-border mb-8">
+          <CardHeader>
+            <CardTitle className="text-foreground text-base">Seu WhatsApp de Contato</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <p className="text-sm text-muted-foreground mb-3">
+              Este número será exibido para seus clientes quando o acesso expirar.
+            </p>
+            <div className="flex gap-2">
+              <Input
+                value={socioWhatsapp}
+                onChange={e => setSocioWhatsapp(e.target.value)}
+                placeholder="(11) 99999-9999"
+                className="bg-background/50 border-border max-w-xs"
+              />
+              <Button onClick={saveSocioWhatsapp} disabled={savingWhatsapp}>
+                {savingWhatsapp ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Salvar'}
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
         {/* Clients Table */}
         <Card className="border-border">
