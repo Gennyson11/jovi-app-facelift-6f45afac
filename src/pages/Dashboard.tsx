@@ -397,11 +397,33 @@ export default function Dashboard() {
             <div className="mb-4 p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-center">
               <Lock className="w-10 h-10 text-red-500 mx-auto mb-2" />
               <h3 className="text-lg font-bold text-red-500 mb-1">Acesso Expirado</h3>
-              <p className="text-red-500/80 text-sm">Seu período de acesso terminou. Assine um plano para continuar.</p>
+              {userProfile?.partner_id && partnerInfo ? (
+                <div>
+                  <p className="text-red-500/80 text-sm mb-3">
+                    Seu período de acesso terminou. Entre em contato com seu revendedor para renovar:
+                  </p>
+                  <div className="inline-block bg-card border border-border rounded-lg p-4 text-left">
+                    <p className="text-sm text-foreground font-semibold">{partnerInfo.name || 'Seu revendedor'}</p>
+                    {partnerInfo.whatsapp && (
+                      <Button 
+                        size="sm" 
+                        className="mt-2 bg-green-500 hover:bg-green-600 text-white"
+                        onClick={() => window.open(`https://wa.me/55${partnerInfo.whatsapp?.replace(/\D/g, '')}`, '_blank')}
+                      >
+                        Falar no WhatsApp: {partnerInfo.whatsapp}
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <>
+                  <p className="text-red-500/80 text-sm">Seu período de acesso terminou. Assine um plano para continuar.</p>
+                </>
+              )}
             </div>
-            <SubscriptionPlans
-              subscriptionEnd={accessExpiresAt}
-            />
+            {!userProfile?.partner_id && (
+              <SubscriptionPlans subscriptionEnd={accessExpiresAt} />
+            )}
           </div>
         )}
 
