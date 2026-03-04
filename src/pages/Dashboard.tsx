@@ -120,7 +120,7 @@ export default function Dashboard() {
   const [isSocio, setIsSocio] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [showWhatsAppPopup, setShowWhatsAppPopup] = useState(false);
-  
+  const [partnerInfo, setPartnerInfo] = useState<{ name: string | null; whatsapp: string | null } | null>(null);
   const {
     user,
     signOut,
