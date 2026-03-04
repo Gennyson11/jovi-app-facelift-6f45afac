@@ -3,7 +3,6 @@ import { Button } from "@/components/ui/button";
 
 const benefits = [
   "Acesso a +12 Ferramentas Premium",
-  "CapCut Pro Privado (somente você)",
   "Canva no Seu Email (acesso individual)",
   "Brindes Exclusivos",
   "Métodos Bônus Inclusos"
