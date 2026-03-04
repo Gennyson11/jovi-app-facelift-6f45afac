@@ -2,11 +2,11 @@ import { Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const benefits = [
-  "Acesso a +12 Ferramentas Premium",
-  "Canva no Seu Email (acesso individual)",
-  "Brindes Exclusivos",
-  "Métodos Bônus Inclusos"
-];
+"Acesso a +12 Ferramentas Premium",
+"Canva no Seu Email (acesso individual)",
+"Brindes Exclusivos",
+"Métodos Bônus Inclusos"];
+
 
 const PricingSection = () => {
   return (
@@ -29,8 +29,8 @@ const PricingSection = () => {
             className="relative p-6 md:p-8 rounded-3xl bg-card/40 border-2 border-accent/40 transition-all duration-500 group hover:scale-[1.02] md:hover:scale-105 hover:border-accent/70"
             style={{
               boxShadow: '0 0 60px -20px hsl(var(--accent) / 0.6), inset 0 1px 0 0 hsl(var(--accent) / 0.2)'
-            }}
-          >
+            }}>
+            
             {/* Popular Badge */}
             <div className="flex justify-center mb-4 md:mb-6">
               <span className="px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-display font-bold bg-primary text-primary-foreground shadow-lg shadow-primary/30">
@@ -46,19 +46,19 @@ const PricingSection = () => {
               
               {/* Current Price */}
               <p className="my-3 md:my-4">
-                <span className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-primary">R$30</span>
+                <span className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-primary">R$27</span>
                 <span className="text-lg md:text-xl text-foreground">/mês</span>
               </p>
             </div>
 
             {/* Benefits */}
             <ul className="mt-6 md:mt-8 space-y-3 md:space-y-4">
-              {benefits.map((benefit) => (
-                <li key={benefit} className="flex items-center gap-2 md:gap-3 text-xs md:text-sm lg:text-base text-muted-foreground">
+              {benefits.map((benefit) =>
+              <li key={benefit} className="flex items-center gap-2 md:gap-3 text-xs md:text-sm lg:text-base text-muted-foreground">
                   <Check className="w-4 h-4 md:w-5 md:h-5 text-primary flex-shrink-0" />
                   {benefit}
                 </li>
-              ))}
+              )}
             </ul>
 
             {/* CTA */}
@@ -66,8 +66,8 @@ const PricingSection = () => {
               variant="default"
               size="lg"
               className="w-full mt-6 md:mt-8 bg-primary hover:bg-primary/90 text-primary-foreground font-display font-bold text-base md:text-lg py-5 md:py-6"
-              onClick={() => window.open('https://pay.cakto.com.br/z4jkfp5_580328', '_blank')}
-            >
+              onClick={() => window.open('https://pay.cakto.com.br/z4jkfp5_580328', '_blank')}>
+              
               ASSINAR AGORA
             </Button>
 
@@ -83,8 +83,8 @@ const PricingSection = () => {
             className="relative p-8 rounded-3xl bg-card/40 border-2 border-primary/40 transition-all duration-500 group hover:scale-105 hover:border-primary/70"
             style={{
               boxShadow: '0 0 100px -20px hsl(var(--primary) / 0.6), inset 0 1px 0 0 hsl(var(--primary) / 0.2)'
-            }}
-          >
+            }}>
+            
             {/* Best Value Badge */}
             <div className="flex justify-center mb-6">
               <span className="px-6 py-2 rounded-full text-sm font-display font-bold bg-accent text-accent-foreground shadow-lg shadow-accent/30">
@@ -100,22 +100,22 @@ const PricingSection = () => {
               
               {/* Current Price */}
               <p className="my-4">
-              <span className="text-5xl md:text-6xl font-display font-bold text-primary">R$97</span>
+              <span className="text-5xl md:text-6xl font-display font-bold text-primary">R$67</span>
                 <span className="text-xl text-foreground">/trimestre</span>
               </p>
               
               {/* Per month breakdown */}
-              <p className="text-primary text-base font-semibold">Apenas R$32/mês</p>
+              <p className="text-primary text-base font-semibold">Apenas R$22,33/mês</p>
             </div>
 
             {/* Benefits */}
             <ul className="mt-8 space-y-4">
-              {benefits.map((benefit) => (
-                <li key={benefit} className="flex items-center gap-3 text-sm md:text-base text-muted-foreground">
+              {benefits.map((benefit) =>
+              <li key={benefit} className="flex items-center gap-3 text-sm md:text-base text-muted-foreground">
                   <Check className="w-5 h-5 text-primary flex-shrink-0" />
                   {benefit}
                 </li>
-              ))}
+              )}
             </ul>
 
             {/* CTA */}
@@ -123,8 +123,8 @@ const PricingSection = () => {
               variant="default"
               size="lg"
               className="w-full mt-8 bg-primary hover:bg-primary/90 text-primary-foreground font-display font-bold text-lg py-6"
-              onClick={() => window.open('https://pay.cakto.com.br/scp6yiy_590727', '_blank')}
-            >
+              onClick={() => window.open('https://pay.cakto.com.br/scp6yiy_590727', '_blank')}>
+              
               ASSINAR AGORA
             </Button>
 
@@ -140,8 +140,8 @@ const PricingSection = () => {
             className="relative p-6 md:p-8 rounded-3xl bg-card/40 border-2 border-cyan-500/40 transition-all duration-500 group hover:scale-[1.02] md:hover:scale-105 hover:border-cyan-500/70"
             style={{
               boxShadow: '0 0 60px -20px hsl(180 100% 50% / 0.6), inset 0 1px 0 0 hsl(180 100% 50% / 0.2)'
-            }}
-          >
+            }}>
+            
             {/* Savings Badge */}
             <div className="flex justify-center mb-4 md:mb-6">
               <span className="px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-display font-bold bg-cyan-500 text-white shadow-lg shadow-cyan-500/30">
@@ -157,22 +157,22 @@ const PricingSection = () => {
               
               {/* Current Price */}
               <p className="my-3 md:my-4">
-                <span className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-primary">R$297</span>
+                <span className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-primary">R$247</span>
                 <span className="text-lg md:text-xl text-foreground">/ano</span>
               </p>
               
               {/* Per month breakdown */}
-              <p className="text-primary text-sm md:text-base font-semibold">Apenas R$24,75/mês</p>
+              <p className="text-primary text-sm md:text-base font-semibold">Apenas R$20,58/mês</p>
             </div>
 
             {/* Benefits */}
             <ul className="mt-6 md:mt-8 space-y-3 md:space-y-4">
-              {benefits.map((benefit) => (
-                <li key={benefit} className="flex items-center gap-2 md:gap-3 text-xs md:text-sm lg:text-base text-muted-foreground">
+              {benefits.map((benefit) =>
+              <li key={benefit} className="flex items-center gap-2 md:gap-3 text-xs md:text-sm lg:text-base text-muted-foreground">
                   <Check className="w-4 h-4 md:w-5 md:h-5 text-primary flex-shrink-0" />
                   {benefit}
                 </li>
-              ))}
+              )}
             </ul>
 
             {/* CTA */}
@@ -180,8 +180,8 @@ const PricingSection = () => {
               variant="default"
               size="lg"
               className="w-full mt-6 md:mt-8 bg-primary hover:bg-primary/90 text-primary-foreground font-display font-bold text-base md:text-lg py-5 md:py-6"
-              onClick={() => window.open('https://pay.cakto.com.br/rjwpjtb_686697', '_blank')}
-            >
+              onClick={() => window.open('https://pay.cakto.com.br/rjwpjtb_686697', '_blank')}>
+              
               ASSINAR AGORA
             </Button>
 
@@ -193,8 +193,8 @@ const PricingSection = () => {
           </div>
         </div>
       </div>
-    </section>
-  );
+    </section>);
+
 };
 
 export default PricingSection;
