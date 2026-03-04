@@ -510,6 +510,13 @@ export type Database = {
         }[]
       }
       generate_invite_code: { Args: never; Returns: string }
+      get_partner_contact: {
+        Args: { p_user_id: string }
+        Returns: {
+          partner_name: string
+          partner_whatsapp: string
+        }[]
+      }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
