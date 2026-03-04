@@ -93,6 +93,7 @@ export default function Socios() {
     }
     
     setIsSocio(true);
+    fetchSocioWhatsapp();
     fetchClients();
   };
 
