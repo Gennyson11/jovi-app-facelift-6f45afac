@@ -40,21 +40,6 @@ const ToolsSection = () => {
               <ToolsList tools={aiTools} />
             </div>
 
-            {/* Editing Tools */}
-            <div>
-              <h3 className="text-base md:text-lg font-display font-bold text-primary mb-6 md:mb-8">
-                EDIÇÕES / DISTRAÇÕES
-              </h3>
-              <ToolsList tools={editingTools} />
-            </div>
-
-            {/* SEO Tools */}
-            <div>
-              <h3 className="text-base md:text-lg font-display font-bold text-primary mb-6 md:mb-8">
-                SEO/MINERAÇÃO
-              </h3>
-              <ToolsList tools={seoTools} />
-            </div>
 
             {/* Streaming Tools */}
             <div>
