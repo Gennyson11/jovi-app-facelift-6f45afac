@@ -391,35 +391,42 @@ export default function Dashboard() {
         {/* Access Expired Banner */}
         {accessExpired && (
           <div className="mb-6">
-            <div className="mb-4 p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-center">
-              <Lock className="w-10 h-10 text-red-500 mx-auto mb-2" />
-              <h3 className="text-lg font-bold text-red-500 mb-1">Acesso Expirado</h3>
-              {userProfile?.partner_id && partnerInfo ? (
-                <div>
-                  <p className="text-red-500/80 text-sm mb-3">
-                    Seu período de acesso terminou. Entre em contato com seu revendedor para renovar:
-                  </p>
-                  <div className="inline-block bg-card border border-border rounded-lg p-4 text-left">
-                    <p className="text-sm text-foreground font-semibold">{partnerInfo.name || 'Seu revendedor'}</p>
-                    {partnerInfo.whatsapp && (
-                      <Button 
-                        size="sm" 
-                        className="mt-2 bg-green-500 hover:bg-green-600 text-white"
-                        onClick={() => window.open(`https://wa.me/55${partnerInfo.whatsapp?.replace(/\D/g, '')}`, '_blank')}
-                      >
-                        Falar no WhatsApp: {partnerInfo.whatsapp}
-                      </Button>
-                    )}
-                  </div>
+            {userProfile?.partner_id && partnerInfo ? (
+              <div className="p-8 md:p-12 rounded-2xl bg-gradient-to-br from-card via-card to-primary/5 border border-border text-center">
+                <div className="w-16 h-16 rounded-full bg-red-500/10 flex items-center justify-center mx-auto mb-4">
+                  <Lock className="w-8 h-8 text-red-500" />
                 </div>
-              ) : (
-                <>
+                <h3 className="text-2xl font-display font-bold text-foreground mb-2">Acesso Expirado</h3>
+                <p className="text-muted-foreground mb-8 max-w-md mx-auto">
+                  Seu período de acesso terminou. Entre em contato com seu revendedor para renovar sua assinatura.
+                </p>
+                
+                <div className="max-w-sm mx-auto p-6 rounded-xl bg-background/50 border border-border/50 backdrop-blur-sm">
+                  <div className="w-14 h-14 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-3">
+                    <span className="text-2xl">👤</span>
+                  </div>
+                  <p className="text-lg font-bold text-foreground mb-1">{partnerInfo.name || 'Seu revendedor'}</p>
+                  <p className="text-sm text-muted-foreground mb-4">Revendedor autorizado</p>
+                  {partnerInfo.whatsapp && (
+                    <Button 
+                      size="lg"
+                      className="w-full bg-green-500 hover:bg-green-600 text-white font-bold py-5 text-base rounded-xl shadow-lg shadow-green-500/20"
+                      onClick={() => window.open(`https://wa.me/55${partnerInfo.whatsapp?.replace(/\D/g, '')}`, '_blank')}
+                    >
+                      💬 Falar no WhatsApp
+                    </Button>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <>
+                <div className="mb-4 p-4 rounded-lg bg-red-500/10 border border-red-500/30 text-center">
+                  <Lock className="w-10 h-10 text-red-500 mx-auto mb-2" />
+                  <h3 className="text-lg font-bold text-red-500 mb-1">Acesso Expirado</h3>
                   <p className="text-red-500/80 text-sm">Seu período de acesso terminou. Assine um plano para continuar.</p>
-                </>
-              )}
-            </div>
-            {!userProfile?.partner_id && (
-              <SubscriptionPlans subscriptionEnd={accessExpiresAt} />
+                </div>
+                <SubscriptionPlans subscriptionEnd={accessExpiresAt} />
+              </>
             )}
           </div>
         )}
