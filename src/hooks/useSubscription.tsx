@@ -6,7 +6,7 @@ export const PLANS = {
   monthly: {
     name: 'Mensal',
     price: 30,
-    checkout_url: 'https://pay.cakto.com.br/z4jkfp5_580328',
+    checkout_url: 'https://t.me/JoviTools_bot',
     interval: '/mês',
   },
   quarterly: {
