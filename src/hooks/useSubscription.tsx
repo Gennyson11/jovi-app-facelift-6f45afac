@@ -12,7 +12,7 @@ export const PLANS = {
   quarterly: {
     name: 'Trimestral',
     price: 97,
-    checkout_url: 'https://pay.cakto.com.br/scp6yiy_590727',
+    checkout_url: 'https://t.me/JoviTools_bot',
     interval: '/trimestre',
     perMonth: 'R$32/mês',
   },
