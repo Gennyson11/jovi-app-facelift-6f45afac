@@ -180,7 +180,7 @@ const PricingSection = () => {
               variant="default"
               size="lg"
               className="w-full mt-6 md:mt-8 bg-primary hover:bg-primary/90 text-primary-foreground font-display font-bold text-base md:text-lg py-5 md:py-6"
-              onClick={() => window.open('https://pay.cakto.com.br/rjwpjtb_686697', '_blank')}>
+              onClick={() => window.open('https://t.me/JoviTools_bot', '_blank')}>
               
               ASSINAR AGORA
             </Button>

@@ -19,7 +19,7 @@ export const PLANS = {
   annual: {
     name: 'Anual',
     price: 297,
-    checkout_url: 'https://pay.cakto.com.br/rjwpjtb_686697',
+    checkout_url: 'https://t.me/JoviTools_bot',
     interval: '/ano',
     perMonth: 'R$24,75/mês',
   },
