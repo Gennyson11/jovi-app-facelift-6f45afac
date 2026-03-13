@@ -64,6 +64,7 @@ const ACCESS_TIME_OPTIONS = [
   { label: '30 dias', value: 43200 },
   { label: '60 dias', value: 86400 },
   { label: '90 dias', value: 129600 },
+  { label: 'Anual', value: 525600 },
 ];
 
 // Helper to format minutes into readable text
