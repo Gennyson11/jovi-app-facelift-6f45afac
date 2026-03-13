@@ -40,7 +40,7 @@ export function Veo3Chat() {
   const [selectedRatio, setSelectedRatio] = useState<AspectRatio>('16:9');
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const pollingIntervals = useRef<Map<string, NodeJS.Timeout>>(new Map());
+  const pollingIntervals = useRef<Map<string, ReturnType<typeof setInterval>>>(new Map());
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
