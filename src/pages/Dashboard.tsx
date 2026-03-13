@@ -156,7 +156,7 @@ export default function Dashboard() {
 
   // WhatsApp popup timer - shows on login and every 3 minutes
   const whatsappTimerStartedRef = useRef(false);
-  const whatsappIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const whatsappIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (!user || whatsappTimerStartedRef.current) return;
