@@ -23,9 +23,9 @@ interface ClientProfile {
 }
 
 const PLAN_OPTIONS = [
+  { label: '7 dias', days: 7 },
+  { label: '15 dias', days: 15 },
   { label: '30 dias', days: 30 },
-  { label: '90 dias', days: 90 },
-  { label: '1 ano', days: 365 },
 ];
 
 export default function Socios() {
