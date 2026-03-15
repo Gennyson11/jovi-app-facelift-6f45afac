@@ -2,7 +2,7 @@ import { Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const benefits = [
-"Acesso a +12 Ferramentas Premium",
+"Acesso +15 Ferramentas Premium",
 "Canva no Seu Email (acesso individual)",
 "Brindes Exclusivos",
 "Métodos Bônus Inclusos"];
