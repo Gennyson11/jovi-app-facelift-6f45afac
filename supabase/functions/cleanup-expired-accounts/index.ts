@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
 
     const now = new Date().toISOString()
 
-    // Only revoke access (has_access = false), do NOT delete accounts
+    // Find expired accounts
     const { data: expiredProfiles, error: fetchError } = await supabaseAdmin
       .from('profiles')
       .select('id, user_id, email, name, access_expires_at')
@@ -45,45 +45,73 @@ Deno.serve(async (req) => {
         JSON.stringify({ 
           success: true, 
           message: 'No expired accounts found',
-          revoked_count: 0 
+          deleted_count: 0 
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    console.log(`Found ${expiredProfiles.length} expired accounts to revoke access`)
+    console.log(`Found ${expiredProfiles.length} expired accounts to delete`)
 
-    const revokedAccounts: string[] = []
+    const deletedAccounts: string[] = []
     const errors: string[] = []
 
     for (const profile of expiredProfiles) {
       try {
-        console.log(`Revoking access for user: ${profile.email} (expired at: ${profile.access_expires_at})`)
-        
-        const { error: updateError } = await supabaseAdmin
+        console.log(`Deleting expired user: ${profile.email} (expired at: ${profile.access_expires_at})`)
+
+        // 1. Delete user_platform_access
+        await supabaseAdmin
+          .from('user_platform_access')
+          .delete()
+          .eq('user_id', profile.id)
+
+        // 2. Delete user_coins
+        await supabaseAdmin
+          .from('user_coins')
+          .delete()
+          .eq('user_id', profile.user_id)
+
+        // 3. Delete user_roles
+        await supabaseAdmin
+          .from('user_roles')
+          .delete()
+          .eq('user_id', profile.user_id)
+
+        // 4. Delete profile
+        const { error: profileError } = await supabaseAdmin
           .from('profiles')
-          .update({ has_access: false, updated_at: now })
+          .delete()
           .eq('id', profile.id)
 
-        if (updateError) {
-          console.error(`Error revoking access for ${profile.email}:`, updateError)
-          errors.push(`${profile.email}: ${updateError.message}`)
+        if (profileError) {
+          console.error(`Error deleting profile for ${profile.email}:`, profileError)
+          errors.push(`${profile.email}: ${profileError.message}`)
+          continue
+        }
+
+        // 5. Delete from auth.users
+        const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(profile.user_id)
+
+        if (authError) {
+          console.error(`Error deleting auth user for ${profile.email}:`, authError)
+          errors.push(`${profile.email}: auth deletion failed - ${authError.message}`)
         } else {
-          console.log(`Successfully revoked access for: ${profile.email}`)
-          revokedAccounts.push(profile.email)
+          console.log(`Successfully deleted user: ${profile.email}`)
+          deletedAccounts.push(profile.email)
         }
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-        console.error(`Exception revoking access for ${profile.email}:`, err)
+        console.error(`Exception deleting ${profile.email}:`, err)
         errors.push(`${profile.email}: ${errorMessage}`)
       }
     }
 
     const result = {
       success: true,
-      message: `Cleanup completed. Revoked access for ${revokedAccounts.length} accounts.`,
-      revoked_count: revokedAccounts.length,
-      revoked_emails: revokedAccounts,
+      message: `Cleanup completed. Deleted ${deletedAccounts.length} expired accounts.`,
+      deleted_count: deletedAccounts.length,
+      deleted_emails: deletedAccounts,
       errors: errors.length > 0 ? errors : undefined
     }
 
