@@ -1339,6 +1339,10 @@ export default function Admin() {
               <Users className="w-4 h-4" />
               Sócios
             </TabsTrigger>
+            <TabsTrigger value="partner-payments" className="gap-2">
+              <DollarSign className="w-4 h-4" />
+              Pagamentos Sócios
+            </TabsTrigger>
             <TabsTrigger value="settings" className="gap-2">
               <Settings className="w-4 h-4" />
               Configurações
