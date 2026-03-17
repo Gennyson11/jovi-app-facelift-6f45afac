@@ -43,6 +43,7 @@ const DASHBOARD_ITEMS = [
   { id: 'biblioteca', label: 'Bônus', icon: Library, category: 'bonus_courses' },
   { id: 'loja', label: 'Loja', icon: ShoppingCart, category: 'loja' },
   { id: 'jovi_ia', label: 'Jovi.ia', icon: Bot, category: 'jovi_ia' },
+  { id: 'creditos', label: 'Meus Créditos', icon: Ticket, href: '/creditos', route: true },
 ];
 
 const GENERAL_ITEMS = [
@@ -73,6 +74,11 @@ export default function DashboardSidebar({
   };
 
   const handleItemClick = (item: typeof DASHBOARD_ITEMS[0]) => {
+    if ('route' in item && (item as any).route && (item as any).href) {
+      navigate((item as any).href);
+      setIsMobileOpen(false);
+      return;
+    }
     // Navigate to dashboard if not already there
     if (location.pathname !== '/dashboard') {
       navigate('/dashboard');
@@ -126,7 +132,10 @@ export default function DashboardSidebar({
           )}
           <nav className="space-y-1">
             {DASHBOARD_ITEMS.map((item) => {
-              const isActive = activeCategory === item.category && item.category !== null;
+              const isRoute = 'route' in item && (item as any).route;
+              const isActive = isRoute 
+                ? location.pathname === (item as any).href
+                : activeCategory === item.category && item.category !== null;
               return (
                 <button
                   key={item.id}
