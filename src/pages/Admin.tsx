@@ -89,6 +89,8 @@ interface SocioUser {
   name: string | null;
   created_at: string;
   clients: SocioClient[];
+  socio_2_enabled: boolean;
+  profile_id: string;
 }
 
 interface UserAccessLog {
