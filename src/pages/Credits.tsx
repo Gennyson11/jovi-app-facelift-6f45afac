@@ -628,6 +628,110 @@ export default function Credits() {
           )}
         </main>
       </div>
+
+      {/* PIX Payment Modal */}
+      <Dialog open={pixModalOpen} onOpenChange={(open) => { if (!open && !pixLoading) { setPixModalOpen(false); setPixData(null); } }}>
+        <DialogContent className="sm:max-w-md border-primary/30 bg-card">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <CreditCard className="w-5 h-5 text-primary" />
+              Comprar Créditos
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-xs text-muted-foreground">Cada crédito equivale a 1 acesso criado para seu cliente</p>
+
+          {pixLoading && (
+            <div className="flex flex-col items-center justify-center py-12 gap-3">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">Gerando pagamento PIX...</p>
+            </div>
+          )}
+
+          {paymentConfirmed && (
+            <div className="flex flex-col items-center justify-center py-8 gap-3">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-emerald-400" />
+              </div>
+              <p className="text-lg font-bold text-foreground">Pagamento Confirmado!</p>
+              <p className="text-sm text-muted-foreground">+{pixData?.creditAmount} créditos adicionados ao seu saldo</p>
+              <Button onClick={() => { setPixModalOpen(false); setPixData(null); }} className="mt-2">
+                Fechar
+              </Button>
+            </div>
+          )}
+
+          {pixData && !pixLoading && !paymentConfirmed && (
+            <div className="space-y-4">
+              {/* Package info */}
+              <div className="flex items-center justify-between p-3 rounded-lg border border-primary/30 bg-primary/5">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium text-foreground">{pixData.creditAmount} Crédito{pixData.creditAmount > 1 ? 's' : ''}</span>
+                </div>
+                <span className="text-lg font-bold text-primary">
+                  R$ {pixData.value.toFixed(2).replace('.', ',')}
+                </span>
+              </div>
+
+              {/* QR Code */}
+              <div className="flex flex-col items-center gap-2">
+                <div className="bg-white p-3 rounded-lg">
+                  <img
+                    src={`data:image/png;base64,${pixData.qrCodeImage}`}
+                    alt="QR Code PIX"
+                    className="w-48 h-48"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">Escaneie o QR Code ou copie o código abaixo</p>
+              </div>
+
+              {/* PIX Code */}
+              <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                <p className="text-[10px] text-muted-foreground font-mono break-all leading-relaxed max-h-16 overflow-y-auto">
+                  {pixData.pixCode}
+                </p>
+              </div>
+
+              {/* Copy button */}
+              <Button variant="outline" className="w-full gap-2" onClick={handleCopyPixCode}>
+                <Copy className="w-4 h-4" />
+                Copiar código PIX
+              </Button>
+
+              {/* Checking payment */}
+              <Button
+                className="w-full gap-2"
+                variant="default"
+                onClick={handleCheckPayment}
+                disabled={checkingPayment}
+              >
+                {checkingPayment ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Verificando...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-4 h-4" />
+                    Aguardando pagamento
+                  </>
+                )}
+              </Button>
+
+              {/* Already paid */}
+              <Button
+                variant="ghost"
+                className="w-full gap-2 text-muted-foreground"
+                onClick={handleCheckPayment}
+                disabled={checkingPayment}
+              >
+                <CheckCircle className="w-4 h-4" />
+                Já fiz o Pagamento
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
