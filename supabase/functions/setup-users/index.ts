@@ -240,7 +240,7 @@ serve(async (req) => {
         throw updateError;
       }
 
-      console.log("Password updated for user:", email, "by admin:", callerUser.email);
+      console.log("Password updated for user:", email, "by admin:", callerUserEmail);
 
       return new Response(
         JSON.stringify({ success: true, message: "Password updated successfully", userId }),
