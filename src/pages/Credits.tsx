@@ -320,14 +320,28 @@ export default function Credits() {
     const pkg = CREDIT_PACKAGES.find(p => p.id === packageId);
     if (!pkg) return;
     
-    setPixLoading(true);
-    setPixModalOpen(true);
+    setSelectedPackage(pkg);
+    setCpfStep(true);
+    setCpfInput('');
     setPixData(null);
     setPaymentConfirmed(false);
+    setPixModalOpen(true);
+  };
+
+  const handleConfirmCpf = async () => {
+    if (!selectedPackage) return;
+    const cleanCpf = cpfInput.replace(/\D/g, '');
+    if (cleanCpf.length !== 11 && cleanCpf.length !== 14) {
+      toast({ title: '❌ CPF/CNPJ inválido', description: 'Informe um CPF (11 dígitos) ou CNPJ (14 dígitos) válido.', variant: 'destructive' });
+      return;
+    }
+
+    setCpfStep(false);
+    setPixLoading(true);
 
     try {
       const { data, error } = await supabase.functions.invoke('create-pix-payment', {
-        body: { amount: pkg.amount, price: pkg.price },
+        body: { amount: selectedPackage.amount, price: selectedPackage.price, cpfCnpj: cleanCpf },
       });
 
       if (error) throw error;
