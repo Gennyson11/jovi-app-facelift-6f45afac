@@ -436,6 +436,22 @@ export default function Admin() {
       setUserLastAccess(lastAccessMap);
     }
     
+    // Process partner payments (credit purchases by socios)
+    if (creditTxRes.data && usersRes.data && sociosRes.data) {
+      const socioUserIds = new Set(sociosRes.data.map((s: any) => s.user_id));
+      const payments: PartnerPayment[] = creditTxRes.data
+        .filter((tx: any) => socioUserIds.has(tx.user_id))
+        .map((tx: any) => {
+          const profile = usersRes.data!.find((u: any) => u.user_id === tx.user_id);
+          return {
+            ...tx,
+            partner_name: profile?.name || null,
+            partner_email: profile?.email || tx.user_id,
+          };
+        });
+      setPartnerPayments(payments);
+    }
+    
     setLoading(false);
   };
   const handleLogout = async () => {
