@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Coins, Trophy, Star, Target, Gift, CheckCircle, Lock, ArrowRight, Zap, Clock } from 'lucide-react';
+import { Loader2, Coins, Trophy, Star, Target, Gift, CheckCircle, Lock, ArrowRight, Zap, Clock, Copy, RefreshCw, X, CreditCard } from 'lucide-react';
 import DashboardSidebar from '@/components/DashboardSidebar';
 
 // Mission tier system
@@ -191,6 +192,18 @@ export default function Credits() {
   const [loading, setLoading] = useState(true);
   const [claimingMission, setClaimingMission] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'creditos' | 'missoes' | 'historico'>('creditos');
+  const [pixModalOpen, setPixModalOpen] = useState(false);
+  const [pixLoading, setPixLoading] = useState(false);
+  const [pixData, setPixData] = useState<{
+    paymentId: string;
+    pixCode: string;
+    qrCodeImage: string;
+    value: number;
+    creditAmount: number;
+    status: string;
+  } | null>(null);
+  const [checkingPayment, setCheckingPayment] = useState(false);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
 
   const { user, signOut, loading: authLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
@@ -300,8 +313,62 @@ export default function Credits() {
     setClaimingMission(null);
   };
 
-  const handleBuyCredits = (packageId: string) => {
-    toast({ title: '💳 Em breve!', description: 'A integração com Asaas está sendo configurada. Aguarde!' });
+  const handleBuyCredits = async (packageId: string) => {
+    const pkg = CREDIT_PACKAGES.find(p => p.id === packageId);
+    if (!pkg) return;
+    
+    setPixLoading(true);
+    setPixModalOpen(true);
+    setPixData(null);
+    setPaymentConfirmed(false);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-pix-payment', {
+        body: { amount: pkg.amount, price: pkg.price },
+      });
+
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+
+      setPixData(data);
+    } catch (err: any) {
+      toast({ title: '❌ Erro', description: err.message || 'Erro ao gerar PIX', variant: 'destructive' });
+      setPixModalOpen(false);
+    } finally {
+      setPixLoading(false);
+    }
+  };
+
+  const handleCopyPixCode = () => {
+    if (pixData?.pixCode) {
+      navigator.clipboard.writeText(pixData.pixCode);
+      toast({ title: '✅ Copiado!', description: 'Código PIX copiado para a área de transferência' });
+    }
+  };
+
+  const handleCheckPayment = async () => {
+    if (!pixData) return;
+    setCheckingPayment(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('check-pix-payment', {
+        body: { paymentId: pixData.paymentId, creditAmount: pixData.creditAmount },
+      });
+
+      if (error) throw error;
+
+      if (data.status === 'CONFIRMED') {
+        setPaymentConfirmed(true);
+        toast({ title: '🎉 Pagamento Confirmado!', description: `+${pixData.creditAmount} créditos adicionados!` });
+        fetchData();
+      } else {
+        toast({ title: '⏳ Aguardando', description: 'Pagamento ainda não confirmado. Tente novamente em alguns segundos.' });
+      }
+    } catch (err: any) {
+      toast({ title: '❌ Erro', description: err.message || 'Erro ao verificar pagamento', variant: 'destructive' });
+    } finally {
+      setCheckingPayment(false);
+    }
   };
 
   const handleLogout = async () => {
@@ -561,6 +628,110 @@ export default function Credits() {
           )}
         </main>
       </div>
+
+      {/* PIX Payment Modal */}
+      <Dialog open={pixModalOpen} onOpenChange={(open) => { if (!open && !pixLoading) { setPixModalOpen(false); setPixData(null); } }}>
+        <DialogContent className="sm:max-w-md border-primary/30 bg-card">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2 text-foreground">
+              <CreditCard className="w-5 h-5 text-primary" />
+              Comprar Créditos
+            </DialogTitle>
+          </DialogHeader>
+          <p className="text-xs text-muted-foreground">Cada crédito equivale a 1 acesso criado para seu cliente</p>
+
+          {pixLoading && (
+            <div className="flex flex-col items-center justify-center py-12 gap-3">
+              <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              <p className="text-sm text-muted-foreground">Gerando pagamento PIX...</p>
+            </div>
+          )}
+
+          {paymentConfirmed && (
+            <div className="flex flex-col items-center justify-center py-8 gap-3">
+              <div className="w-16 h-16 rounded-full bg-emerald-500/20 flex items-center justify-center">
+                <CheckCircle className="w-8 h-8 text-emerald-400" />
+              </div>
+              <p className="text-lg font-bold text-foreground">Pagamento Confirmado!</p>
+              <p className="text-sm text-muted-foreground">+{pixData?.creditAmount} créditos adicionados ao seu saldo</p>
+              <Button onClick={() => { setPixModalOpen(false); setPixData(null); }} className="mt-2">
+                Fechar
+              </Button>
+            </div>
+          )}
+
+          {pixData && !pixLoading && !paymentConfirmed && (
+            <div className="space-y-4">
+              {/* Package info */}
+              <div className="flex items-center justify-between p-3 rounded-lg border border-primary/30 bg-primary/5">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium text-foreground">{pixData.creditAmount} Crédito{pixData.creditAmount > 1 ? 's' : ''}</span>
+                </div>
+                <span className="text-lg font-bold text-primary">
+                  R$ {pixData.value.toFixed(2).replace('.', ',')}
+                </span>
+              </div>
+
+              {/* QR Code */}
+              <div className="flex flex-col items-center gap-2">
+                <div className="bg-white p-3 rounded-lg">
+                  <img
+                    src={`data:image/png;base64,${pixData.qrCodeImage}`}
+                    alt="QR Code PIX"
+                    className="w-48 h-48"
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground">Escaneie o QR Code ou copie o código abaixo</p>
+              </div>
+
+              {/* PIX Code */}
+              <div className="p-3 rounded-lg bg-muted/50 border border-border">
+                <p className="text-[10px] text-muted-foreground font-mono break-all leading-relaxed max-h-16 overflow-y-auto">
+                  {pixData.pixCode}
+                </p>
+              </div>
+
+              {/* Copy button */}
+              <Button variant="outline" className="w-full gap-2" onClick={handleCopyPixCode}>
+                <Copy className="w-4 h-4" />
+                Copiar código PIX
+              </Button>
+
+              {/* Checking payment */}
+              <Button
+                className="w-full gap-2"
+                variant="default"
+                onClick={handleCheckPayment}
+                disabled={checkingPayment}
+              >
+                {checkingPayment ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    Verificando...
+                  </>
+                ) : (
+                  <>
+                    <RefreshCw className="w-4 h-4" />
+                    Aguardando pagamento
+                  </>
+                )}
+              </Button>
+
+              {/* Already paid */}
+              <Button
+                variant="ghost"
+                className="w-full gap-2 text-muted-foreground"
+                onClick={handleCheckPayment}
+                disabled={checkingPayment}
+              >
+                <CheckCircle className="w-4 h-4" />
+                Já fiz o Pagamento
+              </Button>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
