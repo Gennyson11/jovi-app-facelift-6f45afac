@@ -10,7 +10,8 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Loader2, UserCheck, UserX, Clock, Calendar, Infinity, Users, Handshake, Eye, EyeOff, Coins, Trophy, Gift } from 'lucide-react';
+import { LogOut, Plus, Loader2, UserCheck, UserX, Clock, Calendar, Infinity, Users, Handshake, Eye, EyeOff, Coins, Trophy, Gift, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface ClientProfile {
   id: string;
@@ -47,6 +48,8 @@ export default function Socios() {
   const [savingClient, setSavingClient] = useState(false);
   const [socioWhatsapp, setSocioWhatsapp] = useState('');
   const [savingWhatsapp, setSavingWhatsapp] = useState(false);
+  const [deletingClientId, setDeletingClientId] = useState<string | null>(null);
+  const [confirmDeleteClient, setConfirmDeleteClient] = useState<ClientProfile | null>(null);
 
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -289,6 +292,36 @@ export default function Socios() {
     fetchClients();
   };
 
+  const deleteClient = async (client: ClientProfile) => {
+    setDeletingClientId(client.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('setup-users', {
+        body: {
+          action: 'delete_client',
+          client_profile_id: client.id
+        }
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Falha ao deletar cliente');
+
+      toast({
+        title: 'Sucesso',
+        description: `Cliente "${client.name || 'sem nome'}" deletado permanentemente.`
+      });
+      fetchClients();
+    } catch (error: any) {
+      console.error('Error deleting client:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Falha ao deletar cliente',
+        variant: 'destructive'
+      });
+    } finally {
+      setDeletingClientId(null);
+      setConfirmDeleteClient(null);
+    }
+  };
 
   const getAccessStatus = (client: ClientProfile) => {
     if (!client.has_access) {
@@ -537,23 +570,38 @@ export default function Socios() {
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant={client.has_access ? "destructive" : "default"}
-                            size="sm"
-                            onClick={() => toggleClientAccess(client.id, client.has_access)}
-                          >
-                            {client.has_access ? (
-                              <>
-                                <UserX className="w-4 h-4 mr-2" />
-                                Bloquear
-                              </>
-                            ) : (
-                              <>
-                                <UserCheck className="w-4 h-4 mr-2" />
-                                Liberar
-                              </>
-                            )}
-                          </Button>
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant={client.has_access ? "destructive" : "default"}
+                              size="sm"
+                              onClick={() => toggleClientAccess(client.id, client.has_access)}
+                            >
+                              {client.has_access ? (
+                                <>
+                                  <UserX className="w-4 h-4 mr-2" />
+                                  Bloquear
+                                </>
+                              ) : (
+                                <>
+                                  <UserCheck className="w-4 h-4 mr-2" />
+                                  Liberar
+                                </>
+                              )}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                              onClick={() => setConfirmDeleteClient(client)}
+                              disabled={deletingClientId === client.id}
+                            >
+                              {deletingClientId === client.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
@@ -573,6 +621,28 @@ export default function Socios() {
           </CardContent>
         </Card>
       </main>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!confirmDeleteClient} onOpenChange={(open) => !open && setConfirmDeleteClient(null)}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deletar Cliente</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja deletar o cliente <strong>{confirmDeleteClient?.name || 'sem nome'}</strong>? 
+              Esta ação é <strong>permanente</strong> e não pode ser desfeita. O usuário será removido completamente do sistema.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={() => confirmDeleteClient && deleteClient(confirmDeleteClient)}
+            >
+              Deletar Permanentemente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* New Client Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
