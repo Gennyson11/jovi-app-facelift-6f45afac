@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Users, UserCheck, UserX, Settings, CheckSquare, Clock, Calendar, Infinity, PlusCircle, MinusCircle, Megaphone, ToggleLeft, ToggleRight, Wifi, WifiOff, MousePointerClick, Gift, QrCode, Handshake, Search, ShoppingCart, Package, MapPin, AlertOctagon, UserPlus, Construction } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import { useMaintenance } from '@/hooks/useMaintenance';
 import InvitesManager from '@/components/admin/InvitesManager';
 type StreamingStatus = 'online' | 'maintenance';
