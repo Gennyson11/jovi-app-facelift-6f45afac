@@ -656,6 +656,14 @@ export default function Socios() {
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
                             <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openEditDialog(client)}
+                              className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 border-blue-500/30"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                            <Button
                               variant={client.has_access ? "destructive" : "default"}
                               size="sm"
                               onClick={() => toggleClientAccess(client.id, client.has_access)}
