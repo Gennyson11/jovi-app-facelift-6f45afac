@@ -280,7 +280,7 @@ serve(async (req) => {
       }
       
       const authUserId = profileData.user_id;
-      console.log("Deleting user with auth id:", authUserId, "email:", email, "by admin:", callerUser.email);
+      console.log("Deleting user with auth id:", authUserId, "email:", email, "by admin:", callerUserEmail);
 
       // Delete from auth.users (this will cascade to profiles due to trigger/foreign key)
       const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(authUserId);
