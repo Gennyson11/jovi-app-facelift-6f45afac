@@ -2082,7 +2082,7 @@ export default function Admin() {
             <Card className="border-border">
               <CardHeader className="flex flex-row items-center justify-between">
                 <div>
-                  <CardTitle className="text-foreground">Pagamentos dos Sócios</CardTitle>
+                  <CardTitle className="text-foreground">Recargas dos Sócios</CardTitle>
                   <p className="text-sm text-muted-foreground mt-1">Histórico de compras de crédito realizadas pelos sócios</p>
                 </div>
                 <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 text-green-500">
