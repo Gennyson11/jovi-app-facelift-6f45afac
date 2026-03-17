@@ -517,7 +517,7 @@ serve(async (req) => {
         );
       }
 
-      const { new_email, new_password } = await req.json().catch(() => ({ new_email: null, new_password: null }));
+      // new_email and new_password already parsed from body on line 77
 
       // Get client profile to verify ownership
       const { data: clientProfile, error: clientFetchError } = await supabaseAdmin
