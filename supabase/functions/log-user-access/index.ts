@@ -90,7 +90,7 @@ Deno.serve(async (req) => {
     const { error: insertError } = await supabaseAdmin
       .from('user_access_logs')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         ip_address: ip,
         city,
         region,
