@@ -292,6 +292,36 @@ export default function Socios() {
     fetchClients();
   };
 
+  const deleteClient = async (client: ClientProfile) => {
+    setDeletingClientId(client.id);
+    try {
+      const { data, error } = await supabase.functions.invoke('setup-users', {
+        body: {
+          action: 'delete_client',
+          client_profile_id: client.id
+        }
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Falha ao deletar cliente');
+
+      toast({
+        title: 'Sucesso',
+        description: `Cliente "${client.name || 'sem nome'}" deletado permanentemente.`
+      });
+      fetchClients();
+    } catch (error: any) {
+      console.error('Error deleting client:', error);
+      toast({
+        title: 'Erro',
+        description: error.message || 'Falha ao deletar cliente',
+        variant: 'destructive'
+      });
+    } finally {
+      setDeletingClientId(null);
+      setConfirmDeleteClient(null);
+    }
+  };
 
   const getAccessStatus = (client: ClientProfile) => {
     if (!client.has_access) {
