@@ -355,7 +355,7 @@ export default function Admin() {
       return allAccess;
     };
     
-    const [platformsRes, usersRes, newsRes, clicksRes, sociosRes, productsRes, accessLogsRes, allAccess] = await Promise.all([
+    const [platformsRes, usersRes, newsRes, clicksRes, sociosRes, productsRes, accessLogsRes, allAccess, creditTxRes] = await Promise.all([
       supabase.from('streaming_platforms').select('*').order('name'), 
       supabase.from('profiles').select('*').order('created_at', { ascending: false }), 
       supabase.from('news').select('*').order('created_at', { ascending: false }),
@@ -363,7 +363,8 @@ export default function Admin() {
       supabase.from('user_roles').select('user_id, created_at').eq('role', 'socio'),
       supabase.from('products').select('*').order('created_at', { ascending: false }),
       supabase.from('user_access_logs').select('*').order('created_at', { ascending: false }),
-      fetchAllPlatformAccess()
+      fetchAllPlatformAccess(),
+      supabase.from('credit_transactions').select('*').eq('type', 'purchase').order('created_at', { ascending: false })
     ]);
     
     // Debug logging - IMPORTANT
