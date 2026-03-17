@@ -204,6 +204,9 @@ export default function Credits() {
   } | null>(null);
   const [checkingPayment, setCheckingPayment] = useState(false);
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const [cpfInput, setCpfInput] = useState('');
+  const [selectedPackage, setSelectedPackage] = useState<typeof CREDIT_PACKAGES[0] | null>(null);
+  const [cpfStep, setCpfStep] = useState(true);
 
   const { user, signOut, loading: authLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
@@ -317,14 +320,28 @@ export default function Credits() {
     const pkg = CREDIT_PACKAGES.find(p => p.id === packageId);
     if (!pkg) return;
     
-    setPixLoading(true);
-    setPixModalOpen(true);
+    setSelectedPackage(pkg);
+    setCpfStep(true);
+    setCpfInput('');
     setPixData(null);
     setPaymentConfirmed(false);
+    setPixModalOpen(true);
+  };
+
+  const handleConfirmCpf = async () => {
+    if (!selectedPackage) return;
+    const cleanCpf = cpfInput.replace(/\D/g, '');
+    if (cleanCpf.length !== 11 && cleanCpf.length !== 14) {
+      toast({ title: '❌ CPF/CNPJ inválido', description: 'Informe um CPF (11 dígitos) ou CNPJ (14 dígitos) válido.', variant: 'destructive' });
+      return;
+    }
+
+    setCpfStep(false);
+    setPixLoading(true);
 
     try {
       const { data, error } = await supabase.functions.invoke('create-pix-payment', {
-        body: { amount: pkg.amount, price: pkg.price },
+        body: { amount: selectedPackage.amount, price: selectedPackage.price, cpfCnpj: cleanCpf },
       });
 
       if (error) throw error;
@@ -639,6 +656,35 @@ export default function Credits() {
             </DialogTitle>
           </DialogHeader>
           <p className="text-xs text-muted-foreground">Cada crédito equivale a 1 acesso criado para seu cliente</p>
+
+          {cpfStep && !pixLoading && !pixData && !paymentConfirmed && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between p-3 rounded-lg border border-primary/30 bg-primary/5">
+                <div className="flex items-center gap-2">
+                  <CreditCard className="w-4 h-4 text-primary" />
+                  <span className="text-sm font-medium text-foreground">{selectedPackage?.amount} Crédito{(selectedPackage?.amount || 0) > 1 ? 's' : ''}</span>
+                </div>
+                <span className="text-lg font-bold text-primary">
+                  R$ {(selectedPackage?.price || 0).toFixed(2).replace('.', ',')}
+                </span>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-foreground mb-1 block">CPF ou CNPJ</label>
+                <input
+                  type="text"
+                  placeholder="000.000.000-00"
+                  value={cpfInput}
+                  onChange={(e) => setCpfInput(e.target.value)}
+                  className="w-full px-3 py-2 rounded-lg border border-border bg-background text-foreground text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                  maxLength={18}
+                />
+                <p className="text-xs text-muted-foreground mt-1">Necessário para gerar o pagamento PIX</p>
+              </div>
+              <Button className="w-full" onClick={handleConfirmCpf} disabled={!cpfInput.replace(/\D/g, '')}>
+                Gerar PIX
+              </Button>
+            </div>
+          )}
 
           {pixLoading && (
             <div className="flex flex-col items-center justify-center py-12 gap-3">

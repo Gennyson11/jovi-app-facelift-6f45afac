@@ -22,8 +22,8 @@ serve(async (req) => {
     const { data: { user }, error: authError } = await supabaseClient.auth.getUser(token);
     if (authError || !user) throw new Error("Não autenticado");
 
-    const { amount, price } = await req.json();
-    if (!amount || !price) throw new Error("Dados inválidos");
+    const { amount, price, cpfCnpj } = await req.json();
+    if (!amount || !price || !cpfCnpj) throw new Error("Dados inválidos. CPF/CNPJ é obrigatório.");
 
     const ASAAS_API_KEY = Deno.env.get("ASAAS_API_KEY");
     if (!ASAAS_API_KEY) throw new Error("ASAAS_API_KEY não configurada");
@@ -50,7 +50,7 @@ serve(async (req) => {
         body: JSON.stringify({
           name: user.email!.split("@")[0],
           email: user.email,
-          cpfCnpj: "00000000000", // placeholder
+          cpfCnpj: cpfCnpj.replace(/\D/g, ''),
         }),
       });
       const customerData = await createCustomerRes.json();
