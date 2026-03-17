@@ -85,32 +85,43 @@ serve(async (req) => {
       if (createError) {
         // User might already exist
         if (createError.message.includes("already been registered") || createError.message.includes("already exists")) {
-          // Get existing user
-          const { data: { users }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
-          const existingUser = users?.find(u => u.email === email);
-          
           console.log("User already exists, updating password for:", email);
           
-          if (existingUser) {
-            userId = existingUser.id;
-            // Update password
-            await supabaseAdmin.auth.admin.updateUserById(existingUser.id, { password });
-            
-            // Check/add role
-            const { data: existingRole } = await supabaseAdmin
-              .from("user_roles")
-              .select("*")
-              .eq("user_id", existingUser.id)
-              .maybeSingle();
+          // Look up user_id from profiles table (reliable, no pagination issues)
+          const { data: existingProfile, error: profileLookupError } = await supabaseAdmin
+            .from("profiles")
+            .select("user_id")
+            .eq("email", email)
+            .maybeSingle();
 
-            if (!existingRole) {
-              await supabaseAdmin.from("user_roles").insert({
-                user_id: existingUser.id,
-                role: role,
-              });
+          if (profileLookupError || !existingProfile) {
+            console.error("Profile not found for existing user:", email, profileLookupError);
+            // Fallback: try listing users from auth
+            const { data: { users } } = await supabaseAdmin.auth.admin.listUsers({ perPage: 1000 });
+            const authUser = users?.find(u => u.email === email);
+            if (!authUser) {
+              throw new Error(`User exists in auth but profile not found for: ${email}`);
             }
+            userId = authUser.id;
           } else {
-            throw createError;
+            userId = existingProfile.user_id;
+          }
+
+          // Update password
+          await supabaseAdmin.auth.admin.updateUserById(userId!, { password });
+          
+          // Check/add role
+          const { data: existingRole } = await supabaseAdmin
+            .from("user_roles")
+            .select("*")
+            .eq("user_id", userId!)
+            .maybeSingle();
+
+          if (!existingRole) {
+            await supabaseAdmin.from("user_roles").insert({
+              user_id: userId!,
+              role: role,
+            });
           }
         } else {
           throw createError;
