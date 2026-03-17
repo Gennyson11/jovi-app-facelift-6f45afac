@@ -119,7 +119,7 @@ export default function Credits() {
   const fetchData = async () => {
     setLoading(true);
     const [profileRes, creditsRes, transactionsRes, missionsRes, socioRes] = await Promise.all([
-      supabase.from('profiles').select('id, email, name, avatar_url').eq('user_id', user!.id).maybeSingle(),
+      supabase.from('profiles').select('id, email, name, avatar_url, socio_2_enabled').eq('user_id', user!.id).maybeSingle(),
       supabase.from('user_credits').select('balance').eq('user_id', user!.id).maybeSingle(),
       supabase.from('credit_transactions').select('*').eq('user_id', user!.id).order('created_at', { ascending: false }).limit(20),
       supabase.from('user_missions').select('*').eq('user_id', user!.id),
