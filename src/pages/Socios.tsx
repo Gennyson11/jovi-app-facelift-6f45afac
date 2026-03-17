@@ -32,6 +32,7 @@ export default function Socios() {
   const [clients, setClients] = useState<ClientProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSocio, setIsSocio] = useState(false);
+  const [isSocio2, setIsSocio2] = useState(false);
   
   // New Client Dialog
   const [dialogOpen, setDialogOpen] = useState(false);
