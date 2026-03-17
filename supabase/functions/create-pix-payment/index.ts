@@ -50,6 +50,7 @@ serve(async (req) => {
         body: JSON.stringify({
           name: user.email!.split("@")[0],
           email: user.email,
+          cpfCnpj: cpfCnpj.replace(/\D/g, ''),
         }),
       });
       const customerData = await createCustomerRes.json();
