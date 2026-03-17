@@ -132,7 +132,10 @@ export default function DashboardSidebar({
           )}
           <nav className="space-y-1">
             {DASHBOARD_ITEMS.map((item) => {
-              const isActive = activeCategory === item.category && item.category !== null;
+              const isRoute = 'route' in item && (item as any).route;
+              const isActive = isRoute 
+                ? location.pathname === (item as any).href
+                : activeCategory === item.category && item.category !== null;
               return (
                 <button
                   key={item.id}
