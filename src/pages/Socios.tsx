@@ -255,13 +255,17 @@ export default function Socios() {
 
       // Deduct 1 credit
       if (user) {
-        await supabase.rpc('add_credits', {
+        const { error: creditError } = await supabase.rpc('add_credits', {
           p_user_id: user.id,
           p_amount: -1,
           p_type: 'client_creation',
           p_description: `Cadastro de cliente: ${clientName}`
         });
-        setSocioCredits(prev => prev - 1);
+        if (creditError) {
+          console.error('Error deducting credit:', creditError);
+        } else {
+          setSocioCredits(prev => prev - 1);
+        }
       }
 
       toast({
