@@ -637,12 +637,13 @@ export default function Admin() {
         if (insertError) throw insertError;
       }
 
-      // Update has_access and expiration date
+      // Update has_access, expiration date, and socio_2_enabled
       const hasAnyAccess = selectedPlatforms.length > 0;
       await supabase.from('profiles').update({
         has_access: hasAnyAccess,
-        access_expires_at: hasAnyAccess ? accessExpiresAt : null
-      }).eq('id', selectedUser.id);
+        access_expires_at: hasAnyAccess ? accessExpiresAt : null,
+        socio_2_enabled: userIsSocio2
+      } as any).eq('id', selectedUser.id);
       
       // Handle socio role
       const { data: existingSocioRole } = await supabase
