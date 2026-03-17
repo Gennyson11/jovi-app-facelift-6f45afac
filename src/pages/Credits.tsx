@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
@@ -6,8 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Coins, Trophy, Star, Target, Gift, CheckCircle, Lock, ArrowRight, Zap, Clock } from 'lucide-react';
+import { Loader2, Coins, Trophy, Star, Target, Gift, CheckCircle, Lock, ArrowRight, Zap, Clock, Copy, RefreshCw, X, CreditCard } from 'lucide-react';
 import DashboardSidebar from '@/components/DashboardSidebar';
 
 // Mission tier system
