@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Loader2, UserCheck, UserX, Clock, Calendar, Infinity, Users, Handshake, Eye, EyeOff } from 'lucide-react';
+import { LogOut, Plus, Loader2, UserCheck, UserX, Clock, Calendar, Infinity, Users, Handshake, Eye, EyeOff, Coins, Trophy, Gift } from 'lucide-react';
 
 interface ClientProfile {
   id: string;
