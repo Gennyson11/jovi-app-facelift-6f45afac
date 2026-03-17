@@ -321,6 +321,7 @@ export default function Credits() {
     purchase: '💰 Compra',
     mission_reward: '🏆 Missão',
     usage: '⚡ Uso',
+    client_creation: '👤 Cadastro Cliente',
     admin_grant: '🎁 Admin',
   };
 
