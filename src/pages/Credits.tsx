@@ -192,6 +192,18 @@ export default function Credits() {
   const [loading, setLoading] = useState(true);
   const [claimingMission, setClaimingMission] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'creditos' | 'missoes' | 'historico'>('creditos');
+  const [pixModalOpen, setPixModalOpen] = useState(false);
+  const [pixLoading, setPixLoading] = useState(false);
+  const [pixData, setPixData] = useState<{
+    paymentId: string;
+    pixCode: string;
+    qrCodeImage: string;
+    value: number;
+    creditAmount: number;
+    status: string;
+  } | null>(null);
+  const [checkingPayment, setCheckingPayment] = useState(false);
+  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
 
   const { user, signOut, loading: authLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
