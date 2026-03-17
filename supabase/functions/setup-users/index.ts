@@ -487,7 +487,7 @@ serve(async (req) => {
       }
 
       const clientAuthId = clientProfile.user_id;
-      console.log("Deleting client:", clientProfile.email, "auth id:", clientAuthId, "by:", callerUser.email);
+      console.log("Deleting client:", clientProfile.email, "auth id:", clientAuthId, "by:", callerUserEmail);
 
       // Delete from auth.users (cascades to profiles, roles, etc.)
       const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(clientAuthId);
