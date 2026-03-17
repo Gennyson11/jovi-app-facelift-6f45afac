@@ -479,7 +479,7 @@ serve(async (req) => {
       }
 
       // Sócios can only delete their own clients
-      if (isSocio && !isAdmin && clientProfile.partner_id !== callerUser.id) {
+      if (isSocio && !isAdmin && clientProfile.partner_id !== callerUserId) {
         return new Response(
           JSON.stringify({ error: "Forbidden - You can only delete your own clients" }),
           { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
