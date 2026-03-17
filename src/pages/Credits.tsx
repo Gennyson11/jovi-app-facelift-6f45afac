@@ -313,8 +313,62 @@ export default function Credits() {
     setClaimingMission(null);
   };
 
-  const handleBuyCredits = (packageId: string) => {
-    toast({ title: '💳 Em breve!', description: 'A integração com Asaas está sendo configurada. Aguarde!' });
+  const handleBuyCredits = async (packageId: string) => {
+    const pkg = CREDIT_PACKAGES.find(p => p.id === packageId);
+    if (!pkg) return;
+    
+    setPixLoading(true);
+    setPixModalOpen(true);
+    setPixData(null);
+    setPaymentConfirmed(false);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('create-pix-payment', {
+        body: { amount: pkg.amount, price: pkg.price },
+      });
+
+      if (error) throw error;
+      if (data.error) throw new Error(data.error);
+
+      setPixData(data);
+    } catch (err: any) {
+      toast({ title: '❌ Erro', description: err.message || 'Erro ao gerar PIX', variant: 'destructive' });
+      setPixModalOpen(false);
+    } finally {
+      setPixLoading(false);
+    }
+  };
+
+  const handleCopyPixCode = () => {
+    if (pixData?.pixCode) {
+      navigator.clipboard.writeText(pixData.pixCode);
+      toast({ title: '✅ Copiado!', description: 'Código PIX copiado para a área de transferência' });
+    }
+  };
+
+  const handleCheckPayment = async () => {
+    if (!pixData) return;
+    setCheckingPayment(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('check-pix-payment', {
+        body: { paymentId: pixData.paymentId, creditAmount: pixData.creditAmount },
+      });
+
+      if (error) throw error;
+
+      if (data.status === 'CONFIRMED') {
+        setPaymentConfirmed(true);
+        toast({ title: '🎉 Pagamento Confirmado!', description: `+${pixData.creditAmount} créditos adicionados!` });
+        fetchData();
+      } else {
+        toast({ title: '⏳ Aguardando', description: 'Pagamento ainda não confirmado. Tente novamente em alguns segundos.' });
+      }
+    } catch (err: any) {
+      toast({ title: '❌ Erro', description: err.message || 'Erro ao verificar pagamento', variant: 'destructive' });
+    } finally {
+      setCheckingPayment(false);
+    }
   };
 
   const handleLogout = async () => {
