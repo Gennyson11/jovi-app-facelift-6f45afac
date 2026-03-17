@@ -490,7 +490,7 @@ export default function Credits() {
                                 </div>
                                 <div className="flex flex-col items-center gap-1 flex-shrink-0">
                                   <div className="flex items-center gap-1 text-amber-400 text-xs font-bold">
-                                    <Gift className="w-3 h-3" /> +{mission.reward}
+                                    <Coins className="w-3 h-3" /> +{mission.reward}
                                   </div>
                                   {completed && !claimed ? (
                                     <Button
