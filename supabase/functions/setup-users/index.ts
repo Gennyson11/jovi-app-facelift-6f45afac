@@ -29,17 +29,10 @@ serve(async (req) => {
       );
     }
 
-    const supabaseUser = createClient(
-      Deno.env.get("SUPABASE_URL") ?? "",
-      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
-      { 
-        auth: { autoRefreshToken: false, persistSession: false },
-        global: { headers: { Authorization: authHeader } }
-      }
-    );
+    const token = authHeader.replace('Bearer ', '');
 
-    // Verify the caller is authenticated
-    const { data: { user: callerUser }, error: userError } = await supabaseUser.auth.getUser();
+    // Verify the caller using the admin client with the user's token
+    const { data: { user: callerUser }, error: userError } = await supabaseAdmin.auth.getUser(token);
     if (userError || !callerUser) {
       console.error("Authentication failed:", userError?.message);
       return new Response(
