@@ -118,6 +118,7 @@ export default function Dashboard() {
   const [platformClicks, setPlatformClicks] = useState<Record<string, number>>({});
   const [activeCategory, setActiveCategory] = useState<string | null>('ai_tools');
   const [isSocio, setIsSocio] = useState(false);
+  const [isSocio2, setIsSocio2] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [showWhatsAppPopup, setShowWhatsAppPopup] = useState(false);
   const [partnerInfo, setPartnerInfo] = useState<{name: string | null;whatsapp: string | null;} | null>(null);
