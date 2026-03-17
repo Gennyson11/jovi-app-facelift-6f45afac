@@ -204,6 +204,9 @@ export default function Credits() {
   } | null>(null);
   const [checkingPayment, setCheckingPayment] = useState(false);
   const [paymentConfirmed, setPaymentConfirmed] = useState(false);
+  const [cpfInput, setCpfInput] = useState('');
+  const [selectedPackage, setSelectedPackage] = useState<typeof CREDIT_PACKAGES[0] | null>(null);
+  const [cpfStep, setCpfStep] = useState(true);
 
   const { user, signOut, loading: authLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
