@@ -57,11 +57,11 @@ serve(async (req) => {
     const { data: roleData, error: roleError } = await supabaseAdmin
       .from("user_roles")
       .select("role")
-      .eq("user_id", callerUser.id)
+      .eq("user_id", callerUserId)
       .in("role", ["admin", "socio"]);
 
     if (roleError || !roleData || roleData.length === 0) {
-      console.error("Permission check failed for user:", callerUser.id, "- Not an admin or socio");
+      console.error("Permission check failed for user:", callerUserId, "- Not an admin or socio");
       return new Response(
         JSON.stringify({ error: "Forbidden - Admin or Socio access required" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -72,10 +72,10 @@ serve(async (req) => {
     const isAdmin = userRoles.includes("admin");
     const isSocio = userRoles.includes("socio");
 
-    console.log("User verified:", callerUser.email, "roles:", userRoles);
+    console.log("User verified:", callerUserEmail, "roles:", userRoles);
 
     const { action, email, password, role, partner_id, name, has_access, access_expires_at, client_profile_id } = await req.json();
-    console.log("Setup action:", action, "email:", email, "partner_id:", partner_id, "by user:", callerUser.email, "isAdmin:", isAdmin, "isSocio:", isSocio);
+    console.log("Setup action:", action, "email:", email, "partner_id:", partner_id, "by user:", callerUserEmail, "isAdmin:", isAdmin, "isSocio:", isSocio);
 
     if (action === "create_user") {
       // Create user
