@@ -179,6 +179,7 @@ export default function Admin() {
   const [customDays, setCustomDays] = useState<string>('');
   const [savingPermissions, setSavingPermissions] = useState(false);
   const [userIsSocio, setUserIsSocio] = useState(false);
+  const [userIsSocio2, setUserIsSocio2] = useState(false);
 
   // News Dialog
   const [newsDialogOpen, setNewsDialogOpen] = useState(false);
