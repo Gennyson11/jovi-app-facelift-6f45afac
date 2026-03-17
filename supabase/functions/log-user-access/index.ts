@@ -52,7 +52,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log('Logging access for user:', user.id, user.email);
+    console.log('Logging access for user:', userId, userEmail);
 
     // Get IP from request headers (Cloudflare/proxy headers first, then fallback)
     const ip = req.headers.get('cf-connecting-ip') || 
