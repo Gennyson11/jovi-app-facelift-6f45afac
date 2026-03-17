@@ -359,7 +359,7 @@ export default function Dashboard() {
   const filteredCategoryOrder = activeCategory ? CATEGORY_ORDER.filter((cat) => cat === activeCategory) : CATEGORY_ORDER;
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex w-full">
       {/* Sidebar */}
-      <DashboardSidebar userProfile={userProfile} onLogout={handleLogout} activeCategory={activeCategory} onCategorySelect={setActiveCategory} isSocio={isSocio} />
+      <DashboardSidebar userProfile={userProfile} onLogout={handleLogout} activeCategory={activeCategory} onCategorySelect={setActiveCategory} isSocio={isSocio} isSocio2={isSocio2} isAdmin={isAdmin} />
 
       {/* Main Content Area */}
       <div className="flex-1 min-w-0">
