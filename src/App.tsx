@@ -15,6 +15,7 @@ import Settings from "./pages/Settings";
 import Revendedores from "./pages/Revendedores";
 import Socios from "./pages/Socios";
 import Invite from "./pages/Invite";
+import Credits from "./pages/Credits";
 import FloatingWhatsApp from "./components/FloatingWhatsApp";
 import MaintenanceScreen from "./components/MaintenanceScreen";
 

@@ -163,10 +163,11 @@ export default function Credits() {
       p_reward_amount: rewardAmount,
     });
 
-    if (error || !data?.success) {
-      toast({ title: '❌ Erro', description: (data as any)?.error || error?.message || 'Erro ao reivindicar', variant: 'destructive' });
+    const result = data as any;
+    if (error || !result?.success) {
+      toast({ title: '❌ Erro', description: result?.error || error?.message || 'Erro ao reivindicar', variant: 'destructive' });
     } else {
-      setBalance(data.new_balance);
+      setBalance(result.new_balance);
       setMissionProgress(prev => ({
         ...prev,
         [missionId]: { ...prev[missionId], claimed: true }

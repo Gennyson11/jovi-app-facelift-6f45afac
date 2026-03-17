@@ -43,6 +43,7 @@ const DASHBOARD_ITEMS = [
   { id: 'biblioteca', label: 'Bônus', icon: Library, category: 'bonus_courses' },
   { id: 'loja', label: 'Loja', icon: ShoppingCart, category: 'loja' },
   { id: 'jovi_ia', label: 'Jovi.ia', icon: Bot, category: 'jovi_ia' },
+  { id: 'creditos', label: 'Meus Créditos', icon: Ticket, href: '/creditos', route: true },
 ];
 
 const GENERAL_ITEMS = [
