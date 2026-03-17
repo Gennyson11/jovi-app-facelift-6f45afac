@@ -78,7 +78,9 @@ export default function DashboardSidebar({
     return email.slice(0, 2).toUpperCase();
   };
 
-  const handleItemClick = (item: typeof DASHBOARD_ITEMS[0]) => {
+  const DASHBOARD_ITEMS = [...DASHBOARD_ITEMS_BASE, ...((isSocio2 || isAdmin) ? [CREDITOS_ITEM] : [])];
+
+  const handleItemClick = (item: typeof DASHBOARD_ITEMS_BASE[0]) => {
     if ('route' in item && (item as any).route && (item as any).href) {
       navigate((item as any).href);
       setIsMobileOpen(false);
