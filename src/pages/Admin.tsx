@@ -2687,6 +2687,7 @@ export default function Admin() {
                 >
                   <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${userIsSocio ? 'translate-x-5' : 'translate-x-0'}`} />
                 </button>
+              </div>
             </div>
 
             {/* Socio 2.0 Toggle - only show if user is socio */}
@@ -2712,7 +2713,6 @@ export default function Admin() {
                 </div>
               </div>
             )}
-            </div>
 
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
