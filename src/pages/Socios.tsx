@@ -251,7 +251,7 @@ export default function Socios() {
 
       toast({
         title: 'Sucesso',
-        description: `Cliente "${clientName}" cadastrado com ${selectedPlan} dias de acesso${isSocio2 ? ' (1 crédito utilizado)' : ''}`
+        description: `Cliente "${clientName}" cadastrado com ${selectedPlan} dias de acesso (1 crédito utilizado)`
       });
 
       setDialogOpen(false);
