@@ -206,17 +206,15 @@ export default function Socios() {
     setSavingClient(true);
 
     try {
-      // If Sócio 2.0, check credits first
-      if (isSocio2) {
-        if (socioCredits < 1) {
-          toast({
-            title: 'Créditos insuficientes',
-            description: 'Você precisa de 1 crédito para adicionar um cliente. Adquira mais créditos.',
-            variant: 'destructive'
-          });
-          setSavingClient(false);
-          return;
-        }
+      // Check credits first - all socios need 1 credit to create a client
+      if (socioCredits < 1) {
+        toast({
+          title: 'Créditos insuficientes',
+          description: 'Você precisa de pelo menos 1 crédito para cadastrar um cliente.',
+          variant: 'destructive'
+        });
+        setSavingClient(false);
+        return;
       }
 
       // Calculate expiration date
@@ -240,8 +238,8 @@ export default function Socios() {
       if (functionError) throw functionError;
       if (!functionData?.userId) throw new Error('Falha ao criar usuário');
 
-      // Deduct 1 credit if Sócio 2.0
-      if (isSocio2 && user) {
+      // Deduct 1 credit
+      if (user) {
         await supabase.rpc('add_credits', {
           p_user_id: user.id,
           p_amount: -1,
@@ -253,7 +251,7 @@ export default function Socios() {
 
       toast({
         title: 'Sucesso',
-        description: `Cliente "${clientName}" cadastrado com ${selectedPlan} dias de acesso${isSocio2 ? ' (1 crédito utilizado)' : ''}`
+        description: `Cliente "${clientName}" cadastrado com ${selectedPlan} dias de acesso (1 crédito utilizado)`
       });
 
       setDialogOpen(false);
