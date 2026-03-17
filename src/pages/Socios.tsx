@@ -184,6 +184,16 @@ export default function Socios() {
     setDialogOpen(true);
   };
 
+  const getFreshAccessToken = async () => {
+    const { data, error } = await supabase.auth.refreshSession();
+
+    if (error || !data.session?.access_token) {
+      throw new Error('Sua sessão expirou. Faça login novamente para continuar.');
+    }
+
+    return data.session.access_token;
+  };
+
   const createClient = async () => {
     if (!clientName.trim() || !clientEmail.trim() || !clientPassword.trim()) {
       toast({
