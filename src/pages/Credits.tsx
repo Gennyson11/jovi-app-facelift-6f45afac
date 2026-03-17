@@ -363,8 +363,8 @@ export default function Credits() {
     }
   };
 
-  const handleCheckPayment = async () => {
-    if (!pixData) return;
+  const handleCheckPayment = useCallback(async () => {
+    if (!pixData || paymentConfirmed) return;
     setCheckingPayment(true);
 
     try {
@@ -374,19 +374,26 @@ export default function Credits() {
 
       if (error) throw error;
 
-      if (data.status === 'CONFIRMED') {
+      if (data.status === 'CONFIRMED' || data.status === 'RECEIVED') {
         setPaymentConfirmed(true);
         toast({ title: '🎉 Pagamento Confirmado!', description: `+${pixData.creditAmount} créditos adicionados!` });
         fetchData();
-      } else {
-        toast({ title: '⏳ Aguardando', description: 'Pagamento ainda não confirmado. Tente novamente em alguns segundos.' });
       }
     } catch (err: any) {
-      toast({ title: '❌ Erro', description: err.message || 'Erro ao verificar pagamento', variant: 'destructive' });
+      // silently ignore polling errors
     } finally {
       setCheckingPayment(false);
     }
-  };
+  }, [pixData, paymentConfirmed]);
+
+  // Auto-poll payment status every 5 seconds
+  useEffect(() => {
+    if (!pixData || paymentConfirmed || pixLoading) return;
+    const interval = setInterval(() => {
+      handleCheckPayment();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [pixData, paymentConfirmed, pixLoading, handleCheckPayment]);
 
   const handleLogout = async () => {
     await signOut();
