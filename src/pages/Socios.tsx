@@ -6,10 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Loader2, UserCheck, UserX, Clock, Calendar, Infinity, Users, Handshake, Eye, EyeOff } from 'lucide-react';
+import { LogOut, Plus, Loader2, UserCheck, UserX, Clock, Calendar, Infinity, Users, Handshake, Eye, EyeOff, Coins, Trophy, Gift } from 'lucide-react';
 
 interface ClientProfile {
   id: string;
@@ -32,6 +33,7 @@ export default function Socios() {
   const [clients, setClients] = useState<ClientProfile[]>([]);
   const [loading, setLoading] = useState(true);
   const [isSocio, setIsSocio] = useState(false);
+  const [isSocio2, setIsSocio2] = useState(false);
   
   // New Client Dialog
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -93,7 +95,17 @@ export default function Socios() {
     }
     
     setIsSocio(true);
-    fetchSocioWhatsapp();
+    
+    // Check if socio has 2.0 enabled
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('socio_2_enabled, whatsapp')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    
+    setIsSocio2((profileData as any)?.socio_2_enabled || false);
+    if (profileData?.whatsapp) setSocioWhatsapp(profileData.whatsapp);
+    
     fetchClients();
   };
 
@@ -376,6 +388,57 @@ export default function Socios() {
             </div>
           </CardContent>
         </Card>
+
+        {/* Sócio 2.0 - Credits & Missions Card */}
+        {isSocio2 && (
+          <Card className="border-border mb-8 bg-gradient-to-r from-purple-500/5 to-pink-500/5 border-purple-500/20">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                    <Gift className="w-5 h-5 text-purple-500" />
+                  </div>
+                  <div>
+                    <CardTitle className="text-foreground text-base">Sócio 2.0</CardTitle>
+                    <p className="text-sm text-muted-foreground">Créditos, missões e funcionalidades exclusivas</p>
+                  </div>
+                </div>
+                <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/30 border">2.0</Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col items-center gap-2 border-purple-500/20 hover:bg-purple-500/10"
+                  onClick={() => navigate('/creditos')}
+                >
+                  <Coins className="w-6 h-6 text-purple-400" />
+                  <span className="text-sm font-medium">Meus Créditos</span>
+                  <span className="text-xs text-muted-foreground">Comprar e gerenciar</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col items-center gap-2 border-purple-500/20 hover:bg-purple-500/10"
+                  onClick={() => navigate('/creditos?tab=missions')}
+                >
+                  <Trophy className="w-6 h-6 text-amber-400" />
+                  <span className="text-sm font-medium">Missões</span>
+                  <span className="text-xs text-muted-foreground">Ganhe recompensas</span>
+                </Button>
+                <Button
+                  variant="outline"
+                  className="h-auto py-4 flex flex-col items-center gap-2 border-purple-500/20 hover:bg-purple-500/10"
+                  onClick={() => navigate('/creditos')}
+                >
+                  <Coins className="w-6 h-6 text-green-400" />
+                  <span className="text-sm font-medium">Histórico</span>
+                  <span className="text-xs text-muted-foreground">Transações recentes</span>
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Clients Table */}
         <Card className="border-border">
