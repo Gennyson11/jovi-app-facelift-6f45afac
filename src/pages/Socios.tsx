@@ -353,6 +353,60 @@ export default function Socios() {
     }
   };
 
+
+  const openEditDialog = (client: ClientProfile) => {
+    setEditingClient(client);
+    setEditEmail(client.masked_email || '');
+    setEditPassword('');
+    setShowEditPassword(false);
+    setEditDialogOpen(true);
+  };
+
+  const updateClient = async () => {
+    if (!editingClient) return;
+    
+    if (editEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editEmail)) {
+      toast({ title: 'Erro', description: 'Email inválido', variant: 'destructive' });
+      return;
+    }
+    if (editPassword && editPassword.length < 6) {
+      toast({ title: 'Erro', description: 'A senha deve ter pelo menos 6 caracteres', variant: 'destructive' });
+      return;
+    }
+    if (!editEmail && !editPassword) {
+      toast({ title: 'Erro', description: 'Preencha o novo email ou a nova senha', variant: 'destructive' });
+      return;
+    }
+
+    setSavingEdit(true);
+    try {
+      const accessToken = await getFreshAccessToken();
+      const body: Record<string, string> = {
+        action: 'update_client',
+        client_profile_id: editingClient.id,
+      };
+      if (editEmail && !editEmail.includes('***')) body.new_email = editEmail;
+      if (editPassword) body.new_password = editPassword;
+
+      const { data, error } = await supabase.functions.invoke('setup-users', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body,
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Falha ao atualizar cliente');
+
+      toast({ title: 'Sucesso', description: 'Cliente atualizado com sucesso!' });
+      setEditDialogOpen(false);
+      fetchClients();
+    } catch (error: any) {
+      console.error('Error updating client:', error);
+      toast({ title: 'Erro', description: error.message || 'Falha ao atualizar cliente', variant: 'destructive' });
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
   const getAccessStatus = (client: ClientProfile) => {
     if (!client.has_access) {
       return { text: 'Bloqueado', color: 'bg-red-500/10 text-red-500', icon: UserX };
