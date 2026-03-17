@@ -233,19 +233,45 @@ export default function Credits() {
       setMissionProgress(map);
     }
 
-    // Auto-initialize first_login mission
-    if (!missionsRes.data?.find((m: any) => m.mission_id === 'first_login')) {
-      await supabase.from('user_missions').insert({
-        user_id: user!.id,
-        mission_id: 'first_login',
-        progress: 1,
-        completed: true,
-        completed_at: new Date().toISOString(),
-      });
-      setMissionProgress(prev => ({
-        ...prev,
-        first_login: { mission_id: 'first_login', progress: 1, completed: true, claimed: false }
-      }));
+    // Calculate total credits purchased (only positive purchase transactions)
+    const { data: purchaseData } = await supabase
+      .from('credit_transactions')
+      .select('amount')
+      .eq('user_id', user!.id)
+      .eq('type', 'purchase');
+
+    const totalPurchased = (purchaseData || []).reduce((sum, t) => sum + (t.amount > 0 ? t.amount : 0), 0);
+
+    // Auto-update mission progress based on total purchased credits
+    for (const mission of MISSIONS) {
+      const existing = missionsRes.data?.find((m: any) => m.mission_id === mission.id);
+      const progress = Math.min(totalPurchased, mission.target);
+      const completed = totalPurchased >= mission.target;
+
+      if (!existing) {
+        if (progress > 0) {
+          await supabase.from('user_missions').insert({
+            user_id: user!.id,
+            mission_id: mission.id,
+            progress,
+            completed,
+            completed_at: completed ? new Date().toISOString() : null,
+          });
+          setMissionProgress(prev => ({
+            ...prev,
+            [mission.id]: { mission_id: mission.id, progress, completed, claimed: false }
+          }));
+        }
+      } else if (existing.progress < progress || (completed && !existing.completed)) {
+        await supabase.from('user_missions')
+          .update({ progress, completed, completed_at: completed && !existing.completed ? new Date().toISOString() : existing.completed_at })
+          .eq('user_id', user!.id)
+          .eq('mission_id', mission.id);
+        setMissionProgress(prev => ({
+          ...prev,
+          [mission.id]: { ...prev[mission.id], progress, completed }
+        }));
+      }
     }
 
     setLoading(false);
