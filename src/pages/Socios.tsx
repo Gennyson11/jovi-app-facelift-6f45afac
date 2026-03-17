@@ -50,6 +50,14 @@ export default function Socios() {
   const [savingWhatsapp, setSavingWhatsapp] = useState(false);
   const [deletingClientId, setDeletingClientId] = useState<string | null>(null);
   const [confirmDeleteClient, setConfirmDeleteClient] = useState<ClientProfile | null>(null);
+  
+  // Edit Client Dialog
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingClient, setEditingClient] = useState<ClientProfile | null>(null);
+  const [editEmail, setEditEmail] = useState('');
+  const [editPassword, setEditPassword] = useState('');
+  const [showEditPassword, setShowEditPassword] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
