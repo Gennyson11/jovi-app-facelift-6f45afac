@@ -29,11 +29,23 @@ serve(async (req) => {
       );
     }
 
-    const token = authHeader.replace('Bearer ', '');
+    const token = authHeader.replace("Bearer ", "");
 
-    // Verify the caller using the admin client with the user's token
-    const { data: { user: callerUser }, error: userError } = await supabaseAdmin.auth.getUser(token);
-    if (userError || !callerUser) {
+    // Validate JWT using signing-keys-safe flow
+    const supabaseAuth = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      {
+        auth: { autoRefreshToken: false, persistSession: false },
+        global: { headers: { Authorization: authHeader } }
+      }
+    );
+
+    const { data: claimsData, error: userError } = await supabaseAuth.auth.getClaims(token);
+    const callerUserId = claimsData?.claims?.sub;
+    const callerUserEmail = typeof claimsData?.claims?.email === "string" ? claimsData.claims.email : null;
+
+    if (userError || !callerUserId) {
       console.error("Authentication failed:", userError?.message);
       return new Response(
         JSON.stringify({ error: "Unauthorized - Invalid token" }),
