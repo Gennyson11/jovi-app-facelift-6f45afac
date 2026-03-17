@@ -31,6 +31,7 @@ serve(async (req) => {
     const ASAAS_BASE_URL = "https://api.asaas.com/v3";
 
     // Check/create customer in Asaas
+    const cleanCpfCnpj = String(cpfCnpj).replace(/\D/g, "");
     const customerSearchRes = await fetch(`${ASAAS_BASE_URL}/customers?email=${encodeURIComponent(user.email!)}`, {
       headers: { "access_token": ASAAS_API_KEY },
     });
@@ -38,9 +39,28 @@ serve(async (req) => {
 
     let customerId: string;
     if (customerSearchData.data && customerSearchData.data.length > 0) {
-      customerId = customerSearchData.data[0].id;
+      const existingCustomer = customerSearchData.data[0];
+      customerId = existingCustomer.id;
+
+      if (!existingCustomer.cpfCnpj || existingCustomer.cpfCnpj.replace(/\D/g, "") !== cleanCpfCnpj) {
+        const updateCustomerRes = await fetch(`${ASAAS_BASE_URL}/customers/${customerId}`, {
+          method: "POST",
+          headers: {
+            "access_token": ASAAS_API_KEY,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: existingCustomer.name || user.email!.split("@")[0],
+            email: user.email,
+            cpfCnpj: cleanCpfCnpj,
+          }),
+        });
+        const updateCustomerData = await updateCustomerRes.json();
+        if (updateCustomerData.errors) {
+          throw new Error(`Erro ao atualizar cliente: ${JSON.stringify(updateCustomerData.errors)}`);
+        }
+      }
     } else {
-      // Create customer
       const createCustomerRes = await fetch(`${ASAAS_BASE_URL}/customers`, {
         method: "POST",
         headers: {
@@ -50,7 +70,7 @@ serve(async (req) => {
         body: JSON.stringify({
           name: user.email!.split("@")[0],
           email: user.email,
-          cpfCnpj: cpfCnpj.replace(/\D/g, ''),
+          cpfCnpj: cleanCpfCnpj,
         }),
       });
       const customerData = await createCustomerRes.json();
