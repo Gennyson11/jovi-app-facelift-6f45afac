@@ -34,6 +34,8 @@ export default function Socios() {
   const [loading, setLoading] = useState(true);
   const [isSocio, setIsSocio] = useState(false);
   const [isSocio2, setIsSocio2] = useState(false);
+  const [socioName, setSocioName] = useState<string | null>(null);
+  const [socioCredits, setSocioCredits] = useState<number>(0);
   
   // New Client Dialog
   const [dialogOpen, setDialogOpen] = useState(false);
