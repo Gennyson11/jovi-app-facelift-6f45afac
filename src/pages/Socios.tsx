@@ -622,6 +622,28 @@ export default function Socios() {
         </Card>
       </main>
 
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!confirmDeleteClient} onOpenChange={(open) => !open && setConfirmDeleteClient(null)}>
+        <AlertDialogContent className="bg-card border-border">
+          <AlertDialogHeader>
+            <AlertDialogTitle>Deletar Cliente</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja deletar o cliente <strong>{confirmDeleteClient?.name || 'sem nome'}</strong>? 
+              Esta ação é <strong>permanente</strong> e não pode ser desfeita. O usuário será removido completamente do sistema.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-red-600 hover:bg-red-700"
+              onClick={() => confirmDeleteClient && deleteClient(confirmDeleteClient)}
+            >
+              Deletar Permanentemente
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
       {/* New Client Dialog */}
       <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogContent className="bg-card border-border max-w-md">
