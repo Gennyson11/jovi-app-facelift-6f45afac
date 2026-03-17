@@ -15,6 +15,7 @@ import { useToast } from '@/hooks/use-toast';
 import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Users, UserCheck, UserX, Settings, CheckSquare, Clock, Calendar, Infinity, PlusCircle, MinusCircle, Megaphone, ToggleLeft, ToggleRight, Wifi, WifiOff, MousePointerClick, Gift, QrCode, Handshake, Search, ShoppingCart, Package, MapPin, AlertOctagon, UserPlus, Construction } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
+import { Badge } from '@/components/ui/badge';
 import { useMaintenance } from '@/hooks/useMaintenance';
 import InvitesManager from '@/components/admin/InvitesManager';
 type StreamingStatus = 'online' | 'maintenance';
@@ -89,6 +90,8 @@ interface SocioUser {
   name: string | null;
   created_at: string;
   clients: SocioClient[];
+  socio_2_enabled: boolean;
+  profile_id: string;
 }
 
 interface UserAccessLog {
@@ -389,7 +392,9 @@ export default function Admin() {
           email: profile?.email || 'Email não encontrado',
           name: profile?.name || null,
           created_at: socio.created_at,
-          clients
+          clients,
+          socio_2_enabled: (profile as any)?.socio_2_enabled || false,
+          profile_id: profile?.id || ''
         };
       });
       setSocios(sociosList);
@@ -1934,6 +1939,31 @@ export default function Admin() {
                             </div>
                           </div>
                           <div className="flex items-center gap-4">
+                            {/* Sócio 2.0 Toggle */}
+                            <div className="flex items-center gap-2">
+                              <Label htmlFor={`socio2-${socio.user_id}`} className="text-xs text-muted-foreground whitespace-nowrap">
+                                Sócio 2.0
+                              </Label>
+                              <Switch
+                                id={`socio2-${socio.user_id}`}
+                                checked={socio.socio_2_enabled}
+                                onCheckedChange={async (checked) => {
+                                  const { error } = await supabase
+                                    .from('profiles')
+                                    .update({ socio_2_enabled: checked } as any)
+                                    .eq('id', socio.profile_id);
+                                  if (error) {
+                                    toast({ title: 'Erro', description: 'Falha ao atualizar Sócio 2.0', variant: 'destructive' });
+                                  } else {
+                                    setSocios(prev => prev.map(s => s.user_id === socio.user_id ? { ...s, socio_2_enabled: checked } : s));
+                                    toast({ title: checked ? '✅ Sócio 2.0 Ativado' : '⛔ Sócio 2.0 Desativado', description: `${socio.name || socio.email}` });
+                                  }
+                                }}
+                              />
+                              {socio.socio_2_enabled && (
+                                <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/30 border text-[10px]">2.0</Badge>
+                              )}
+                            </div>
                             <div className="text-right">
                               <p className="text-xs text-muted-foreground">Sócio desde</p>
                               <p className="text-sm font-medium text-foreground">

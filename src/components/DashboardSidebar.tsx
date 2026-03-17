@@ -34,17 +34,20 @@ interface DashboardSidebarProps {
   activeCategory: string | null;
   onCategorySelect: (category: string | null) => void;
   isSocio?: boolean;
+  isSocio2?: boolean;
+  isAdmin?: boolean;
 }
 
-const DASHBOARD_ITEMS = [
+const DASHBOARD_ITEMS_BASE = [
   { id: 'ferramentas', label: 'Ferramentas', icon: Wrench, category: 'ai_tools' },
   { id: 'streamings', label: 'Streamings', icon: Clapperboard, category: 'streamings' },
   { id: 'softwares', label: 'Softwares', icon: Monitor, category: 'software' },
   { id: 'biblioteca', label: 'Bônus', icon: Library, category: 'bonus_courses' },
   { id: 'loja', label: 'Loja', icon: ShoppingCart, category: 'loja' },
   { id: 'jovi_ia', label: 'Jovi.ia', icon: Bot, category: 'jovi_ia' },
-  { id: 'creditos', label: 'Meus Créditos', icon: Ticket, href: '/creditos', route: true },
 ];
+
+const CREDITOS_ITEM = { id: 'creditos', label: 'Meus Créditos', icon: Ticket, href: '/creditos', route: true, category: 'creditos' };
 
 const GENERAL_ITEMS = [
   { id: 'sorteios', label: 'Sorteios', icon: Gift, category: 'sorteios', disabled: false },
@@ -59,7 +62,9 @@ export default function DashboardSidebar({
   onLogout, 
   activeCategory, 
   onCategorySelect,
-  isSocio = false
+  isSocio = false,
+  isSocio2 = false,
+  isAdmin = false
 }: DashboardSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -73,7 +78,9 @@ export default function DashboardSidebar({
     return email.slice(0, 2).toUpperCase();
   };
 
-  const handleItemClick = (item: typeof DASHBOARD_ITEMS[0]) => {
+  const DASHBOARD_ITEMS = [...DASHBOARD_ITEMS_BASE, ...((isSocio2 || isAdmin) ? [CREDITOS_ITEM] : [])];
+
+  const handleItemClick = (item: typeof DASHBOARD_ITEMS_BASE[0]) => {
     if ('route' in item && (item as any).route && (item as any).href) {
       navigate((item as any).href);
       setIsMobileOpen(false);

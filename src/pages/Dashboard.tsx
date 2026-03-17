@@ -118,6 +118,7 @@ export default function Dashboard() {
   const [platformClicks, setPlatformClicks] = useState<Record<string, number>>({});
   const [activeCategory, setActiveCategory] = useState<string | null>('ai_tools');
   const [isSocio, setIsSocio] = useState(false);
+  const [isSocio2, setIsSocio2] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
   const [showWhatsAppPopup, setShowWhatsAppPopup] = useState(false);
   const [partnerInfo, setPartnerInfo] = useState<{name: string | null;whatsapp: string | null;} | null>(null);
@@ -244,6 +245,7 @@ export default function Dashboard() {
       eq('role', 'socio').
       maybeSingle();
       setIsSocio(!!socioRole);
+      setIsSocio2(!!(profileData as any).socio_2_enabled);
 
       // If user was added by a partner, fetch partner info via secure function
       if (profileData.partner_id) {
@@ -358,7 +360,7 @@ export default function Dashboard() {
   const filteredCategoryOrder = activeCategory ? CATEGORY_ORDER.filter((cat) => cat === activeCategory) : CATEGORY_ORDER;
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex w-full">
       {/* Sidebar */}
-      <DashboardSidebar userProfile={userProfile} onLogout={handleLogout} activeCategory={activeCategory} onCategorySelect={setActiveCategory} isSocio={isSocio} />
+      <DashboardSidebar userProfile={userProfile} onLogout={handleLogout} activeCategory={activeCategory} onCategorySelect={setActiveCategory} isSocio={isSocio} isSocio2={isSocio2} isAdmin={isAdmin} />
 
       {/* Main Content Area */}
       <div className="flex-1 min-w-0">

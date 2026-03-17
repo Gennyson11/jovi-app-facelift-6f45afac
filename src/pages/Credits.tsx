@@ -119,14 +119,22 @@ export default function Credits() {
   const fetchData = async () => {
     setLoading(true);
     const [profileRes, creditsRes, transactionsRes, missionsRes, socioRes] = await Promise.all([
-      supabase.from('profiles').select('id, email, name, avatar_url').eq('user_id', user!.id).maybeSingle(),
+      supabase.from('profiles').select('id, email, name, avatar_url, socio_2_enabled').eq('user_id', user!.id).maybeSingle(),
       supabase.from('user_credits').select('balance').eq('user_id', user!.id).maybeSingle(),
       supabase.from('credit_transactions').select('*').eq('user_id', user!.id).order('created_at', { ascending: false }).limit(20),
       supabase.from('user_missions').select('*').eq('user_id', user!.id),
       supabase.from('user_roles').select('role').eq('user_id', user!.id).eq('role', 'socio').maybeSingle(),
     ]);
 
-    if (profileRes.data) setUserProfile(profileRes.data as UserProfile);
+    if (profileRes.data) {
+      setUserProfile(profileRes.data as UserProfile);
+      // Gate: only socio_2_enabled or admin can access
+      const isSocio2 = (profileRes.data as any).socio_2_enabled;
+      if (!isAdmin && !isSocio2) {
+        navigate('/dashboard');
+        return;
+      }
+    }
     if (creditsRes.data) setBalance(creditsRes.data.balance);
     if (transactionsRes.data) setTransactions(transactionsRes.data as Transaction[]);
     setIsSocio(!!socioRes.data);
