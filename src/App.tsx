@@ -61,6 +61,7 @@ const AppRoutes = () => (
       <Route path="/revendedores" element={<Revendedores />} />
       <Route path="/socios" element={<Socios />} />
       <Route path="/convite/:code" element={<Invite />} />
+      <Route path="/creditos" element={<Credits />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
   </MaintenanceWrapper>

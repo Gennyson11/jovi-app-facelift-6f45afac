@@ -74,6 +74,11 @@ export default function DashboardSidebar({
   };
 
   const handleItemClick = (item: typeof DASHBOARD_ITEMS[0]) => {
+    if ('route' in item && (item as any).route && (item as any).href) {
+      navigate((item as any).href);
+      setIsMobileOpen(false);
+      return;
+    }
     // Navigate to dashboard if not already there
     if (location.pathname !== '/dashboard') {
       navigate('/dashboard');
