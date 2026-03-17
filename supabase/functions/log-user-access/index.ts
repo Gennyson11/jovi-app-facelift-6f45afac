@@ -105,7 +105,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log('Access logged successfully for user:', user.email, 'IP:', ip, 'City:', city);
+    console.log('Access logged successfully for user:', userEmail, 'IP:', ip, 'City:', city);
 
     return new Response(
       JSON.stringify({ 
