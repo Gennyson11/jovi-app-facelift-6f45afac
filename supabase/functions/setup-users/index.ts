@@ -508,6 +508,83 @@ serve(async (req) => {
       );
     }
 
+    if (action === "update_client") {
+      // Sócios can update their own clients' email and password
+      if (!client_profile_id) {
+        return new Response(
+          JSON.stringify({ error: "client_profile_id is required" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const { new_email, new_password } = await req.json().catch(() => ({ new_email: null, new_password: null }));
+
+      // Get client profile to verify ownership
+      const { data: clientProfile, error: clientFetchError } = await supabaseAdmin
+        .from("profiles")
+        .select("user_id, partner_id, email")
+        .eq("id", client_profile_id)
+        .single();
+
+      if (clientFetchError || !clientProfile) {
+        return new Response(
+          JSON.stringify({ error: "Client not found" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Sócios can only update their own clients
+      if (isSocio && !isAdmin && clientProfile.partner_id !== callerUserId) {
+        return new Response(
+          JSON.stringify({ error: "Forbidden - You can only update your own clients" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const clientAuthId = clientProfile.user_id;
+      const updateData: Record<string, string> = {};
+      
+      if (new_email && new_email !== clientProfile.email) {
+        updateData.email = new_email;
+      }
+      if (new_password && new_password.length >= 6) {
+        updateData.password = new_password;
+      }
+
+      if (Object.keys(updateData).length === 0) {
+        return new Response(
+          JSON.stringify({ error: "No changes provided" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Update auth user
+      const { error: updateAuthError } = await supabaseAdmin.auth.admin.updateUserById(clientAuthId, updateData);
+
+      if (updateAuthError) {
+        console.error("Error updating client auth:", updateAuthError);
+        return new Response(
+          JSON.stringify({ error: updateAuthError.message }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Update email in profiles table too
+      if (updateData.email) {
+        await supabaseAdmin
+          .from("profiles")
+          .update({ email: updateData.email })
+          .eq("id", client_profile_id);
+      }
+
+      console.log("Updated client:", clientProfile.email, "by:", callerUserEmail, "changes:", Object.keys(updateData));
+
+      return new Response(
+        JSON.stringify({ success: true, message: "Client updated successfully" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     return new Response(
       JSON.stringify({ error: "Invalid action" }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
