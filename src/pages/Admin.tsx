@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Users, UserCheck, UserX, Settings, CheckSquare, Clock, Calendar, Infinity, PlusCircle, MinusCircle, Megaphone, ToggleLeft, ToggleRight, Wifi, WifiOff, MousePointerClick, Gift, QrCode, Handshake, Search, ShoppingCart, Package, MapPin, AlertOctagon, UserPlus, Construction } from 'lucide-react';
+import { LogOut, Plus, Pencil, Trash2, Loader2, Eye, EyeOff, Shield, Upload, Image, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Users, UserCheck, UserX, Settings, CheckSquare, Clock, Calendar, Infinity, PlusCircle, MinusCircle, Megaphone, ToggleLeft, ToggleRight, Wifi, WifiOff, MousePointerClick, Gift, QrCode, Handshake, Search, ShoppingCart, Package, MapPin, AlertOctagon, UserPlus, Construction, DollarSign } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Badge } from '@/components/ui/badge';
@@ -112,6 +112,18 @@ interface LastAccessInfo {
   created_at: string;
 }
 
+interface PartnerPayment {
+  id: string;
+  user_id: string;
+  amount: number;
+  type: string;
+  description: string | null;
+  created_at: string;
+  reference_id: string | null;
+  partner_name: string | null;
+  partner_email: string;
+}
+
 // Access duration options
 const ACCESS_DURATION_OPTIONS = [{
   label: '2 dias',
@@ -149,6 +161,7 @@ export default function Admin() {
   const [platformClicks, setPlatformClicks] = useState<Record<string, number>>({});
   const [socios, setSocios] = useState<SocioUser[]>([]);
   const [userLastAccess, setUserLastAccess] = useState<Record<string, LastAccessInfo>>({});
+  const [partnerPayments, setPartnerPayments] = useState<PartnerPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
   const [userSearchQuery, setUserSearchQuery] = useState('');
@@ -342,7 +355,7 @@ export default function Admin() {
       return allAccess;
     };
     
-    const [platformsRes, usersRes, newsRes, clicksRes, sociosRes, productsRes, accessLogsRes, allAccess] = await Promise.all([
+    const [platformsRes, usersRes, newsRes, clicksRes, sociosRes, productsRes, accessLogsRes, allAccess, creditTxRes] = await Promise.all([
       supabase.from('streaming_platforms').select('*').order('name'), 
       supabase.from('profiles').select('*').order('created_at', { ascending: false }), 
       supabase.from('news').select('*').order('created_at', { ascending: false }),
@@ -350,7 +363,8 @@ export default function Admin() {
       supabase.from('user_roles').select('user_id, created_at').eq('role', 'socio'),
       supabase.from('products').select('*').order('created_at', { ascending: false }),
       supabase.from('user_access_logs').select('*').order('created_at', { ascending: false }),
-      fetchAllPlatformAccess()
+      fetchAllPlatformAccess(),
+      supabase.from('credit_transactions').select('*').eq('type', 'purchase').order('created_at', { ascending: false })
     ]);
     
     // Debug logging - IMPORTANT
@@ -420,6 +434,22 @@ export default function Admin() {
       });
       
       setUserLastAccess(lastAccessMap);
+    }
+    
+    // Process partner payments (credit purchases by socios)
+    if (creditTxRes.data && usersRes.data && sociosRes.data) {
+      const socioUserIds = new Set(sociosRes.data.map((s: any) => s.user_id));
+      const payments: PartnerPayment[] = creditTxRes.data
+        .filter((tx: any) => socioUserIds.has(tx.user_id))
+        .map((tx: any) => {
+          const profile = usersRes.data!.find((u: any) => u.user_id === tx.user_id);
+          return {
+            ...tx,
+            partner_name: profile?.name || null,
+            partner_email: profile?.email || tx.user_id,
+          };
+        });
+      setPartnerPayments(payments);
     }
     
     setLoading(false);
@@ -1339,6 +1369,10 @@ export default function Admin() {
               <Users className="w-4 h-4" />
               Sócios
             </TabsTrigger>
+            <TabsTrigger value="partner-payments" className="gap-2">
+              <DollarSign className="w-4 h-4" />
+              Pagamentos Sócios
+            </TabsTrigger>
             <TabsTrigger value="settings" className="gap-2">
               <Settings className="w-4 h-4" />
               Configurações
@@ -2043,7 +2077,104 @@ export default function Admin() {
             </Card>
           </TabsContent>
 
-          {/* Register Tab */}
+          {/* Partner Payments Tab */}
+          <TabsContent value="partner-payments">
+            <Card className="border-border">
+              <CardHeader className="flex flex-row items-center justify-between">
+                <div>
+                  <CardTitle className="text-foreground">Pagamentos dos Sócios</CardTitle>
+                  <p className="text-sm text-muted-foreground mt-1">Histórico de compras de crédito realizadas pelos sócios</p>
+                </div>
+                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 text-green-500">
+                  <DollarSign className="w-4 h-4" />
+                  <span className="font-semibold">
+                    R$ {partnerPayments.reduce((sum, p) => sum + p.amount, 0).toFixed(2).replace('.', ',')}
+                  </span>
+                  <span className="text-xs">total</span>
+                </div>
+              </CardHeader>
+              <CardContent>
+                {partnerPayments.length === 0 ? (
+                  <div className="text-center text-muted-foreground py-8">
+                    Nenhum pagamento de sócio registrado
+                  </div>
+                ) : (
+                  <div className="space-y-6">
+                    {/* Summary per partner */}
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {(() => {
+                        const grouped: Record<string, { name: string | null; email: string; total: number; count: number }> = {};
+                        partnerPayments.forEach(p => {
+                          if (!grouped[p.user_id]) {
+                            grouped[p.user_id] = { name: p.partner_name, email: p.partner_email, total: 0, count: 0 };
+                          }
+                          grouped[p.user_id].total += p.amount;
+                          grouped[p.user_id].count += 1;
+                        });
+                        return Object.entries(grouped).map(([userId, data]) => (
+                          <div key={userId} className="border border-border rounded-lg p-4 bg-secondary/20">
+                            <div className="flex items-center gap-3 mb-2">
+                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                <Handshake className="w-4 h-4 text-primary" />
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                <p className="font-medium text-foreground text-sm truncate">{data.name || 'Sem nome'}</p>
+                                <p className="text-xs text-muted-foreground truncate">{data.email}</p>
+                              </div>
+                            </div>
+                            <div className="flex justify-between items-center mt-3 pt-3 border-t border-border">
+                              <span className="text-xs text-muted-foreground">{data.count} compra{data.count !== 1 ? 's' : ''}</span>
+                              <span className="font-bold text-green-500">R$ {data.total.toFixed(2).replace('.', ',')}</span>
+                            </div>
+                          </div>
+                        ));
+                      })()}
+                    </div>
+
+                    {/* Full transactions list */}
+                    <div className="overflow-x-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead>Sócio</TableHead>
+                            <TableHead>Descrição</TableHead>
+                            <TableHead>Valor (créditos)</TableHead>
+                            <TableHead>Referência</TableHead>
+                            <TableHead>Data</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {partnerPayments.map(payment => (
+                            <TableRow key={payment.id}>
+                              <TableCell>
+                                <div>
+                                  <p className="font-medium text-sm">{payment.partner_name || 'Sem nome'}</p>
+                                  <p className="text-xs text-muted-foreground">{payment.partner_email}</p>
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-sm text-muted-foreground">
+                                {payment.description || '-'}
+                              </TableCell>
+                              <TableCell>
+                                <span className="font-semibold text-green-500">+{payment.amount}</span>
+                              </TableCell>
+                              <TableCell className="text-xs text-muted-foreground font-mono">
+                                {payment.reference_id || '-'}
+                              </TableCell>
+                              <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                                {new Date(payment.created_at).toLocaleDateString('pt-BR')} {new Date(payment.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                              </TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+
           <TabsContent value="register">
             <Card className="border-border">
               <CardHeader>
