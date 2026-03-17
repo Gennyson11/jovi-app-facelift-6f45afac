@@ -201,6 +201,7 @@ export type Database = {
           id: string
           name: string | null
           partner_id: string | null
+          socio_2_enabled: boolean
           updated_at: string
           user_id: string
           whatsapp: string | null
@@ -215,6 +216,7 @@ export type Database = {
           id?: string
           name?: string | null
           partner_id?: string | null
+          socio_2_enabled?: boolean
           updated_at?: string
           user_id: string
           whatsapp?: string | null
@@ -229,6 +231,7 @@ export type Database = {
           id?: string
           name?: string | null
           partner_id?: string | null
+          socio_2_enabled?: boolean
           updated_at?: string
           user_id?: string
           whatsapp?: string | null
