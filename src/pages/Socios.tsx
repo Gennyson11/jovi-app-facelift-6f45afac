@@ -231,8 +231,13 @@ export default function Socios() {
       const expirationDate = new Date();
       expirationDate.setDate(expirationDate.getDate() + selectedPlan);
 
+      const accessToken = await getFreshAccessToken();
+
       // Create user via edge function with all data (bypasses RLS using service role)
       const { data: functionData, error: functionError } = await supabase.functions.invoke('setup-users', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        },
         body: {
           action: 'create_user',
           email: clientEmail,
