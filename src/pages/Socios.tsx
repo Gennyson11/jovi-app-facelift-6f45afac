@@ -34,6 +34,8 @@ export default function Socios() {
   const [loading, setLoading] = useState(true);
   const [isSocio, setIsSocio] = useState(false);
   const [isSocio2, setIsSocio2] = useState(false);
+  const [socioName, setSocioName] = useState<string | null>(null);
+  const [socioCredits, setSocioCredits] = useState<number>(0);
   
   // New Client Dialog
   const [dialogOpen, setDialogOpen] = useState(false);
@@ -96,18 +98,27 @@ export default function Socios() {
     
     setIsSocio(true);
     
-    // Check if socio has 2.0 enabled
+    // Check if socio has 2.0 enabled + get name
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
-      .select('socio_2_enabled, whatsapp')
+      .select('socio_2_enabled, whatsapp, name')
       .eq('user_id', user.id)
       .maybeSingle();
     
     console.log('Socio profile data:', profileData, 'Error:', profileError);
-    console.log('socio_2_enabled:', profileData?.socio_2_enabled);
     
     setIsSocio2(profileData?.socio_2_enabled || false);
+    setSocioName(profileData?.name || null);
     if (profileData?.whatsapp) setSocioWhatsapp(profileData.whatsapp);
+    
+    // Fetch credits balance
+    const { data: creditsData } = await supabase
+      .from('user_credits')
+      .select('balance')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    
+    setSocioCredits(creditsData?.balance || 0);
     
     fetchClients();
   };
@@ -310,8 +321,18 @@ export default function Socios() {
               <Handshake className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Painel do Sócio</h1>
-              <p className="text-sm text-muted-foreground">Gerencie seus clientes</p>
+              <h1 className="text-xl font-bold text-foreground">
+                Painel do Sócio {socioName && <span className="text-primary">— {socioName}</span>}
+              </h1>
+              <div className="flex items-center gap-3">
+                <p className="text-sm text-muted-foreground">Gerencie seus clientes</p>
+                {isSocio2 && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/30">
+                    <Coins className="w-3 h-3" />
+                    {socioCredits} créditos
+                  </span>
+                )}
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-4">
