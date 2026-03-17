@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Loader2, UserCheck, UserX, Clock, Calendar, Infinity, Users, Handshake, Eye, EyeOff, Coins, Trophy, Gift, Trash2 } from 'lucide-react';
+import { LogOut, Plus, Loader2, UserCheck, UserX, Clock, Calendar, Infinity, Users, Handshake, Eye, EyeOff, Coins, Trophy, Gift, Trash2, Pencil } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface ClientProfile {
@@ -50,6 +50,14 @@ export default function Socios() {
   const [savingWhatsapp, setSavingWhatsapp] = useState(false);
   const [deletingClientId, setDeletingClientId] = useState<string | null>(null);
   const [confirmDeleteClient, setConfirmDeleteClient] = useState<ClientProfile | null>(null);
+  
+  // Edit Client Dialog
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [editingClient, setEditingClient] = useState<ClientProfile | null>(null);
+  const [editEmail, setEditEmail] = useState('');
+  const [editPassword, setEditPassword] = useState('');
+  const [showEditPassword, setShowEditPassword] = useState(false);
+  const [savingEdit, setSavingEdit] = useState(false);
 
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -345,6 +353,60 @@ export default function Socios() {
     }
   };
 
+
+  const openEditDialog = (client: ClientProfile) => {
+    setEditingClient(client);
+    setEditEmail(client.masked_email || '');
+    setEditPassword('');
+    setShowEditPassword(false);
+    setEditDialogOpen(true);
+  };
+
+  const updateClient = async () => {
+    if (!editingClient) return;
+    
+    if (editEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(editEmail)) {
+      toast({ title: 'Erro', description: 'Email inválido', variant: 'destructive' });
+      return;
+    }
+    if (editPassword && editPassword.length < 6) {
+      toast({ title: 'Erro', description: 'A senha deve ter pelo menos 6 caracteres', variant: 'destructive' });
+      return;
+    }
+    if (!editEmail && !editPassword) {
+      toast({ title: 'Erro', description: 'Preencha o novo email ou a nova senha', variant: 'destructive' });
+      return;
+    }
+
+    setSavingEdit(true);
+    try {
+      const accessToken = await getFreshAccessToken();
+      const body: Record<string, string> = {
+        action: 'update_client',
+        client_profile_id: editingClient.id,
+      };
+      if (editEmail && !editEmail.includes('***')) body.new_email = editEmail;
+      if (editPassword) body.new_password = editPassword;
+
+      const { data, error } = await supabase.functions.invoke('setup-users', {
+        headers: { Authorization: `Bearer ${accessToken}` },
+        body,
+      });
+
+      if (error) throw error;
+      if (!data?.success) throw new Error(data?.error || 'Falha ao atualizar cliente');
+
+      toast({ title: 'Sucesso', description: 'Cliente atualizado com sucesso!' });
+      setEditDialogOpen(false);
+      fetchClients();
+    } catch (error: any) {
+      console.error('Error updating client:', error);
+      toast({ title: 'Erro', description: error.message || 'Falha ao atualizar cliente', variant: 'destructive' });
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
   const getAccessStatus = (client: ClientProfile) => {
     if (!client.has_access) {
       return { text: 'Bloqueado', color: 'bg-red-500/10 text-red-500', icon: UserX };
@@ -594,6 +656,14 @@ export default function Socios() {
                         <TableCell className="text-right">
                           <div className="flex items-center justify-end gap-2">
                             <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => openEditDialog(client)}
+                              className="text-blue-400 hover:text-blue-300 hover:bg-blue-500/10 border-blue-500/30"
+                            >
+                              <Pencil className="w-4 h-4" />
+                            </Button>
+                            <Button
                               variant={client.has_access ? "destructive" : "default"}
                               size="sm"
                               onClick={() => toggleClientAccess(client.id, client.has_access)}
@@ -748,6 +818,63 @@ export default function Socios() {
             >
               {savingClient ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Plus className="w-4 h-4 mr-2" />}
               Cadastrar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Client Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="bg-card border-border max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-foreground">Editar Cliente: {editingClient?.name || 'sem nome'}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="edit-email">Novo Email</Label>
+              <Input
+                id="edit-email"
+                type="email"
+                value={editEmail}
+                onChange={e => setEditEmail(e.target.value)}
+                placeholder="novo-email@exemplo.com"
+                className="bg-background/50 border-border"
+              />
+              <p className="text-xs text-muted-foreground">Deixe o email mascarado para não alterar</p>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="edit-password">Nova Senha</Label>
+              <div className="relative">
+                <Input
+                  id="edit-password"
+                  type={showEditPassword ? "text" : "password"}
+                  value={editPassword}
+                  onChange={e => setEditPassword(e.target.value)}
+                  placeholder="Mínimo 6 caracteres"
+                  className="bg-background/50 border-border pr-10"
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowEditPassword(!showEditPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showEditPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                </button>
+              </div>
+              <p className="text-xs text-muted-foreground">Deixe em branco para não alterar a senha</p>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={updateClient} 
+              disabled={savingEdit}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
+            >
+              {savingEdit ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Pencil className="w-4 h-4 mr-2" />}
+              Salvar Alterações
             </Button>
           </DialogFooter>
         </DialogContent>
