@@ -112,6 +112,18 @@ interface LastAccessInfo {
   created_at: string;
 }
 
+interface PartnerPayment {
+  id: string;
+  user_id: string;
+  amount: number;
+  type: string;
+  description: string | null;
+  created_at: string;
+  reference_id: string | null;
+  partner_name: string | null;
+  partner_email: string;
+}
+
 // Access duration options
 const ACCESS_DURATION_OPTIONS = [{
   label: '2 dias',
