@@ -321,18 +321,18 @@ export default function Socios() {
               <Handshake className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">
-                Painel do Sócio {socioName && <span className="text-primary">— {socioName}</span>}
-              </h1>
-              <div className="flex items-center gap-3">
-                <p className="text-sm text-muted-foreground">Gerencie seus clientes</p>
+              <div className="flex items-center gap-2">
+                <h1 className="text-xl font-bold text-foreground">Painel do Sócio</h1>
                 {isSocio2 && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-purple-500/10 text-purple-400 border border-purple-500/30">
-                    <Coins className="w-3 h-3" />
-                    {socioCredits} créditos
-                  </span>
+                  <Badge className="bg-purple-500/10 text-purple-400 border-purple-500/30 border text-[10px]">2.0</Badge>
                 )}
               </div>
+              <p className="text-sm text-muted-foreground">
+                {socioName || 'Gerencie seus clientes'}
+                {isSocio2 && (
+                  <span className="ml-2 text-purple-400">• {socioCredits} créditos</span>
+                )}
+              </p>
             </div>
           </div>
           <div className="flex items-center gap-4">
