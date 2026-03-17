@@ -69,7 +69,7 @@ serve(async (req) => {
 
     console.log("User verified:", callerUser.email, "roles:", userRoles);
 
-    const { action, email, password, role, partner_id, name, has_access, access_expires_at } = await req.json();
+    const { action, email, password, role, partner_id, name, has_access, access_expires_at, client_profile_id } = await req.json();
     console.log("Setup action:", action, "email:", email, "partner_id:", partner_id, "by user:", callerUser.email, "isAdmin:", isAdmin, "isSocio:", isSocio);
 
     if (action === "create_user") {
