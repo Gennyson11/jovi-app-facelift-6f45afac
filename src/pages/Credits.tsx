@@ -417,20 +417,25 @@ export default function Credits() {
 
           {/* Missões Tab */}
           {activeTab === 'missoes' && (
-            <div className="space-y-4">
-              {['Iniciante', 'Intermediário', 'Expert'].map((level) => {
-                const levelMissions = MISSIONS.filter(m => m.level === level);
-                if (levelMissions.length === 0) return null;
-                const colors = LEVEL_COLORS[level];
+            <div className="space-y-6">
+              {Object.entries(TIER_CONFIG).map(([tierKey, tierInfo]) => {
+                const tierMissions = MISSIONS.filter(m => m.tier === tierKey);
+                if (tierMissions.length === 0) return null;
+                
+                const completedCount = tierMissions.filter(m => missionProgress[m.id]?.claimed).length;
+                
                 return (
-                  <div key={level}>
-                    <div className="flex items-center gap-2 mb-3">
-                      <Badge className={`${colors.bg} ${colors.text} ${colors.border} border`}>
-                        <Star className="w-3 h-3 mr-1" /> {level}
+                  <div key={tierKey}>
+                    <div className="flex items-center justify-between mb-3">
+                      <Badge className={`${tierInfo.bg} ${tierInfo.text} ${tierInfo.border} border`}>
+                        <span className="mr-1">{tierInfo.emoji}</span> {tierInfo.label} ({completedCount}/{tierMissions.length})
                       </Badge>
+                      <span className="text-xs text-muted-foreground">
+                        Lvl {tierMissions[0].level}-{tierMissions[tierMissions.length - 1].level}
+                      </span>
                     </div>
-                    <div className="grid gap-3">
-                      {levelMissions.map((mission) => {
+                    <div className="grid gap-2">
+                      {tierMissions.map((mission) => {
                         const mp = missionProgress[mission.id];
                         const progress = mp?.progress || 0;
                         const completed = mp?.completed || false;
@@ -439,30 +444,31 @@ export default function Credits() {
 
                         return (
                           <Card key={mission.id} className={`border transition-all ${claimed ? 'opacity-60' : ''}`}>
-                            <CardContent className="p-4">
-                              <div className="flex items-center gap-4">
-                                <div className="text-3xl flex-shrink-0">{mission.icon}</div>
+                            <CardContent className="p-3">
+                              <div className="flex items-center gap-3">
+                                <div className="text-2xl flex-shrink-0">{mission.icon}</div>
                                 <div className="flex-1 min-w-0">
-                                  <div className="flex items-center gap-2 mb-1">
+                                  <div className="flex items-center gap-2 mb-0.5">
+                                    <span className="text-[10px] text-muted-foreground font-mono">Lv.{mission.level}</span>
                                     <h4 className="font-semibold text-foreground text-sm">{mission.title}</h4>
-                                    {claimed && <CheckCircle className="w-4 h-4 text-emerald-400" />}
+                                    {claimed && <CheckCircle className="w-3.5 h-3.5 text-emerald-400" />}
                                   </div>
-                                  <p className="text-xs text-muted-foreground mb-2">{mission.description}</p>
+                                  <p className="text-[11px] text-muted-foreground mb-1.5">{mission.description}</p>
                                   <div className="flex items-center gap-3">
-                                    <Progress value={progressPercent} className="flex-1 h-2" />
-                                    <span className="text-xs text-muted-foreground whitespace-nowrap">
+                                    <Progress value={progressPercent} className="flex-1 h-1.5" />
+                                    <span className="text-[10px] text-muted-foreground whitespace-nowrap">
                                       {progress}/{mission.target}
                                     </span>
                                   </div>
                                 </div>
                                 <div className="flex flex-col items-center gap-1 flex-shrink-0">
-                                  <div className="flex items-center gap-1 text-amber-400 text-sm font-bold">
-                                    <Gift className="w-3.5 h-3.5" /> +{mission.reward}
+                                  <div className="flex items-center gap-1 text-amber-400 text-xs font-bold">
+                                    <Gift className="w-3 h-3" /> +{mission.reward}
                                   </div>
                                   {completed && !claimed ? (
                                     <Button
                                       size="sm"
-                                      className="text-xs h-7 px-3"
+                                      className="text-[10px] h-6 px-2"
                                       onClick={() => handleClaimReward(mission.id, mission.reward)}
                                       disabled={claimingMission === mission.id}
                                     >
@@ -473,9 +479,9 @@ export default function Credits() {
                                       )}
                                     </Button>
                                   ) : claimed ? (
-                                    <span className="text-[10px] text-emerald-400">Resgatado</span>
+                                    <span className="text-[9px] text-emerald-400">Resgatado</span>
                                   ) : (
-                                    <Lock className="w-4 h-4 text-muted-foreground" />
+                                    <Lock className="w-3.5 h-3.5 text-muted-foreground" />
                                   )}
                                 </div>
                               </div>
