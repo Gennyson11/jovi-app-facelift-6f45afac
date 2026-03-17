@@ -62,7 +62,9 @@ export default function DashboardSidebar({
   onLogout, 
   activeCategory, 
   onCategorySelect,
-  isSocio = false
+  isSocio = false,
+  isSocio2 = false,
+  isAdmin = false
 }: DashboardSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
