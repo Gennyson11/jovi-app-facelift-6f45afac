@@ -363,8 +363,8 @@ export default function Credits() {
     }
   };
 
-  const handleCheckPayment = async () => {
-    if (!pixData) return;
+  const handleCheckPayment = useCallback(async () => {
+    if (!pixData || paymentConfirmed) return;
     setCheckingPayment(true);
 
     try {
@@ -374,19 +374,26 @@ export default function Credits() {
 
       if (error) throw error;
 
-      if (data.status === 'CONFIRMED') {
+      if (data.status === 'CONFIRMED' || data.status === 'RECEIVED') {
         setPaymentConfirmed(true);
         toast({ title: '🎉 Pagamento Confirmado!', description: `+${pixData.creditAmount} créditos adicionados!` });
         fetchData();
-      } else {
-        toast({ title: '⏳ Aguardando', description: 'Pagamento ainda não confirmado. Tente novamente em alguns segundos.' });
       }
     } catch (err: any) {
-      toast({ title: '❌ Erro', description: err.message || 'Erro ao verificar pagamento', variant: 'destructive' });
+      // silently ignore polling errors
     } finally {
       setCheckingPayment(false);
     }
-  };
+  }, [pixData, paymentConfirmed]);
+
+  // Auto-poll payment status every 5 seconds
+  useEffect(() => {
+    if (!pixData || paymentConfirmed || pixLoading) return;
+    const interval = setInterval(() => {
+      handleCheckPayment();
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [pixData, paymentConfirmed, pixLoading, handleCheckPayment]);
 
   const handleLogout = async () => {
     await signOut();
@@ -744,35 +751,14 @@ export default function Credits() {
                 Copiar código PIX
               </Button>
 
-              {/* Checking payment */}
+              {/* Auto-checking payment status */}
               <Button
                 className="w-full gap-2"
                 variant="default"
-                onClick={handleCheckPayment}
-                disabled={checkingPayment}
+                disabled
               >
-                {checkingPayment ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Verificando...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="w-4 h-4" />
-                    Aguardando pagamento
-                  </>
-                )}
-              </Button>
-
-              {/* Already paid */}
-              <Button
-                variant="ghost"
-                className="w-full gap-2 text-muted-foreground"
-                onClick={handleCheckPayment}
-                disabled={checkingPayment}
-              >
-                <CheckCircle className="w-4 h-4" />
-                Já fiz o Pagamento
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                Aguardando pagamento
               </Button>
             </div>
           )}
