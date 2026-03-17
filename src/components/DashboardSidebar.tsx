@@ -38,15 +38,16 @@ interface DashboardSidebarProps {
   isAdmin?: boolean;
 }
 
-const DASHBOARD_ITEMS = [
+const DASHBOARD_ITEMS_BASE = [
   { id: 'ferramentas', label: 'Ferramentas', icon: Wrench, category: 'ai_tools' },
   { id: 'streamings', label: 'Streamings', icon: Clapperboard, category: 'streamings' },
   { id: 'softwares', label: 'Softwares', icon: Monitor, category: 'software' },
   { id: 'biblioteca', label: 'Bônus', icon: Library, category: 'bonus_courses' },
   { id: 'loja', label: 'Loja', icon: ShoppingCart, category: 'loja' },
   { id: 'jovi_ia', label: 'Jovi.ia', icon: Bot, category: 'jovi_ia' },
-  { id: 'creditos', label: 'Meus Créditos', icon: Ticket, href: '/creditos', route: true },
 ];
+
+const CREDITOS_ITEM = { id: 'creditos', label: 'Meus Créditos', icon: Ticket, href: '/creditos', route: true, category: 'creditos' };
 
 const GENERAL_ITEMS = [
   { id: 'sorteios', label: 'Sorteios', icon: Gift, category: 'sorteios', disabled: false },
