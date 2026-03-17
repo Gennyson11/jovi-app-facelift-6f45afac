@@ -751,35 +751,14 @@ export default function Credits() {
                 Copiar código PIX
               </Button>
 
-              {/* Checking payment */}
+              {/* Auto-checking payment status */}
               <Button
                 className="w-full gap-2"
                 variant="default"
-                onClick={handleCheckPayment}
-                disabled={checkingPayment}
+                disabled
               >
-                {checkingPayment ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    Verificando...
-                  </>
-                ) : (
-                  <>
-                    <RefreshCw className="w-4 h-4" />
-                    Aguardando pagamento
-                  </>
-                )}
-              </Button>
-
-              {/* Already paid */}
-              <Button
-                variant="ghost"
-                className="w-full gap-2 text-muted-foreground"
-                onClick={handleCheckPayment}
-                disabled={checkingPayment}
-              >
-                <CheckCircle className="w-4 h-4" />
-                Já fiz o Pagamento
+                <RefreshCw className="w-4 h-4 animate-spin" />
+                Aguardando pagamento
               </Button>
             </div>
           )}
