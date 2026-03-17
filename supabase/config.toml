@@ -4,7 +4,7 @@ project_id = "xuwnkzwfsprhmuxynlap"
 verify_jwt = false
 
 [functions.setup-users]
-verify_jwt = true
+verify_jwt = false
 
 [functions.generate-video]
 verify_jwt = false
