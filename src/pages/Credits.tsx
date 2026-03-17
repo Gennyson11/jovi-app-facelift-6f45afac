@@ -423,11 +423,15 @@ export default function Credits() {
                       <p className="text-3xl font-display font-bold text-foreground">{pkg.amount}</p>
                       <p className="text-xs text-muted-foreground">créditos</p>
                     </div>
+                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-2 py-1.5">
+                      <p className="text-xs font-bold text-emerald-400">+{pkg.bonus} bônus grátis</p>
+                      <p className="text-[10px] text-emerald-400/70">Total: {pkg.amount + pkg.bonus} créditos</p>
+                    </div>
                     <p className="text-lg font-bold text-primary">
                       R$ {pkg.price.toFixed(2).replace('.', ',')}
                     </p>
                     <p className="text-[10px] text-muted-foreground">
-                      R$ {(pkg.price / pkg.amount).toFixed(2).replace('.', ',')} / crédito
+                      R$ {(pkg.price / (pkg.amount + pkg.bonus)).toFixed(2).replace('.', ',')} / crédito efetivo
                     </p>
                     <Button
                       className="w-full"
