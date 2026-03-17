@@ -48,6 +48,8 @@ export default function Socios() {
   const [savingClient, setSavingClient] = useState(false);
   const [socioWhatsapp, setSocioWhatsapp] = useState('');
   const [savingWhatsapp, setSavingWhatsapp] = useState(false);
+  const [deletingClientId, setDeletingClientId] = useState<string | null>(null);
+  const [confirmDeleteClient, setConfirmDeleteClient] = useState<ClientProfile | null>(null);
 
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
