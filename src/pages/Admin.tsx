@@ -578,6 +578,14 @@ export default function Admin() {
       .maybeSingle();
     setUserIsSocio(!!roleData);
     
+    // Check if user has socio_2_enabled
+    const { data: profileData } = await supabase
+      .from('profiles')
+      .select('socio_2_enabled')
+      .eq('id', userProfile.id)
+      .single();
+    setUserIsSocio2((profileData as any)?.socio_2_enabled || false);
+    
     setPermissionsDialogOpen(true);
   };
 
