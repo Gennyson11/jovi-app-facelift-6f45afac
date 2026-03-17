@@ -34,6 +34,8 @@ interface DashboardSidebarProps {
   activeCategory: string | null;
   onCategorySelect: (category: string | null) => void;
   isSocio?: boolean;
+  isSocio2?: boolean;
+  isAdmin?: boolean;
 }
 
 const DASHBOARD_ITEMS = [
