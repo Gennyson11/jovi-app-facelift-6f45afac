@@ -28,18 +28,24 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Create client with user's token to get user info
-    const supabaseUser = createClient(
+    const token = authHeader.replace('Bearer ', '');
+
+    // Validate JWT using signing-keys-safe flow
+    const supabaseAuth = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
+      {
+        auth: { autoRefreshToken: false, persistSession: false },
+        global: { headers: { Authorization: authHeader } }
+      }
     );
 
-    // Get the user from the token
-    const { data: { user }, error: userError } = await supabaseUser.auth.getUser();
+    const { data: claimsData, error: userError } = await supabaseAuth.auth.getClaims(token);
+    const userId = claimsData?.claims?.sub;
+    const userEmail = typeof claimsData?.claims?.email === 'string' ? claimsData.claims.email : null;
     
-    if (userError || !user) {
-      console.error('Error getting user:', userError);
+    if (userError || !userId) {
+      console.error('Error getting user claims:', userError);
       return new Response(
         JSON.stringify({ error: 'Invalid user token' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
