@@ -245,6 +245,7 @@ export default function Dashboard() {
       eq('role', 'socio').
       maybeSingle();
       setIsSocio(!!socioRole);
+      setIsSocio2(!!(profileData as any).socio_2_enabled);
 
       // If user was added by a partner, fetch partner info via secure function
       if (profileData.partner_id) {
