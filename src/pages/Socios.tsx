@@ -238,8 +238,8 @@ export default function Socios() {
       if (functionError) throw functionError;
       if (!functionData?.userId) throw new Error('Falha ao criar usuário');
 
-      // Deduct 1 credit if Sócio 2.0
-      if (isSocio2 && user) {
+      // Deduct 1 credit
+      if (user) {
         await supabase.rpc('add_credits', {
           p_user_id: user.id,
           p_amount: -1,
