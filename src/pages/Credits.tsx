@@ -65,11 +65,13 @@ const LEVEL_COLORS: Record<string, { bg: string; text: string; border: string }>
   'Expert': { bg: 'bg-purple-500/10', text: 'text-purple-400', border: 'border-purple-500/30' },
 };
 
+const CREDIT_UNIT_PRICE = 9.90;
+
 const CREDIT_PACKAGES = [
-  { id: 'pack_10', amount: 10, price: 9.90, popular: false },
-  { id: 'pack_30', amount: 30, price: 24.90, popular: true },
-  { id: 'pack_50', amount: 50, price: 39.90, popular: false },
-  { id: 'pack_100', amount: 100, price: 69.90, popular: false },
+  { id: 'pack_1', amount: 1, price: 9.90, popular: false },
+  { id: 'pack_5', amount: 5, price: 44.90, popular: false },
+  { id: 'pack_10', amount: 10, price: 84.90, popular: true },
+  { id: 'pack_20', amount: 20, price: 159.90, popular: false },
 ];
 
 interface UserProfile {
