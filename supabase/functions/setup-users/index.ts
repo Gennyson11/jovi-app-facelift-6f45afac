@@ -388,7 +388,7 @@ serve(async (req) => {
           { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      console.log("Finding and deleting orphan auth users... Requested by:", callerUser.email);
+      console.log("Finding and deleting orphan auth users... Requested by:", callerUserEmail);
       
       // Get all auth users
       const { data: { users: authUsers }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
