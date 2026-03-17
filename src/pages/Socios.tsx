@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Loader2, UserCheck, UserX, Clock, Calendar, Infinity, Users, Handshake, Eye, EyeOff, Coins, Trophy, Gift, Trash2 } from 'lucide-react';
+import { LogOut, Plus, Loader2, UserCheck, UserX, Clock, Calendar, Infinity, Users, Handshake, Eye, EyeOff, Coins, Trophy, Gift, Trash2, Pencil } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface ClientProfile {
