@@ -126,7 +126,15 @@ export default function Credits() {
       supabase.from('user_roles').select('role').eq('user_id', user!.id).eq('role', 'socio').maybeSingle(),
     ]);
 
-    if (profileRes.data) setUserProfile(profileRes.data as UserProfile);
+    if (profileRes.data) {
+      setUserProfile(profileRes.data as UserProfile);
+      // Gate: only socio_2_enabled or admin can access
+      const isSocio2 = (profileRes.data as any).socio_2_enabled;
+      if (!isAdmin && !isSocio2) {
+        navigate('/dashboard');
+        return;
+      }
+    }
     if (creditsRes.data) setBalance(creditsRes.data.balance);
     if (transactionsRes.data) setTransactions(transactionsRes.data as Transaction[]);
     setIsSocio(!!socioRes.data);
