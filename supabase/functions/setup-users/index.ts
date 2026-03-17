@@ -309,7 +309,7 @@ serve(async (req) => {
           { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      console.log("Deleting all users without access... Requested by:", callerUser.email);
+      console.log("Deleting all users without access... Requested by:", callerUserEmail);
       
       // Get all profiles without access
       const { data: profilesToDelete, error: fetchError } = await supabaseAdmin
