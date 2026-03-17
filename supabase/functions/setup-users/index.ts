@@ -450,6 +450,59 @@ serve(async (req) => {
       );
     }
 
+    if (action === "delete_client") {
+      // Sócios can delete their own clients; admins can delete any client
+      if (!client_profile_id) {
+        return new Response(
+          JSON.stringify({ error: "client_profile_id is required" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Get the client profile to verify ownership
+      const { data: clientProfile, error: clientFetchError } = await supabaseAdmin
+        .from("profiles")
+        .select("user_id, partner_id, email")
+        .eq("id", client_profile_id)
+        .single();
+
+      if (clientFetchError || !clientProfile) {
+        return new Response(
+          JSON.stringify({ error: "Client not found" }),
+          { status: 404, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Sócios can only delete their own clients
+      if (isSocio && !isAdmin && clientProfile.partner_id !== callerUser.id) {
+        return new Response(
+          JSON.stringify({ error: "Forbidden - You can only delete your own clients" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      const clientAuthId = clientProfile.user_id;
+      console.log("Deleting client:", clientProfile.email, "auth id:", clientAuthId, "by:", callerUser.email);
+
+      // Delete from auth.users (cascades to profiles, roles, etc.)
+      const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(clientAuthId);
+
+      if (deleteAuthError) {
+        console.error("Error deleting client auth user:", deleteAuthError);
+        return new Response(
+          JSON.stringify({ error: deleteAuthError.message }),
+          { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      console.log("Successfully deleted client:", clientProfile.email);
+
+      return new Response(
+        JSON.stringify({ success: true, message: "Client deleted successfully" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     return new Response(
       JSON.stringify({ error: "Invalid action" }),
       { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
