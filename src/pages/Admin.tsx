@@ -1371,7 +1371,7 @@ export default function Admin() {
             </TabsTrigger>
             <TabsTrigger value="partner-payments" className="gap-2">
               <DollarSign className="w-4 h-4" />
-              Pagamentos Sócios
+              Recargas Sócios
             </TabsTrigger>
             <TabsTrigger value="settings" className="gap-2">
               <Settings className="w-4 h-4" />
