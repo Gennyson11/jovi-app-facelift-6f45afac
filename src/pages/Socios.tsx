@@ -98,18 +98,27 @@ export default function Socios() {
     
     setIsSocio(true);
     
-    // Check if socio has 2.0 enabled
+    // Check if socio has 2.0 enabled + get name
     const { data: profileData, error: profileError } = await supabase
       .from('profiles')
-      .select('socio_2_enabled, whatsapp')
+      .select('socio_2_enabled, whatsapp, name')
       .eq('user_id', user.id)
       .maybeSingle();
     
     console.log('Socio profile data:', profileData, 'Error:', profileError);
-    console.log('socio_2_enabled:', profileData?.socio_2_enabled);
     
     setIsSocio2(profileData?.socio_2_enabled || false);
+    setSocioName(profileData?.name || null);
     if (profileData?.whatsapp) setSocioWhatsapp(profileData.whatsapp);
+    
+    // Fetch credits balance
+    const { data: creditsData } = await supabase
+      .from('user_credits')
+      .select('balance')
+      .eq('user_id', user.id)
+      .maybeSingle();
+    
+    setSocioCredits(creditsData?.balance || 0);
     
     fetchClients();
   };
