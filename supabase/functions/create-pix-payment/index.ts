@@ -28,7 +28,7 @@ serve(async (req) => {
     const ASAAS_API_KEY = Deno.env.get("ASAAS_API_KEY");
     if (!ASAAS_API_KEY) throw new Error("ASAAS_API_KEY não configurada");
 
-    const ASAAS_BASE_URL = "https://api-sandbox.asaas.com/v3";
+    const ASAAS_BASE_URL = "https://api.asaas.com/v3";
 
     // Check/create customer in Asaas
     const customerSearchRes = await fetch(`${ASAAS_BASE_URL}/customers?email=${encodeURIComponent(user.email!)}`, {
