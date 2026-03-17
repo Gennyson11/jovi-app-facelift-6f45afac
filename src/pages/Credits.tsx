@@ -154,10 +154,10 @@ const MISSIONS: MissionDef[] = [
 const CREDIT_UNIT_PRICE = 9.90;
 
 const CREDIT_PACKAGES = [
-  { id: 'pack_1', amount: 1, price: 9.90, popular: false },
-  { id: 'pack_5', amount: 5, price: 44.90, popular: false },
-  { id: 'pack_10', amount: 10, price: 84.90, popular: true },
-  { id: 'pack_20', amount: 20, price: 159.90, popular: false },
+  { id: 'pack_5', amount: 5, bonus: 1, price: 49.50, popular: false },
+  { id: 'pack_10', amount: 10, bonus: 3, price: 99.00, popular: false },
+  { id: 'pack_20', amount: 20, bonus: 7, price: 198.00, popular: true },
+  { id: 'pack_50', amount: 50, bonus: 20, price: 495.00, popular: false },
 ];
 
 interface UserProfile {
