@@ -147,7 +147,11 @@ Junte-se a nós como sócio e ganhe 100% de lucro</p>
           <div className="px-6 py-6 space-y-4">
             <div className="flex items-center gap-3 text-lg">
               <span className="text-primary text-xl">✅</span>
-              <span className="text-foreground font-medium">Acesso total ao painel administrativo</span>
+              <span className="text-foreground font-medium">Acesso ao painel de revendedor</span>
+            </div>
+            <div className="flex items-center gap-3 text-lg">
+              <span className="text-primary text-xl">✅</span>
+              <span className="text-foreground font-medium">R$ 197,00 — Acesso vitalício</span>
             </div>
             <div className="flex items-center gap-3 text-lg">
               <span className="text-primary text-xl">✅</span>
