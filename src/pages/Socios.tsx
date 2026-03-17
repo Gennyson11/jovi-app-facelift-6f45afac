@@ -570,23 +570,38 @@ export default function Socios() {
                           </span>
                         </TableCell>
                         <TableCell className="text-right">
-                          <Button
-                            variant={client.has_access ? "destructive" : "default"}
-                            size="sm"
-                            onClick={() => toggleClientAccess(client.id, client.has_access)}
-                          >
-                            {client.has_access ? (
-                              <>
-                                <UserX className="w-4 h-4 mr-2" />
-                                Bloquear
-                              </>
-                            ) : (
-                              <>
-                                <UserCheck className="w-4 h-4 mr-2" />
-                                Liberar
-                              </>
-                            )}
-                          </Button>
+                          <div className="flex items-center justify-end gap-2">
+                            <Button
+                              variant={client.has_access ? "destructive" : "default"}
+                              size="sm"
+                              onClick={() => toggleClientAccess(client.id, client.has_access)}
+                            >
+                              {client.has_access ? (
+                                <>
+                                  <UserX className="w-4 h-4 mr-2" />
+                                  Bloquear
+                                </>
+                              ) : (
+                                <>
+                                  <UserCheck className="w-4 h-4 mr-2" />
+                                  Liberar
+                                </>
+                              )}
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="text-red-500 hover:text-red-400 hover:bg-red-500/10"
+                              onClick={() => setConfirmDeleteClient(client)}
+                              disabled={deletingClientId === client.id}
+                            >
+                              {deletingClientId === client.id ? (
+                                <Loader2 className="w-4 h-4 animate-spin" />
+                              ) : (
+                                <Trash2 className="w-4 h-4" />
+                              )}
+                            </Button>
+                          </div>
                         </TableCell>
                       </TableRow>
                     );
