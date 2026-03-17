@@ -391,7 +391,9 @@ export default function Admin() {
           email: profile?.email || 'Email não encontrado',
           name: profile?.name || null,
           created_at: socio.created_at,
-          clients
+          clients,
+          socio_2_enabled: (profile as any)?.socio_2_enabled || false,
+          profile_id: profile?.id || ''
         };
       });
       setSocios(sociosList);
