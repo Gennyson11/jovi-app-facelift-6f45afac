@@ -1938,6 +1938,31 @@ export default function Admin() {
                             </div>
                           </div>
                           <div className="flex items-center gap-4">
+                            {/* Sócio 2.0 Toggle */}
+                            <div className="flex items-center gap-2">
+                              <Label htmlFor={`socio2-${socio.user_id}`} className="text-xs text-muted-foreground whitespace-nowrap">
+                                Sócio 2.0
+                              </Label>
+                              <Switch
+                                id={`socio2-${socio.user_id}`}
+                                checked={socio.socio_2_enabled}
+                                onCheckedChange={async (checked) => {
+                                  const { error } = await supabase
+                                    .from('profiles')
+                                    .update({ socio_2_enabled: checked } as any)
+                                    .eq('id', socio.profile_id);
+                                  if (error) {
+                                    toast({ title: 'Erro', description: 'Falha ao atualizar Sócio 2.0', variant: 'destructive' });
+                                  } else {
+                                    setSocios(prev => prev.map(s => s.user_id === socio.user_id ? { ...s, socio_2_enabled: checked } : s));
+                                    toast({ title: checked ? '✅ Sócio 2.0 Ativado' : '⛔ Sócio 2.0 Desativado', description: `${socio.name || socio.email}` });
+                                  }
+                                }}
+                              />
+                              {socio.socio_2_enabled && (
+                                <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/30 border text-[10px]">2.0</Badge>
+                              )}
+                            </div>
                             <div className="text-right">
                               <p className="text-xs text-muted-foreground">Sócio desde</p>
                               <p className="text-sm font-medium text-foreground">
