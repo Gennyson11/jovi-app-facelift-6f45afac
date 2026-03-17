@@ -308,7 +308,12 @@ export default function Socios() {
   const deleteClient = async (client: ClientProfile) => {
     setDeletingClientId(client.id);
     try {
+      const accessToken = await getFreshAccessToken();
+
       const { data, error } = await supabase.functions.invoke('setup-users', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        },
         body: {
           action: 'delete_client',
           client_profile_id: client.id
