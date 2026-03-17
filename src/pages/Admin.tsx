@@ -2687,7 +2687,31 @@ export default function Admin() {
                 >
                   <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${userIsSocio ? 'translate-x-5' : 'translate-x-0'}`} />
                 </button>
+            </div>
+
+            {/* Socio 2.0 Toggle - only show if user is socio */}
+            {userIsSocio && (
+              <div className="border border-border rounded-lg p-4 bg-gradient-to-r from-purple-500/5 to-pink-500/5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
+                      <Gift className="w-5 h-5 text-purple-500" />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-medium cursor-pointer">Sócio 2.0</Label>
+                      <p className="text-xs text-muted-foreground">Ativar créditos, missões e funcionalidades 2.0</p>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setUserIsSocio2(!userIsSocio2)}
+                    className={`relative w-11 h-6 rounded-full transition-colors ${userIsSocio2 ? 'bg-purple-500' : 'bg-muted'}`}
+                  >
+                    <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${userIsSocio2 ? 'translate-x-5' : 'translate-x-0'}`} />
+                  </button>
+                </div>
               </div>
+            )}
             </div>
 
             <div className="flex items-center justify-between">
