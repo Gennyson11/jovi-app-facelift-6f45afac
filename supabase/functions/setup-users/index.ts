@@ -29,11 +29,23 @@ serve(async (req) => {
       );
     }
 
-    const token = authHeader.replace('Bearer ', '');
+    const token = authHeader.replace("Bearer ", "");
 
-    // Verify the caller using the admin client with the user's token
-    const { data: { user: callerUser }, error: userError } = await supabaseAdmin.auth.getUser(token);
-    if (userError || !callerUser) {
+    // Validate JWT using signing-keys-safe flow
+    const supabaseAuth = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_ANON_KEY") ?? "",
+      {
+        auth: { autoRefreshToken: false, persistSession: false },
+        global: { headers: { Authorization: authHeader } }
+      }
+    );
+
+    const { data: claimsData, error: userError } = await supabaseAuth.auth.getClaims(token);
+    const callerUserId = claimsData?.claims?.sub;
+    const callerUserEmail = typeof claimsData?.claims?.email === "string" ? claimsData.claims.email : null;
+
+    if (userError || !callerUserId) {
       console.error("Authentication failed:", userError?.message);
       return new Response(
         JSON.stringify({ error: "Unauthorized - Invalid token" }),
@@ -45,11 +57,11 @@ serve(async (req) => {
     const { data: roleData, error: roleError } = await supabaseAdmin
       .from("user_roles")
       .select("role")
-      .eq("user_id", callerUser.id)
+      .eq("user_id", callerUserId)
       .in("role", ["admin", "socio"]);
 
     if (roleError || !roleData || roleData.length === 0) {
-      console.error("Permission check failed for user:", callerUser.id, "- Not an admin or socio");
+      console.error("Permission check failed for user:", callerUserId, "- Not an admin or socio");
       return new Response(
         JSON.stringify({ error: "Forbidden - Admin or Socio access required" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -60,10 +72,10 @@ serve(async (req) => {
     const isAdmin = userRoles.includes("admin");
     const isSocio = userRoles.includes("socio");
 
-    console.log("User verified:", callerUser.email, "roles:", userRoles);
+    console.log("User verified:", callerUserEmail, "roles:", userRoles);
 
     const { action, email, password, role, partner_id, name, has_access, access_expires_at, client_profile_id } = await req.json();
-    console.log("Setup action:", action, "email:", email, "partner_id:", partner_id, "by user:", callerUser.email, "isAdmin:", isAdmin, "isSocio:", isSocio);
+    console.log("Setup action:", action, "email:", email, "partner_id:", partner_id, "by user:", callerUserEmail, "isAdmin:", isAdmin, "isSocio:", isSocio);
 
     if (action === "create_user") {
       // Create user
@@ -228,7 +240,7 @@ serve(async (req) => {
         throw updateError;
       }
 
-      console.log("Password updated for user:", email, "by admin:", callerUser.email);
+      console.log("Password updated for user:", email, "by admin:", callerUserEmail);
 
       return new Response(
         JSON.stringify({ success: true, message: "Password updated successfully", userId }),
@@ -268,7 +280,7 @@ serve(async (req) => {
       }
       
       const authUserId = profileData.user_id;
-      console.log("Deleting user with auth id:", authUserId, "email:", email, "by admin:", callerUser.email);
+      console.log("Deleting user with auth id:", authUserId, "email:", email, "by admin:", callerUserEmail);
 
       // Delete from auth.users (this will cascade to profiles due to trigger/foreign key)
       const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(authUserId);
@@ -297,7 +309,7 @@ serve(async (req) => {
           { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      console.log("Deleting all users without access... Requested by:", callerUser.email);
+      console.log("Deleting all users without access... Requested by:", callerUserEmail);
       
       // Get all profiles without access
       const { data: profilesToDelete, error: fetchError } = await supabaseAdmin
@@ -376,7 +388,7 @@ serve(async (req) => {
           { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
-      console.log("Finding and deleting orphan auth users... Requested by:", callerUser.email);
+      console.log("Finding and deleting orphan auth users... Requested by:", callerUserEmail);
       
       // Get all auth users
       const { data: { users: authUsers }, error: listError } = await supabaseAdmin.auth.admin.listUsers();
@@ -467,7 +479,7 @@ serve(async (req) => {
       }
 
       // Sócios can only delete their own clients
-      if (isSocio && !isAdmin && clientProfile.partner_id !== callerUser.id) {
+      if (isSocio && !isAdmin && clientProfile.partner_id !== callerUserId) {
         return new Response(
           JSON.stringify({ error: "Forbidden - You can only delete your own clients" }),
           { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
@@ -475,7 +487,7 @@ serve(async (req) => {
       }
 
       const clientAuthId = clientProfile.user_id;
-      console.log("Deleting client:", clientProfile.email, "auth id:", clientAuthId, "by:", callerUser.email);
+      console.log("Deleting client:", clientProfile.email, "auth id:", clientAuthId, "by:", callerUserEmail);
 
       // Delete from auth.users (cascades to profiles, roles, etc.)
       const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(clientAuthId);

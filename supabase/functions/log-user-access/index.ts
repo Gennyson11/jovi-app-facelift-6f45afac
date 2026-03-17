@@ -28,25 +28,31 @@ Deno.serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    // Create client with user's token to get user info
-    const supabaseUser = createClient(
+    const token = authHeader.replace('Bearer ', '');
+
+    // Validate JWT using signing-keys-safe flow
+    const supabaseAuth = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_ANON_KEY') ?? '',
-      { global: { headers: { Authorization: authHeader } } }
+      {
+        auth: { autoRefreshToken: false, persistSession: false },
+        global: { headers: { Authorization: authHeader } }
+      }
     );
 
-    // Get the user from the token
-    const { data: { user }, error: userError } = await supabaseUser.auth.getUser();
+    const { data: claimsData, error: userError } = await supabaseAuth.auth.getClaims(token);
+    const userId = claimsData?.claims?.sub;
+    const userEmail = typeof claimsData?.claims?.email === 'string' ? claimsData.claims.email : null;
     
-    if (userError || !user) {
-      console.error('Error getting user:', userError);
+    if (userError || !userId) {
+      console.error('Error getting user claims:', userError);
       return new Response(
         JSON.stringify({ error: 'Invalid user token' }),
         { status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Logging access for user:', user.id, user.email);
+    console.log('Logging access for user:', userId, userEmail);
 
     // Get IP from request headers (Cloudflare/proxy headers first, then fallback)
     const ip = req.headers.get('cf-connecting-ip') || 
@@ -84,7 +90,7 @@ Deno.serve(async (req) => {
     const { error: insertError } = await supabaseAdmin
       .from('user_access_logs')
       .insert({
-        user_id: user.id,
+        user_id: userId,
         ip_address: ip,
         city,
         region,
@@ -99,7 +105,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log('Access logged successfully for user:', user.email, 'IP:', ip, 'City:', city);
+    console.log('Access logged successfully for user:', userEmail, 'IP:', ip, 'City:', city);
 
     return new Response(
       JSON.stringify({ 
