@@ -161,6 +161,7 @@ export default function Admin() {
   const [platformClicks, setPlatformClicks] = useState<Record<string, number>>({});
   const [socios, setSocios] = useState<SocioUser[]>([]);
   const [userLastAccess, setUserLastAccess] = useState<Record<string, LastAccessInfo>>({});
+  const [partnerPayments, setPartnerPayments] = useState<PartnerPayment[]>([]);
   const [loading, setLoading] = useState(true);
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
   const [userSearchQuery, setUserSearchQuery] = useState('');
