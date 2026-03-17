@@ -154,10 +154,10 @@ const MISSIONS: MissionDef[] = [
 const CREDIT_UNIT_PRICE = 9.90;
 
 const CREDIT_PACKAGES = [
-  { id: 'pack_5', amount: 5, bonus: 1, price: 49.50, popular: false },
-  { id: 'pack_10', amount: 10, bonus: 3, price: 99.00, popular: false },
-  { id: 'pack_20', amount: 20, bonus: 7, price: 198.00, popular: true },
-  { id: 'pack_50', amount: 50, bonus: 20, price: 495.00, popular: false },
+  { id: 'pack_1', amount: 1, price: 9.90, popular: false },
+  { id: 'pack_5', amount: 5, price: 44.90, popular: false },
+  { id: 'pack_10', amount: 10, price: 84.90, popular: true },
+  { id: 'pack_20', amount: 20, price: 159.90, popular: false },
 ];
 
 interface UserProfile {
@@ -423,15 +423,11 @@ export default function Credits() {
                       <p className="text-3xl font-display font-bold text-foreground">{pkg.amount}</p>
                       <p className="text-xs text-muted-foreground">créditos</p>
                     </div>
-                    <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg px-2 py-1.5">
-                      <p className="text-xs font-bold text-emerald-400">+{pkg.bonus} bônus grátis</p>
-                      <p className="text-[10px] text-emerald-400/70">Total: {pkg.amount + pkg.bonus} créditos</p>
-                    </div>
                     <p className="text-lg font-bold text-primary">
                       R$ {pkg.price.toFixed(2).replace('.', ',')}
                     </p>
                     <p className="text-[10px] text-muted-foreground">
-                      R$ {(pkg.price / (pkg.amount + pkg.bonus)).toFixed(2).replace('.', ',')} / crédito efetivo
+                      R$ {(pkg.price / pkg.amount).toFixed(2).replace('.', ',')} / crédito
                     </p>
                     <Button
                       className="w-full"
