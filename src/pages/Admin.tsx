@@ -2079,100 +2079,114 @@ export default function Admin() {
 
           {/* Partner Payments Tab */}
           <TabsContent value="partner-payments">
-            <Card className="border-border">
-              <CardHeader className="flex flex-row items-center justify-between">
-                <div>
-                  <CardTitle className="text-foreground">Recargas dos Sócios</CardTitle>
-                  <p className="text-sm text-muted-foreground mt-1">Histórico de compras de crédito realizadas pelos sócios</p>
-                </div>
-                <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 text-green-500">
-                  <DollarSign className="w-4 h-4" />
-                  <span className="font-semibold">
-                    R$ {partnerPayments.reduce((sum, p) => sum + p.amount, 0).toFixed(2).replace('.', ',')}
-                  </span>
-                  <span className="text-xs">total</span>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {partnerPayments.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-8">
-                    Nenhum pagamento de sócio registrado
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {/* Summary per partner */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                      {(() => {
-                        const grouped: Record<string, { name: string | null; email: string; total: number; count: number }> = {};
-                        partnerPayments.forEach(p => {
-                          if (!grouped[p.user_id]) {
-                            grouped[p.user_id] = { name: p.partner_name, email: p.partner_email, total: 0, count: 0 };
-                          }
-                          grouped[p.user_id].total += p.amount;
-                          grouped[p.user_id].count += 1;
-                        });
-                        return Object.entries(grouped).map(([userId, data]) => (
-                          <div key={userId} className="border border-border rounded-lg p-4 bg-secondary/20">
-                            <div className="flex items-center gap-3 mb-2">
-                              <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
-                                <Handshake className="w-4 h-4 text-primary" />
-                              </div>
-                              <div className="min-w-0 flex-1">
-                                <p className="font-medium text-foreground text-sm truncate">{data.name || 'Sem nome'}</p>
-                                <p className="text-xs text-muted-foreground truncate">{data.email}</p>
-                              </div>
-                            </div>
-                            <div className="flex justify-between items-center mt-3 pt-3 border-t border-border">
-                              <span className="text-xs text-muted-foreground">{data.count} compra{data.count !== 1 ? 's' : ''}</span>
-                              <span className="font-bold text-green-500">R$ {data.total.toFixed(2).replace('.', ',')}</span>
-                            </div>
-                          </div>
-                        ));
-                      })()}
-                    </div>
+            {(() => {
+              // Credit package price mapping
+              const CREDIT_PRICES: Record<number, number> = { 1: 9.90, 5: 44.90, 10: 84.90, 20: 159.90 };
+              const getReaisValue = (credits: number) => CREDIT_PRICES[credits] || credits * 9.90;
+              const totalReais = partnerPayments.reduce((sum, p) => sum + getReaisValue(p.amount), 0);
 
-                    {/* Full transactions list */}
-                    <div className="overflow-x-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead>Sócio</TableHead>
-                            <TableHead>Descrição</TableHead>
-                            <TableHead>Valor (créditos)</TableHead>
-                            <TableHead>Referência</TableHead>
-                            <TableHead>Data</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {partnerPayments.map(payment => (
-                            <TableRow key={payment.id}>
-                              <TableCell>
-                                <div>
-                                  <p className="font-medium text-sm">{payment.partner_name || 'Sem nome'}</p>
-                                  <p className="text-xs text-muted-foreground">{payment.partner_email}</p>
-                                </div>
-                              </TableCell>
-                              <TableCell className="text-sm text-muted-foreground">
-                                {payment.description || '-'}
-                              </TableCell>
-                              <TableCell>
-                                <span className="font-semibold text-green-500">+{payment.amount}</span>
-                              </TableCell>
-                              <TableCell className="text-xs text-muted-foreground font-mono">
-                                {payment.reference_id || '-'}
-                              </TableCell>
-                              <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                                {new Date(payment.created_at).toLocaleDateString('pt-BR')} {new Date(payment.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
-                              </TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+              return (
+                <Card className="border-border">
+                  <CardHeader className="flex flex-row items-center justify-between">
+                    <div>
+                      <CardTitle className="text-foreground">Recargas dos Sócios</CardTitle>
+                      <p className="text-sm text-muted-foreground mt-1">Histórico de compras de crédito realizadas pelos sócios</p>
                     </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 text-green-500">
+                      <DollarSign className="w-4 h-4" />
+                      <span className="font-semibold">
+                        R$ {totalReais.toFixed(2).replace('.', ',')}
+                      </span>
+                      <span className="text-xs">total</span>
+                    </div>
+                  </CardHeader>
+                  <CardContent>
+                    {partnerPayments.length === 0 ? (
+                      <div className="text-center text-muted-foreground py-8">
+                        Nenhuma recarga de sócio registrada
+                      </div>
+                    ) : (
+                      <div className="space-y-6">
+                        {/* Summary per partner */}
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                          {(() => {
+                            const grouped: Record<string, { name: string | null; email: string; totalReais: number; totalCredits: number; count: number }> = {};
+                            partnerPayments.forEach(p => {
+                              if (!grouped[p.user_id]) {
+                                grouped[p.user_id] = { name: p.partner_name, email: p.partner_email, totalReais: 0, totalCredits: 0, count: 0 };
+                              }
+                              grouped[p.user_id].totalReais += getReaisValue(p.amount);
+                              grouped[p.user_id].totalCredits += p.amount;
+                              grouped[p.user_id].count += 1;
+                            });
+                            return Object.entries(grouped).map(([userId, data]) => (
+                              <div key={userId} className="border border-border rounded-lg p-4 bg-secondary/20">
+                                <div className="flex items-center gap-3 mb-2">
+                                  <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
+                                    <Handshake className="w-4 h-4 text-primary" />
+                                  </div>
+                                  <div className="min-w-0 flex-1">
+                                    <p className="font-medium text-foreground text-sm truncate">{data.name || 'Sem nome'}</p>
+                                    <p className="text-xs text-muted-foreground truncate">{data.email}</p>
+                                  </div>
+                                </div>
+                                <div className="flex justify-between items-center mt-3 pt-3 border-t border-border">
+                                  <span className="text-xs text-muted-foreground">{data.count} compra{data.count !== 1 ? 's' : ''} • {data.totalCredits} crédito{data.totalCredits !== 1 ? 's' : ''}</span>
+                                  <span className="font-bold text-green-500">R$ {data.totalReais.toFixed(2).replace('.', ',')}</span>
+                                </div>
+                              </div>
+                            ));
+                          })()}
+                        </div>
+
+                        {/* Full transactions list */}
+                        <div className="overflow-x-auto">
+                          <Table>
+                            <TableHeader>
+                              <TableRow>
+                                <TableHead>Sócio</TableHead>
+                                <TableHead>Descrição</TableHead>
+                                <TableHead>Créditos</TableHead>
+                                <TableHead>Valor (R$)</TableHead>
+                                <TableHead>Referência</TableHead>
+                                <TableHead>Data</TableHead>
+                              </TableRow>
+                            </TableHeader>
+                            <TableBody>
+                              {partnerPayments.map(payment => (
+                                <TableRow key={payment.id}>
+                                  <TableCell>
+                                    <div>
+                                      <p className="font-medium text-sm">{payment.partner_name || 'Sem nome'}</p>
+                                      <p className="text-xs text-muted-foreground">{payment.partner_email}</p>
+                                    </div>
+                                  </TableCell>
+                                  <TableCell className="text-sm text-muted-foreground">
+                                    {payment.description || '-'}
+                                  </TableCell>
+                                  <TableCell>
+                                    <span className="font-semibold text-primary">+{payment.amount}</span>
+                                  </TableCell>
+                                  <TableCell>
+                                    <span className="font-semibold text-green-500">R$ {getReaisValue(payment.amount).toFixed(2).replace('.', ',')}</span>
+                                  </TableCell>
+                                  <TableCell className="text-xs text-muted-foreground font-mono">
+                                    {payment.reference_id || '-'}
+                                  </TableCell>
+                                  <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                                    {new Date(payment.created_at).toLocaleDateString('pt-BR')} {new Date(payment.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
+                                  </TableCell>
+                                </TableRow>
+                              ))}
+                            </TableBody>
+                          </Table>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+              );
+            })()}
           </TabsContent>
 
           <TabsContent value="register">
