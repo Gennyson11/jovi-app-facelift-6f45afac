@@ -162,6 +162,7 @@ export default function Admin() {
   const [socios, setSocios] = useState<SocioUser[]>([]);
   const [userLastAccess, setUserLastAccess] = useState<Record<string, LastAccessInfo>>({});
   const [partnerPayments, setPartnerPayments] = useState<PartnerPayment[]>([]);
+  const [socioCredits, setSocioCredits] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [showPasswords, setShowPasswords] = useState<Record<string, boolean>>({});
   const [userSearchQuery, setUserSearchQuery] = useState('');
@@ -355,7 +356,7 @@ export default function Admin() {
       return allAccess;
     };
     
-    const [platformsRes, usersRes, newsRes, clicksRes, sociosRes, productsRes, accessLogsRes, allAccess, creditTxRes] = await Promise.all([
+    const [platformsRes, usersRes, newsRes, clicksRes, sociosRes, productsRes, accessLogsRes, allAccess, creditTxRes, userCreditsRes] = await Promise.all([
       supabase.from('streaming_platforms').select('*').order('name'), 
       supabase.from('profiles').select('*').order('created_at', { ascending: false }), 
       supabase.from('news').select('*').order('created_at', { ascending: false }),
@@ -364,7 +365,8 @@ export default function Admin() {
       supabase.from('products').select('*').order('created_at', { ascending: false }),
       supabase.from('user_access_logs').select('*').order('created_at', { ascending: false }),
       fetchAllPlatformAccess(),
-      supabase.from('credit_transactions').select('*').eq('type', 'purchase').order('created_at', { ascending: false })
+      supabase.from('credit_transactions').select('*').order('created_at', { ascending: false }),
+      supabase.from('user_credits').select('*')
     ]);
     
     // Debug logging - IMPORTANT
@@ -450,6 +452,18 @@ export default function Admin() {
           };
         });
       setPartnerPayments(payments);
+    }
+    
+    // Process socio credit balances
+    if (userCreditsRes.data && sociosRes.data) {
+      const socioUserIds = new Set(sociosRes.data.map((s: any) => s.user_id));
+      const creditsMap: Record<string, number> = {};
+      userCreditsRes.data.forEach((uc: any) => {
+        if (socioUserIds.has(uc.user_id)) {
+          creditsMap[uc.user_id] = uc.balance;
+        }
+      });
+      setSocioCredits(creditsMap);
     }
     
     setLoading(false);
@@ -2083,14 +2097,14 @@ export default function Admin() {
               // Credit package price mapping
               const CREDIT_PRICES: Record<number, number> = { 1: 9.90, 5: 44.90, 10: 84.90, 20: 159.90 };
               const getReaisValue = (credits: number) => CREDIT_PRICES[credits] || credits * 9.90;
-              const totalReais = partnerPayments.reduce((sum, p) => sum + getReaisValue(p.amount), 0);
+              const totalReais = partnerPayments.filter(p => p.type === 'purchase').reduce((sum, p) => sum + getReaisValue(p.amount), 0);
 
               return (
                 <Card className="border-border">
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
                       <CardTitle className="text-foreground">Recargas dos Sócios</CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1">Histórico de compras de crédito realizadas pelos sócios</p>
+                      <p className="text-sm text-muted-foreground mt-1">Histórico de créditos e recargas dos sócios</p>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 text-green-500">
                       <DollarSign className="w-4 h-4" />
@@ -2101,24 +2115,44 @@ export default function Admin() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    {partnerPayments.length === 0 ? (
+                    {socios.length === 0 && partnerPayments.length === 0 ? (
                       <div className="text-center text-muted-foreground py-8">
-                        Nenhuma recarga de sócio registrada
+                        Nenhum sócio registrado
                       </div>
                     ) : (
                       <div className="space-y-6">
-                        {/* Summary per partner */}
+                        {/* Summary per partner - all socios with credits */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {(() => {
-                            const grouped: Record<string, { name: string | null; email: string; totalReais: number; totalCredits: number; count: number }> = {};
+                            // Build data for all socios, not just those with payments
+                            const grouped: Record<string, { name: string | null; email: string; totalReais: number; totalCredits: number; count: number; balance: number }> = {};
+                            
+                            // Initialize with all socios
+                            socios.forEach(s => {
+                              grouped[s.user_id] = { 
+                                name: s.name, 
+                                email: s.email, 
+                                totalReais: 0, 
+                                totalCredits: 0, 
+                                count: 0,
+                                balance: socioCredits[s.user_id] || 0
+                              };
+                            });
+                            
+                            // Add payment data
                             partnerPayments.forEach(p => {
                               if (!grouped[p.user_id]) {
-                                grouped[p.user_id] = { name: p.partner_name, email: p.partner_email, totalReais: 0, totalCredits: 0, count: 0 };
+                                grouped[p.user_id] = { name: p.partner_name, email: p.partner_email, totalReais: 0, totalCredits: 0, count: 0, balance: socioCredits[p.user_id] || 0 };
                               }
-                              grouped[p.user_id].totalReais += getReaisValue(p.amount);
-                              grouped[p.user_id].totalCredits += p.amount;
-                              grouped[p.user_id].count += 1;
+                              if (p.type === 'purchase') {
+                                grouped[p.user_id].totalReais += getReaisValue(p.amount);
+                              }
+                              if (p.amount > 0) {
+                                grouped[p.user_id].totalCredits += p.amount;
+                                grouped[p.user_id].count += 1;
+                              }
                             });
+                            
                             return Object.entries(grouped).map(([userId, data]) => (
                               <div key={userId} className="border border-border rounded-lg p-4 bg-secondary/20">
                                 <div className="flex items-center gap-3 mb-2">
@@ -2129,10 +2163,13 @@ export default function Admin() {
                                     <p className="font-medium text-foreground text-sm truncate">{data.name || 'Sem nome'}</p>
                                     <p className="text-xs text-muted-foreground truncate">{data.email}</p>
                                   </div>
+                                  <Badge variant="outline" className="shrink-0">
+                                    {data.balance} crédito{data.balance !== 1 ? 's' : ''}
+                                  </Badge>
                                 </div>
                                 <div className="flex justify-between items-center mt-3 pt-3 border-t border-border">
-                                  <span className="text-xs text-muted-foreground">{data.count} compra{data.count !== 1 ? 's' : ''} • {data.totalCredits} crédito{data.totalCredits !== 1 ? 's' : ''}</span>
-                                  <span className="font-bold text-green-500">R$ {data.totalReais.toFixed(2).replace('.', ',')}</span>
+                                  <span className="text-xs text-muted-foreground">{data.count} recarga{data.count !== 1 ? 's' : ''} • {data.totalCredits} crédito{data.totalCredits !== 1 ? 's' : ''} total</span>
+                                  {data.totalReais > 0 && <span className="font-bold text-green-500">R$ {data.totalReais.toFixed(2).replace('.', ',')}</span>}
                                 </div>
                               </div>
                             ));
@@ -2147,13 +2184,16 @@ export default function Admin() {
                                 <TableHead>Sócio</TableHead>
                                 <TableHead>Descrição</TableHead>
                                 <TableHead>Créditos</TableHead>
+                                <TableHead>Tipo</TableHead>
                                 <TableHead>Valor (R$)</TableHead>
                                 <TableHead>Referência</TableHead>
                                 <TableHead>Data</TableHead>
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {partnerPayments.map(payment => (
+                              {partnerPayments.map(payment => {
+                                const typeLabels: Record<string, string> = { purchase: 'Compra PIX', admin_grant: 'Admin', client_creation: 'Criação cliente', mission_reward: 'Missão' };
+                                return (
                                 <TableRow key={payment.id}>
                                   <TableCell>
                                     <div>
@@ -2165,10 +2205,17 @@ export default function Admin() {
                                     {payment.description || '-'}
                                   </TableCell>
                                   <TableCell>
-                                    <span className="font-semibold text-primary">+{payment.amount}</span>
+                                    <span className={`font-semibold ${payment.amount >= 0 ? 'text-primary' : 'text-destructive'}`}>{payment.amount >= 0 ? '+' : ''}{payment.amount}</span>
                                   </TableCell>
                                   <TableCell>
-                                    <span className="font-semibold text-green-500">R$ {getReaisValue(payment.amount).toFixed(2).replace('.', ',')}</span>
+                                    <Badge variant="outline" className="text-xs">{typeLabels[payment.type] || payment.type}</Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                    {payment.type === 'purchase' ? (
+                                      <span className="font-semibold text-green-500">R$ {getReaisValue(payment.amount).toFixed(2).replace('.', ',')}</span>
+                                    ) : (
+                                      <span className="text-muted-foreground">-</span>
+                                    )}
                                   </TableCell>
                                   <TableCell className="text-xs text-muted-foreground font-mono">
                                     {payment.reference_id || '-'}
@@ -2177,7 +2224,8 @@ export default function Admin() {
                                     {new Date(payment.created_at).toLocaleDateString('pt-BR')} {new Date(payment.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                                   </TableCell>
                                 </TableRow>
-                              ))}
+                                );
+                              })}
                             </TableBody>
                           </Table>
                         </div>
