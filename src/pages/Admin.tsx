@@ -323,6 +323,36 @@ export default function Admin() {
     };
   }, [isAdmin]);
 
+  // Real-time listener for credit balance changes
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    const creditsChannel = supabase
+      .channel('credits-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_credits'
+        },
+        (payload) => {
+          const record = payload.new as any;
+          if (record?.user_id && record?.balance !== undefined) {
+            setSocioCredits((prev) => ({
+              ...prev,
+              [record.user_id]: record.balance
+            }));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(creditsChannel);
+    };
+  }, [isAdmin]);
+
   const fetchData = async () => {
     setLoading(true);
 
