@@ -2197,12 +2197,12 @@ export default function Admin() {
                                     <p className="text-xs text-muted-foreground truncate">{data.email}</p>
                                   </div>
                                   <Badge variant="outline" className="shrink-0">
-                                    {data.balance} crédito{data.balance !== 1 ? 's' : ''}
+                                    Saldo: {data.balance}
                                   </Badge>
                                 </div>
                                 <div className="flex flex-col gap-1 mt-3 pt-3 border-t border-border">
                                   <div className="flex justify-between items-center">
-                                    <span className="text-xs text-muted-foreground">{data.count} recarga{data.count !== 1 ? 's' : ''} • {data.totalEarned} recebido{data.totalEarned !== 1 ? 's' : ''} • {data.totalSpent} gasto{data.totalSpent !== 1 ? 's' : ''}</span>
+                                    <span className="text-xs text-muted-foreground">{data.count} recarga{data.count !== 1 ? 's' : ''} • {data.totalEarned} total recebido • {data.totalSpent} gasto{data.totalSpent !== 1 ? 's' : ''}</span>
                                     {data.totalReais > 0 && <span className="font-bold text-green-500">R$ {data.totalReais.toFixed(2).replace('.', ',')}</span>}
                                   </div>
                                 </div>
