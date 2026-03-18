@@ -2177,10 +2177,10 @@ export default function Admin() {
                           }
                           if (p.type === 'purchase') {
                             grouped[p.user_id].totalReais += getReaisValue(p.amount);
+                            grouped[p.user_id].count += 1;
                           }
                           if (p.amount > 0) {
                             grouped[p.user_id].totalEarned += p.amount;
-                            grouped[p.user_id].count += 1;
                           } else if (p.amount < 0) {
                             grouped[p.user_id].totalSpent += Math.abs(p.amount);
                           }
