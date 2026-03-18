@@ -2121,18 +2121,38 @@ export default function Admin() {
                       </div>
                     ) : (
                       <div className="space-y-6">
-                        {/* Summary per partner */}
+                        {/* Summary per partner - all socios with credits */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {(() => {
-                            const grouped: Record<string, { name: string | null; email: string; totalReais: number; totalCredits: number; count: number }> = {};
+                            // Build data for all socios, not just those with payments
+                            const grouped: Record<string, { name: string | null; email: string; totalReais: number; totalCredits: number; count: number; balance: number }> = {};
+                            
+                            // Initialize with all socios
+                            socios.forEach(s => {
+                              grouped[s.user_id] = { 
+                                name: s.name, 
+                                email: s.email, 
+                                totalReais: 0, 
+                                totalCredits: 0, 
+                                count: 0,
+                                balance: socioCredits[s.user_id] || 0
+                              };
+                            });
+                            
+                            // Add payment data
                             partnerPayments.forEach(p => {
                               if (!grouped[p.user_id]) {
-                                grouped[p.user_id] = { name: p.partner_name, email: p.partner_email, totalReais: 0, totalCredits: 0, count: 0 };
+                                grouped[p.user_id] = { name: p.partner_name, email: p.partner_email, totalReais: 0, totalCredits: 0, count: 0, balance: socioCredits[p.user_id] || 0 };
                               }
-                              grouped[p.user_id].totalReais += getReaisValue(p.amount);
-                              grouped[p.user_id].totalCredits += p.amount;
-                              grouped[p.user_id].count += 1;
+                              if (p.type === 'purchase') {
+                                grouped[p.user_id].totalReais += getReaisValue(p.amount);
+                              }
+                              if (p.amount > 0) {
+                                grouped[p.user_id].totalCredits += p.amount;
+                                grouped[p.user_id].count += 1;
+                              }
                             });
+                            
                             return Object.entries(grouped).map(([userId, data]) => (
                               <div key={userId} className="border border-border rounded-lg p-4 bg-secondary/20">
                                 <div className="flex items-center gap-3 mb-2">
@@ -2143,10 +2163,13 @@ export default function Admin() {
                                     <p className="font-medium text-foreground text-sm truncate">{data.name || 'Sem nome'}</p>
                                     <p className="text-xs text-muted-foreground truncate">{data.email}</p>
                                   </div>
+                                  <Badge variant="outline" className="shrink-0">
+                                    {data.balance} crédito{data.balance !== 1 ? 's' : ''}
+                                  </Badge>
                                 </div>
                                 <div className="flex justify-between items-center mt-3 pt-3 border-t border-border">
-                                  <span className="text-xs text-muted-foreground">{data.count} compra{data.count !== 1 ? 's' : ''} • {data.totalCredits} crédito{data.totalCredits !== 1 ? 's' : ''}</span>
-                                  <span className="font-bold text-green-500">R$ {data.totalReais.toFixed(2).replace('.', ',')}</span>
+                                  <span className="text-xs text-muted-foreground">{data.count} recarga{data.count !== 1 ? 's' : ''} • {data.totalCredits} crédito{data.totalCredits !== 1 ? 's' : ''} total</span>
+                                  {data.totalReais > 0 && <span className="font-bold text-green-500">R$ {data.totalReais.toFixed(2).replace('.', ',')}</span>}
                                 </div>
                               </div>
                             ));
@@ -2161,6 +2184,7 @@ export default function Admin() {
                                 <TableHead>Sócio</TableHead>
                                 <TableHead>Descrição</TableHead>
                                 <TableHead>Créditos</TableHead>
+                                <TableHead>Tipo</TableHead>
                                 <TableHead>Valor (R$)</TableHead>
                                 <TableHead>Referência</TableHead>
                                 <TableHead>Data</TableHead>
