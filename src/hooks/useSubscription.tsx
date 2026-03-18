@@ -14,7 +14,7 @@ export const PLANS = {
     price: 97,
     checkout_url: 'https://t.me/JoviTools_bot',
     interval: '/trimestre',
-    perMonth: 'R$32/mês',
+    perMonth: 'R$32,33/mês',
   },
   annual: {
     name: 'Anual',
