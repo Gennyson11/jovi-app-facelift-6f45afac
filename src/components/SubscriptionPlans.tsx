@@ -81,7 +81,7 @@ export default function SubscriptionPlans({ subscriptionEnd }: SubscriptionPlans
             <h4 className="text-xl md:text-2xl lg:text-3xl font-display font-bold text-accent mb-3 md:mb-4">TRIMESTRAL</h4>
             <p className="text-muted-foreground line-through text-base md:text-lg">R$2.691,00</p>
             <p className="my-3 md:my-4">
-              <span className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-primary">R$67</span>
+              <span className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-primary">R$97</span>
               <span className="text-lg md:text-xl text-foreground">/trimestre</span>
             </p>
             <p className="text-primary text-sm md:text-base font-semibold">Apenas R$32,33/mês</p>
