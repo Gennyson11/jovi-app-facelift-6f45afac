@@ -5,7 +5,7 @@ import { useAuth } from '@/hooks/useAuth';
 export const PLANS = {
   monthly: {
     name: 'Mensal',
-    price: 30,
+    price: 37,
     checkout_url: 'https://t.me/JoviTools_bot',
     interval: '/mês',
   },
