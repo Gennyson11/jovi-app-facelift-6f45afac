@@ -122,7 +122,7 @@ export default function SubscriptionPlans({ subscriptionEnd }: SubscriptionPlans
             <h4 className="text-xl md:text-2xl lg:text-3xl font-display font-bold text-accent mb-3 md:mb-4">ANUAL</h4>
             <p className="text-muted-foreground line-through text-base md:text-lg">R$10.764,00</p>
             <p className="my-3 md:my-4">
-              <span className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-primary">R$247</span>
+              <span className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-primary">R$297</span>
               <span className="text-lg md:text-xl text-foreground">/ano</span>
             </p>
             <p className="text-primary text-sm md:text-base font-semibold">Apenas R$20,58/mês</p>
