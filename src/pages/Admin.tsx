@@ -454,6 +454,18 @@ export default function Admin() {
       setPartnerPayments(payments);
     }
     
+    // Process socio credit balances
+    if (userCreditsRes.data && sociosRes.data) {
+      const socioUserIds = new Set(sociosRes.data.map((s: any) => s.user_id));
+      const creditsMap: Record<string, number> = {};
+      userCreditsRes.data.forEach((uc: any) => {
+        if (socioUserIds.has(uc.user_id)) {
+          creditsMap[uc.user_id] = uc.balance;
+        }
+      });
+      setSocioCredits(creditsMap);
+    }
+    
     setLoading(false);
   };
   const handleLogout = async () => {
