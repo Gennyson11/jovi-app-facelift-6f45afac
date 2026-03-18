@@ -2097,14 +2097,14 @@ export default function Admin() {
               // Credit package price mapping
               const CREDIT_PRICES: Record<number, number> = { 1: 9.90, 5: 44.90, 10: 84.90, 20: 159.90 };
               const getReaisValue = (credits: number) => CREDIT_PRICES[credits] || credits * 9.90;
-              const totalReais = partnerPayments.reduce((sum, p) => sum + getReaisValue(p.amount), 0);
+              const totalReais = partnerPayments.filter(p => p.type === 'purchase').reduce((sum, p) => sum + getReaisValue(p.amount), 0);
 
               return (
                 <Card className="border-border">
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
                       <CardTitle className="text-foreground">Recargas dos Sócios</CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1">Histórico de compras de crédito realizadas pelos sócios</p>
+                      <p className="text-sm text-muted-foreground mt-1">Histórico de créditos e recargas dos sócios</p>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 text-green-500">
                       <DollarSign className="w-4 h-4" />
@@ -2115,9 +2115,9 @@ export default function Admin() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    {partnerPayments.length === 0 ? (
+                    {socios.length === 0 && partnerPayments.length === 0 ? (
                       <div className="text-center text-muted-foreground py-8">
-                        Nenhuma recarga de sócio registrada
+                        Nenhum sócio registrado
                       </div>
                     ) : (
                       <div className="space-y-6">
