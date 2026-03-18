@@ -100,7 +100,7 @@ const PricingSection = () => {
               
               {/* Current Price */}
               <p className="my-4">
-              <span className="text-5xl md:text-6xl font-display font-bold text-primary">R$67</span>
+              <span className="text-5xl md:text-6xl font-display font-bold text-primary">R$97</span>
                 <span className="text-xl text-foreground">/trimestre</span>
               </p>
               
@@ -157,12 +157,12 @@ const PricingSection = () => {
               
               {/* Current Price */}
               <p className="my-3 md:my-4">
-                <span className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-primary">R$247</span>
+                <span className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-primary">R$297</span>
                 <span className="text-lg md:text-xl text-foreground">/ano</span>
               </p>
               
               {/* Per month breakdown */}
-              <p className="text-primary text-sm md:text-base font-semibold">Apenas R$20,58/mês</p>
+              <p className="text-primary text-sm md:text-base font-semibold">Apenas R$24,75/mês</p>
             </div>
 
             {/* Benefits */}
