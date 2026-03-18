@@ -2191,7 +2191,9 @@ export default function Admin() {
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {partnerPayments.map(payment => (
+                              {partnerPayments.map(payment => {
+                                const typeLabels: Record<string, string> = { purchase: 'Compra PIX', admin_grant: 'Admin', client_creation: 'Criação cliente', mission_reward: 'Missão' };
+                                return (
                                 <TableRow key={payment.id}>
                                   <TableCell>
                                     <div>
@@ -2203,10 +2205,17 @@ export default function Admin() {
                                     {payment.description || '-'}
                                   </TableCell>
                                   <TableCell>
-                                    <span className="font-semibold text-primary">+{payment.amount}</span>
+                                    <span className={`font-semibold ${payment.amount >= 0 ? 'text-primary' : 'text-destructive'}`}>{payment.amount >= 0 ? '+' : ''}{payment.amount}</span>
                                   </TableCell>
                                   <TableCell>
-                                    <span className="font-semibold text-green-500">R$ {getReaisValue(payment.amount).toFixed(2).replace('.', ',')}</span>
+                                    <Badge variant="outline" className="text-xs">{typeLabels[payment.type] || payment.type}</Badge>
+                                  </TableCell>
+                                  <TableCell>
+                                    {payment.type === 'purchase' ? (
+                                      <span className="font-semibold text-green-500">R$ {getReaisValue(payment.amount).toFixed(2).replace('.', ',')}</span>
+                                    ) : (
+                                      <span className="text-muted-foreground">-</span>
+                                    )}
                                   </TableCell>
                                   <TableCell className="text-xs text-muted-foreground font-mono">
                                     {payment.reference_id || '-'}
@@ -2215,7 +2224,8 @@ export default function Admin() {
                                     {new Date(payment.created_at).toLocaleDateString('pt-BR')} {new Date(payment.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                                   </TableCell>
                                 </TableRow>
-                              ))}
+                                );
+                              })}
                             </TableBody>
                           </Table>
                         </div>
