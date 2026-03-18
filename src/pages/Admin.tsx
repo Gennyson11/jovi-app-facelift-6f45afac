@@ -2170,9 +2170,11 @@ export default function Admin() {
                                     {data.balance} crédito{data.balance !== 1 ? 's' : ''}
                                   </Badge>
                                 </div>
-                                <div className="flex justify-between items-center mt-3 pt-3 border-t border-border">
-                                  <span className="text-xs text-muted-foreground">{data.count} recarga{data.count !== 1 ? 's' : ''} • {data.totalCredits} crédito{data.totalCredits !== 1 ? 's' : ''} total</span>
-                                  {data.totalReais > 0 && <span className="font-bold text-green-500">R$ {data.totalReais.toFixed(2).replace('.', ',')}</span>}
+                                <div className="flex flex-col gap-1 mt-3 pt-3 border-t border-border">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-xs text-muted-foreground">{data.count} recarga{data.count !== 1 ? 's' : ''} • {data.totalEarned} recebido{data.totalEarned !== 1 ? 's' : ''} • {data.totalSpent} gasto{data.totalSpent !== 1 ? 's' : ''}</span>
+                                    {data.totalReais > 0 && <span className="font-bold text-green-500">R$ {data.totalReais.toFixed(2).replace('.', ',')}</span>}
+                                  </div>
                                 </div>
                               </div>
                         );
