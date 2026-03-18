@@ -2139,17 +2139,17 @@ export default function Admin() {
                               };
                             });
                             
-                            // Add payment data
+                             // Add payment data
                             partnerPayments.forEach(p => {
                               if (!grouped[p.user_id]) {
                                 grouped[p.user_id] = { name: p.partner_name, email: p.partner_email, totalReais: 0, totalCredits: 0, count: 0, balance: socioCredits[p.user_id] || 0 };
                               }
                               if (p.type === 'purchase') {
                                 grouped[p.user_id].totalReais += getReaisValue(p.amount);
+                                grouped[p.user_id].count += 1;
                               }
                               if (p.amount > 0) {
                                 grouped[p.user_id].totalCredits += p.amount;
-                                grouped[p.user_id].count += 1;
                               }
                             });
                             
