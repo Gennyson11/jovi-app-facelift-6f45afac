@@ -175,12 +175,12 @@ export default function Admin() {
   const [platformStatus, setPlatformStatus] = useState<StreamingStatus>('online');
   const [platformAccessType, setPlatformAccessType] = useState<AccessType>('credentials');
   const [platformCoverUrl, setPlatformCoverUrl] = useState('');
-  const [platformCredentials, setPlatformCredentials] = useState<Array<{ login: string; password: string }>>([{ login: '', password: '' }]);
+  const [platformCredentials, setPlatformCredentials] = useState<Array<{login: string;password: string;}>>([{ login: '', password: '' }]);
   const [platformWebsiteUrl, setPlatformWebsiteUrl] = useState('');
   const [platformCategory, setPlatformCategory] = useState<PlatformCategory>('streamings');
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // New platform access distribution
   const [accessDistribution, setAccessDistribution] = useState<'none' | 'all_active' | 'select'>('none');
   const [selectedUsersForAccess, setSelectedUsersForAccess] = useState<string[]>([]);
@@ -215,7 +215,7 @@ export default function Admin() {
   const [productIsActive, setProductIsActive] = useState(true);
   const [uploadingProductImage, setUploadingProductImage] = useState(false);
   const productFileInputRef = useRef<HTMLInputElement>(null);
-  
+
   // Block reason dialog
   const [blockReasonDialogOpen, setBlockReasonDialogOpen] = useState(false);
   const [blockingUser, setBlockingUser] = useState<UserProfile | null>(null);
@@ -227,7 +227,7 @@ export default function Admin() {
   const [registerPassword, setRegisterPassword] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [showRegisterPassword, setShowRegisterPassword] = useState(false);
-  
+
   const {
     user,
     isAdmin,
@@ -243,12 +243,12 @@ export default function Admin() {
     onlineUsers,
     onlineCount
   } = useOnlineUsers();
-  
+
   // Maintenance mode
   const { isMaintenanceMode, maintenanceMessage, toggleMaintenance } = useMaintenance();
   const [maintenanceMessageInput, setMaintenanceMessageInput] = useState('');
   const [savingMaintenance, setSavingMaintenance] = useState(false);
-  
+
   // Sync maintenance message input when data loads
   useEffect(() => {
     if (maintenanceMessage) {
@@ -263,7 +263,7 @@ export default function Admin() {
   const hasFetchedRef = useRef(false);
   const currentUserIdRef = useRef<string | null>(null);
 
-  
+
 
   useEffect(() => {
     if (!authLoading) {
@@ -282,7 +282,7 @@ export default function Admin() {
       currentUserIdRef.current = user.id;
       hasFetchedRef.current = false;
     }
-    
+
     if (user?.id && isAdmin && !hasFetchedRef.current) {
       hasFetchedRef.current = true;
       fetchData();
@@ -293,30 +293,30 @@ export default function Admin() {
   useEffect(() => {
     if (!isAdmin) return;
 
-    const channel = supabase
-      .channel('access-logs-realtime')
-      .on(
-        'postgres_changes',
-        {
-          event: 'INSERT',
-          schema: 'public',
-          table: 'user_access_logs'
-        },
-        async (payload) => {
-          const newLog = payload.new as UserAccessLog;
-          setUserLastAccess(prev => ({
-            ...prev,
-            [newLog.user_id]: {
-              ip: newLog.ip_address,
-              city: newLog.city,
-              region: newLog.region,
-              country: newLog.country,
-              created_at: newLog.created_at
-            }
-          }));
-        }
-      )
-      .subscribe();
+    const channel = supabase.
+    channel('access-logs-realtime').
+    on(
+      'postgres_changes',
+      {
+        event: 'INSERT',
+        schema: 'public',
+        table: 'user_access_logs'
+      },
+      async (payload) => {
+        const newLog = payload.new as UserAccessLog;
+        setUserLastAccess((prev) => ({
+          ...prev,
+          [newLog.user_id]: {
+            ip: newLog.ip_address,
+            city: newLog.city,
+            region: newLog.region,
+            country: newLog.country,
+            created_at: newLog.created_at
+          }
+        }));
+      }
+    ).
+    subscribe();
 
     return () => {
       supabase.removeChannel(channel);
@@ -325,25 +325,25 @@ export default function Admin() {
 
   const fetchData = async () => {
     setLoading(true);
-    
+
     // Fetch all platform access with pagination (Supabase default limit is 1000)
     const fetchAllPlatformAccess = async () => {
       const allAccess: UserPlatformAccess[] = [];
       let from = 0;
       const pageSize = 1000;
       let hasMore = true;
-      
+
       while (hasMore) {
-        const { data, error } = await supabase
-          .from('user_platform_access')
-          .select('*')
-          .range(from, from + pageSize - 1);
-        
+        const { data, error } = await supabase.
+        from('user_platform_access').
+        select('*').
+        range(from, from + pageSize - 1);
+
         if (error) {
           console.error('Error fetching platform access:', error);
           break;
         }
-        
+
         if (data && data.length > 0) {
           allAccess.push(...(data as UserPlatformAccess[]));
           from += pageSize;
@@ -352,58 +352,58 @@ export default function Admin() {
           hasMore = false;
         }
       }
-      
+
       return allAccess;
     };
-    
+
     const [platformsRes, usersRes, newsRes, clicksRes, sociosRes, productsRes, accessLogsRes, allAccess, creditTxRes, userCreditsRes] = await Promise.all([
-      supabase.from('streaming_platforms').select('*').order('name'), 
-      supabase.from('profiles').select('*').order('created_at', { ascending: false }), 
-      supabase.from('news').select('*').order('created_at', { ascending: false }),
-      supabase.from('platform_clicks').select('platform_id, click_count'),
-      supabase.from('user_roles').select('user_id, created_at').eq('role', 'socio'),
-      supabase.from('products').select('*').order('created_at', { ascending: false }),
-      supabase.from('user_access_logs').select('*').order('created_at', { ascending: false }),
-      fetchAllPlatformAccess(),
-      supabase.from('credit_transactions').select('*').order('created_at', { ascending: false }),
-      supabase.from('user_credits').select('*')
-    ]);
-    
+    supabase.from('streaming_platforms').select('*').order('name'),
+    supabase.from('profiles').select('*').order('created_at', { ascending: false }),
+    supabase.from('news').select('*').order('created_at', { ascending: false }),
+    supabase.from('platform_clicks').select('platform_id, click_count'),
+    supabase.from('user_roles').select('user_id, created_at').eq('role', 'socio'),
+    supabase.from('products').select('*').order('created_at', { ascending: false }),
+    supabase.from('user_access_logs').select('*').order('created_at', { ascending: false }),
+    fetchAllPlatformAccess(),
+    supabase.from('credit_transactions').select('*').order('created_at', { ascending: false }),
+    supabase.from('user_credits').select('*')]
+    );
+
     // Debug logging - IMPORTANT
     console.log('=== ADMIN FETCH DATA ===');
     console.log('Access data count:', allAccess.length);
-    
+
     if (platformsRes.data) setPlatforms(platformsRes.data as Platform[]);
     if (usersRes.data) setUsers(usersRes.data as UserProfile[]);
-    
+
     console.log('Setting userPlatformAccess with', allAccess.length, 'records');
     setUserPlatformAccess(allAccess);
-    
+
     if (newsRes.data) setNews(newsRes.data as News[]);
     if (productsRes.data) setProducts(productsRes.data as Product[]);
     if (clicksRes.data) {
       const clicksMap: Record<string, number> = {};
-      clicksRes.data.forEach((c: { platform_id: string; click_count: number }) => {
+      clicksRes.data.forEach((c: {platform_id: string;click_count: number;}) => {
         clicksMap[c.platform_id] = c.click_count;
       });
       setPlatformClicks(clicksMap);
     }
-    
+
     // Map socios with profile data and their clients
     if (sociosRes.data && usersRes.data) {
-      const sociosList: SocioUser[] = sociosRes.data.map(socio => {
-        const profile = usersRes.data.find(u => u.user_id === socio.user_id);
+      const sociosList: SocioUser[] = sociosRes.data.map((socio) => {
+        const profile = usersRes.data.find((u) => u.user_id === socio.user_id);
         // Find clients registered by this socio (partner_id = socio's user_id)
-        const clients = usersRes.data
-          .filter(u => u.partner_id === socio.user_id)
-          .map(client => ({
-            id: client.id,
-            email: client.email,
-            name: client.name,
-            has_access: client.has_access,
-            created_at: client.created_at,
-            access_expires_at: client.access_expires_at
-          }));
+        const clients = usersRes.data.
+        filter((u) => u.partner_id === socio.user_id).
+        map((client) => ({
+          id: client.id,
+          email: client.email,
+          name: client.name,
+          has_access: client.has_access,
+          created_at: client.created_at,
+          access_expires_at: client.access_expires_at
+        }));
         return {
           user_id: socio.user_id,
           email: profile?.email || 'Email não encontrado',
@@ -416,13 +416,13 @@ export default function Admin() {
       });
       setSocios(sociosList);
     }
-    
+
     // Process access logs - keep only last access per user
     if (accessLogsRes.data) {
       const lastAccessMap: Record<string, LastAccessInfo> = {};
       const logs = accessLogsRes.data as UserAccessLog[];
-      
-      logs.forEach(log => {
+
+      logs.forEach((log) => {
         // Logs are sorted by created_at desc, so first occurrence is the latest
         if (!lastAccessMap[log.user_id]) {
           lastAccessMap[log.user_id] = {
@@ -434,26 +434,26 @@ export default function Admin() {
           };
         }
       });
-      
+
       setUserLastAccess(lastAccessMap);
     }
-    
+
     // Process partner payments (credit purchases by socios)
     if (creditTxRes.data && usersRes.data && sociosRes.data) {
       const socioUserIds = new Set(sociosRes.data.map((s: any) => s.user_id));
-      const payments: PartnerPayment[] = creditTxRes.data
-        .filter((tx: any) => socioUserIds.has(tx.user_id))
-        .map((tx: any) => {
-          const profile = usersRes.data!.find((u: any) => u.user_id === tx.user_id);
-          return {
-            ...tx,
-            partner_name: profile?.name || null,
-            partner_email: profile?.email || tx.user_id,
-          };
-        });
+      const payments: PartnerPayment[] = creditTxRes.data.
+      filter((tx: any) => socioUserIds.has(tx.user_id)).
+      map((tx: any) => {
+        const profile = usersRes.data!.find((u: any) => u.user_id === tx.user_id);
+        return {
+          ...tx,
+          partner_name: profile?.name || null,
+          partner_email: profile?.email || tx.user_id
+        };
+      });
       setPartnerPayments(payments);
     }
-    
+
     // Process socio credit balances
     if (userCreditsRes.data && sociosRes.data) {
       const socioUserIds = new Set(sociosRes.data.map((s: any) => s.user_id));
@@ -465,7 +465,7 @@ export default function Admin() {
       });
       setSocioCredits(creditsMap);
     }
-    
+
     setLoading(false);
   };
   const handleLogout = async () => {
@@ -483,15 +483,15 @@ export default function Admin() {
   // Block user with reason
   const blockUserWithReason = async () => {
     if (!blockingUser) return;
-    
-    const { error } = await supabase
-      .from('profiles')
-      .update({ 
-        has_access: false,
-        block_reason: blockReason.trim() || null
-      })
-      .eq('id', blockingUser.id);
-      
+
+    const { error } = await supabase.
+    from('profiles').
+    update({
+      has_access: false,
+      block_reason: blockReason.trim() || null
+    }).
+    eq('id', blockingUser.id);
+
     if (error) {
       toast({
         title: 'Erro',
@@ -500,12 +500,12 @@ export default function Admin() {
       });
       return;
     }
-    
+
     toast({
       title: 'Sucesso',
       description: 'Usuário bloqueado com sucesso'
     });
-    
+
     setBlockReasonDialogOpen(false);
     setBlockingUser(null);
     setBlockReason('');
@@ -516,16 +516,16 @@ export default function Admin() {
   const unblockUser = async (userId: string) => {
     const expirationDate = new Date();
     expirationDate.setDate(expirationDate.getDate() + 30);
-    
-    const { error } = await supabase
-      .from('profiles')
-      .update({ 
-        has_access: true,
-        block_reason: null,
-        access_expires_at: expirationDate.toISOString()
-      })
-      .eq('id', userId);
-      
+
+    const { error } = await supabase.
+    from('profiles').
+    update({
+      has_access: true,
+      block_reason: null,
+      access_expires_at: expirationDate.toISOString()
+    }).
+    eq('id', userId);
+
     if (error) {
       toast({
         title: 'Erro',
@@ -534,7 +534,7 @@ export default function Admin() {
       });
       return;
     }
-    
+
     toast({
       title: 'Sucesso',
       description: 'Acesso liberado (30 dias)'
@@ -557,11 +557,11 @@ export default function Admin() {
       });
 
       if (error) throw error;
-      
+
       if (data?.error) {
         throw new Error(data.error);
       }
-      
+
       toast({
         title: 'Sucesso',
         description: 'Usuário deletado completamente do sistema'
@@ -580,16 +580,16 @@ export default function Admin() {
   // Open permissions dialog
   const openPermissionsDialog = async (userProfile: UserProfile) => {
     setSelectedUser(userProfile);
-    
+
     // Fetch fresh platform access data from database
-    const { data: freshAccess, error: accessError } = await supabase
-      .from('user_platform_access')
-      .select('platform_id')
-      .eq('user_id', userProfile.id);
-    
+    const { data: freshAccess, error: accessError } = await supabase.
+    from('user_platform_access').
+    select('platform_id').
+    eq('user_id', userProfile.id);
+
     console.log('Loading permissions for:', userProfile.name, 'Profile ID:', userProfile.id);
     console.log('Fresh access data:', freshAccess?.length, 'platforms', accessError);
-    
+
     if (accessError) {
       toast({
         title: 'Erro',
@@ -598,8 +598,8 @@ export default function Admin() {
       });
       return;
     }
-    
-    const userAccess = freshAccess?.map(a => a.platform_id) || [];
+
+    const userAccess = freshAccess?.map((a) => a.platform_id) || [];
     setSelectedPlatforms(userAccess);
 
     // Set current duration based on expiration
@@ -612,35 +612,35 @@ export default function Admin() {
       setSelectedDuration(daysRemaining);
     }
     setCustomDays('');
-    
+
     // Check if user has socio role
-    const { data: roleData } = await supabase
-      .from('user_roles')
-      .select('role')
-      .eq('user_id', userProfile.user_id)
-      .eq('role', 'socio')
-      .maybeSingle();
+    const { data: roleData } = await supabase.
+    from('user_roles').
+    select('role').
+    eq('user_id', userProfile.user_id).
+    eq('role', 'socio').
+    maybeSingle();
     setUserIsSocio(!!roleData);
-    
+
     // Check if user has socio_2_enabled
-    const { data: profileData } = await supabase
-      .from('profiles')
-      .select('socio_2_enabled')
-      .eq('id', userProfile.id)
-      .single();
+    const { data: profileData } = await supabase.
+    from('profiles').
+    select('socio_2_enabled').
+    eq('id', userProfile.id).
+    single();
     setUserIsSocio2((profileData as any)?.socio_2_enabled || false);
-    
+
     setPermissionsDialogOpen(true);
   };
 
   // Toggle platform selection
   const togglePlatformSelection = (platformId: string) => {
-    setSelectedPlatforms(prev => prev.includes(platformId) ? prev.filter(id => id !== platformId) : [...prev, platformId]);
+    setSelectedPlatforms((prev) => prev.includes(platformId) ? prev.filter((id) => id !== platformId) : [...prev, platformId]);
   };
 
   // Select all platforms
   const selectAllPlatforms = () => {
-    setSelectedPlatforms(platforms.map(p => p.id));
+    setSelectedPlatforms(platforms.map((p) => p.id));
   };
 
   // Deselect all platforms
@@ -661,23 +661,23 @@ export default function Admin() {
       expirationDate.setDate(expirationDate.getDate() + daysToAdd);
       accessExpiresAt = expirationDate.toISOString();
     }
-    
+
     try {
       // user_platform_access.user_id references profiles.id
       // Delete ALL existing access for this user first, then insert fresh
-      await supabase.from('user_platform_access')
-        .delete()
-        .eq('user_id', selectedUser.id);
+      await supabase.from('user_platform_access').
+      delete().
+      eq('user_id', selectedUser.id);
 
       // Add new access for selected platforms
       if (selectedPlatforms.length > 0) {
-        const newAccess = selectedPlatforms.map(platformId => ({
+        const newAccess = selectedPlatforms.map((platformId) => ({
           user_id: selectedUser.id,
           platform_id: platformId
         }));
-        const { error: insertError } = await supabase
-          .from('user_platform_access')
-          .insert(newAccess);
+        const { error: insertError } = await supabase.
+        from('user_platform_access').
+        insert(newAccess);
         if (insertError) throw insertError;
       }
 
@@ -688,15 +688,15 @@ export default function Admin() {
         access_expires_at: hasAnyAccess ? accessExpiresAt : null,
         socio_2_enabled: userIsSocio2
       } as any).eq('id', selectedUser.id);
-      
+
       // Handle socio role
-      const { data: existingSocioRole } = await supabase
-        .from('user_roles')
-        .select('id')
-        .eq('user_id', selectedUser.user_id)
-        .eq('role', 'socio')
-        .maybeSingle();
-      
+      const { data: existingSocioRole } = await supabase.
+      from('user_roles').
+      select('id').
+      eq('user_id', selectedUser.user_id).
+      eq('role', 'socio').
+      maybeSingle();
+
       if (userIsSocio && !existingSocioRole) {
         // Add socio role
         await supabase.from('user_roles').insert({
@@ -705,11 +705,11 @@ export default function Admin() {
         });
       } else if (!userIsSocio && existingSocioRole) {
         // Remove socio role
-        await supabase.from('user_roles').delete()
-          .eq('user_id', selectedUser.user_id)
-          .eq('role', 'socio');
+        await supabase.from('user_roles').delete().
+        eq('user_id', selectedUser.user_id).
+        eq('role', 'socio');
       }
-      
+
       const durationLabel = daysToAdd === null ? 'Vitalício' : `${daysToAdd} dias`;
       toast({
         title: 'Sucesso',
@@ -819,7 +819,7 @@ export default function Admin() {
   // Get number of platforms user has access to
   // user_platform_access.user_id references profiles.id
   const getUserPlatformCount = (profileId: string) => {
-    return userPlatformAccess.filter(a => a.user_id === profileId).length;
+    return userPlatformAccess.filter((a) => a.user_id === profileId).length;
   };
 
   // Image upload
@@ -864,7 +864,7 @@ export default function Admin() {
   // Get active users (users with has_access = true and not expired)
   const getActiveUsers = () => {
     const now = new Date();
-    return users.filter(u => {
+    return users.filter((u) => {
       if (!u.has_access) return false;
       if (!u.access_expires_at) return true; // Lifetime access
       return new Date(u.access_expires_at) > now;
@@ -884,15 +884,15 @@ export default function Admin() {
       // Don't show access distribution when editing
       setAccessDistribution('none');
       setSelectedUsersForAccess([]);
-      
+
       // Load existing credentials from streaming_credentials table
-      const { data: credentials } = await supabase
-        .from('streaming_credentials')
-        .select('login, password')
-        .eq('platform_id', platform.id);
-      
+      const { data: credentials } = await supabase.
+      from('streaming_credentials').
+      select('login, password').
+      eq('platform_id', platform.id);
+
       if (credentials && credentials.length > 0) {
-        setPlatformCredentials(credentials.map(c => ({ login: c.login, password: c.password })));
+        setPlatformCredentials(credentials.map((c) => ({ login: c.login, password: c.password })));
       } else {
         setPlatformCredentials([{ login: '', password: '' }]);
       }
@@ -948,17 +948,17 @@ export default function Admin() {
         });
         return;
       }
-      
+
       // Update credentials in streaming_credentials table
       if (platformAccessType === 'credentials') {
         // Delete existing credentials
         await supabase.from('streaming_credentials').delete().eq('platform_id', editingPlatform.id);
-        
+
         // Insert new credentials
-        const validCredentials = platformCredentials.filter(c => c.login || c.password);
+        const validCredentials = platformCredentials.filter((c) => c.login || c.password);
         if (validCredentials.length > 0) {
           await supabase.from('streaming_credentials').insert(
-            validCredentials.map(c => ({
+            validCredentials.map((c) => ({
               platform_id: editingPlatform.id,
               login: c.login,
               password: c.password
@@ -966,7 +966,7 @@ export default function Admin() {
           );
         }
       }
-      
+
       toast({
         title: 'Sucesso',
         description: 'Plataforma atualizada'
@@ -984,13 +984,13 @@ export default function Admin() {
         });
         return;
       }
-      
+
       // Save credentials to streaming_credentials table
       if (newPlatform && platformAccessType === 'credentials') {
-        const validCredentials = platformCredentials.filter(c => c.login || c.password);
+        const validCredentials = platformCredentials.filter((c) => c.login || c.password);
         if (validCredentials.length > 0) {
           await supabase.from('streaming_credentials').insert(
-            validCredentials.map(c => ({
+            validCredentials.map((c) => ({
               platform_id: newPlatform.id,
               login: c.login,
               password: c.password
@@ -998,24 +998,24 @@ export default function Admin() {
           );
         }
       }
-      
+
       // Grant access to users based on distribution selection
       if (newPlatform && accessDistribution !== 'none') {
         const activeUsers = getActiveUsers();
-        const usersToGrant = accessDistribution === 'all_active' 
-          ? activeUsers.map(u => u.id)
-          : selectedUsersForAccess;
-        
+        const usersToGrant = accessDistribution === 'all_active' ?
+        activeUsers.map((u) => u.id) :
+        selectedUsersForAccess;
+
         if (usersToGrant.length > 0) {
-          const accessEntries = usersToGrant.map(userId => ({
+          const accessEntries = usersToGrant.map((userId) => ({
             user_id: userId,
             platform_id: newPlatform.id
           }));
-          
-          const { error: accessError } = await supabase
-            .from('user_platform_access')
-            .insert(accessEntries);
-          
+
+          const { error: accessError } = await supabase.
+          from('user_platform_access').
+          insert(accessEntries);
+
           if (accessError) {
             console.error('Error granting access:', accessError);
             toast({
@@ -1064,7 +1064,7 @@ export default function Admin() {
     fetchData();
   };
   const togglePasswordVisibility = (id: string) => {
-    setShowPasswords(prev => ({
+    setShowPasswords((prev) => ({
       ...prev,
       [id]: !prev[id]
     }));
@@ -1206,9 +1206,9 @@ export default function Admin() {
     const fileExt = file.name.split('.').pop();
     const fileName = `${crypto.randomUUID()}.${fileExt}`;
 
-    const { error: uploadError } = await supabase.storage
-      .from('product-images')
-      .upload(fileName, file);
+    const { error: uploadError } = await supabase.storage.
+    from('product-images').
+    upload(fileName, file);
 
     if (uploadError) {
       toast({
@@ -1323,8 +1323,8 @@ export default function Admin() {
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>;
   }
-  const usersWithAccess = users.filter(u => u.has_access).length;
-  const usersWithoutAccess = users.filter(u => !u.has_access).length;
+  const usersWithAccess = users.filter((u) => u.has_access).length;
+  const usersWithoutAccess = users.filter((u) => !u.has_access).length;
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5">
       {/* Header */}
       <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-50">
@@ -1402,11 +1402,11 @@ export default function Admin() {
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                     <Input
-                      placeholder="Buscar plataforma..."
-                      value={platformSearchQuery}
-                      onChange={(e) => setPlatformSearchQuery(e.target.value)}
-                      className="pl-9 w-[200px] sm:w-[250px]"
-                    />
+                    placeholder="Buscar plataforma..."
+                    value={platformSearchQuery}
+                    onChange={(e) => setPlatformSearchQuery(e.target.value)}
+                    className="pl-9 w-[200px] sm:w-[250px]" />
+                  
                   </div>
                   <Button onClick={() => openPlatformDialog()} size="sm">
                     <Plus className="w-4 h-4 mr-2" />
@@ -1429,11 +1429,11 @@ export default function Admin() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {platforms
-                        .filter(platform => 
-                          platform.name.toLowerCase().includes(platformSearchQuery.toLowerCase())
-                        )
-                        .map(platform => <TableRow key={platform.id}>
+                      {platforms.
+                    filter((platform) =>
+                    platform.name.toLowerCase().includes(platformSearchQuery.toLowerCase())
+                    ).
+                    map((platform) => <TableRow key={platform.id}>
                           <TableCell>
                             {platform.cover_image_url ? <img src={platform.cover_image_url} alt={platform.name} className="w-16 h-10 object-cover rounded-md" /> : <div className="w-16 h-10 bg-muted rounded-md flex items-center justify-center">
                                 <Image className="w-5 h-5 text-muted-foreground" />
@@ -1555,11 +1555,11 @@ export default function Admin() {
                 <CardTitle className="text-foreground">Gerenciar Usuários</CardTitle>
                 <div className="relative w-64">
                   <Input
-                    placeholder="Pesquisar por nome ou email..."
-                    value={userSearchQuery}
-                    onChange={(e) => setUserSearchQuery(e.target.value)}
-                    className="bg-background/50 border-border pl-9"
-                  />
+                  placeholder="Pesquisar por nome ou email..."
+                  value={userSearchQuery}
+                  onChange={(e) => setUserSearchQuery(e.target.value)}
+                  className="bg-background/50 border-border pl-9" />
+                
                   <Users className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
                 </div>
               </CardHeader>
@@ -1579,16 +1579,16 @@ export default function Admin() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {users
-                        .filter(u => {
-                          if (!userSearchQuery.trim()) return true;
-                          const query = userSearchQuery.toLowerCase();
-                          return (
-                            (u.name?.toLowerCase().includes(query)) ||
-                            (u.email?.toLowerCase().includes(query))
-                          );
-                        })
-                        .map(userProfile => <TableRow key={userProfile.id}>
+                      {users.
+                    filter((u) => {
+                      if (!userSearchQuery.trim()) return true;
+                      const query = userSearchQuery.toLowerCase();
+                      return (
+                        u.name?.toLowerCase().includes(query) ||
+                        u.email?.toLowerCase().includes(query));
+
+                    }).
+                    map((userProfile) => <TableRow key={userProfile.id}>
                           <TableCell className="font-medium">
                             {userProfile.name || '-'}
                           </TableCell>
@@ -1600,22 +1600,22 @@ export default function Admin() {
                           </TableCell>
                           <TableCell>
                             {(() => {
-                              const lastAccess = userLastAccess[userProfile.user_id];
-                              if (!lastAccess) {
-                                return <span className="text-xs text-muted-foreground">Sem dados</span>;
-                              }
-                              return (
-                                <div className="flex flex-col gap-0.5">
+                          const lastAccess = userLastAccess[userProfile.user_id];
+                          if (!lastAccess) {
+                            return <span className="text-xs text-muted-foreground">Sem dados</span>;
+                          }
+                          return (
+                            <div className="flex flex-col gap-0.5">
                                   <span className="text-xs font-mono text-muted-foreground">{lastAccess.ip}</span>
-                                  {lastAccess.city && (
-                                    <div className="flex items-center gap-1 text-xs text-muted-foreground/80">
+                                  {lastAccess.city &&
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground/80">
                                       <MapPin className="w-3 h-3" />
                                       <span>{lastAccess.city}{lastAccess.region ? `, ${lastAccess.region}` : ''}</span>
                                     </div>
-                                  )}
-                                </div>
-                              );
-                            })()}
+                              }
+                                </div>);
+
+                        })()}
                           </TableCell>
                           <TableCell>
                             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-primary/10 text-primary">
@@ -1672,11 +1672,11 @@ export default function Admin() {
                                 <Settings className="w-4 h-4 mr-2" />
                                 Permissões
                               </Button>
-                              <Button 
-                                variant={userProfile.has_access ? "destructive" : "default"} 
-                                size="sm" 
-                                onClick={() => userProfile.has_access ? openBlockDialog(userProfile) : unblockUser(userProfile.id)}
-                              >
+                              <Button
+                            variant={userProfile.has_access ? "destructive" : "default"}
+                            size="sm"
+                            onClick={() => userProfile.has_access ? openBlockDialog(userProfile) : unblockUser(userProfile.id)}>
+                            
                                 {userProfile.has_access ? <>
                                     <UserX className="w-4 h-4 mr-2" />
                                     Bloquear
@@ -1758,10 +1758,10 @@ export default function Admin() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {onlineUsers.map(onlineUser => {
-                          const lastAccess = userLastAccess[onlineUser.user_id];
-                          return (
-                            <TableRow key={onlineUser.user_id}>
+                        {onlineUsers.map((onlineUser) => {
+                      const lastAccess = userLastAccess[onlineUser.user_id];
+                      return (
+                        <TableRow key={onlineUser.user_id}>
                               <TableCell>
                                 <div className="flex items-center gap-2">
                                   <span className="w-3 h-3 bg-green-500 rounded-full animate-pulse" />
@@ -1771,32 +1771,32 @@ export default function Admin() {
                               <TableCell className="font-medium">{onlineUser.user_name}</TableCell>
                               <TableCell className="text-muted-foreground">{onlineUser.user_email}</TableCell>
                               <TableCell>
-                                {!lastAccess ? (
-                                  <span className="text-xs text-muted-foreground">Sem dados</span>
-                                ) : (
-                                  <div className="flex flex-col gap-0.5">
+                                {!lastAccess ?
+                            <span className="text-xs text-muted-foreground">Sem dados</span> :
+
+                            <div className="flex flex-col gap-0.5">
                                     <span className="text-xs font-mono text-muted-foreground">{lastAccess.ip}</span>
-                                    {lastAccess.city && (
-                                      <div className="flex items-center gap-1 text-xs text-muted-foreground/80">
+                                    {lastAccess.city &&
+                              <div className="flex items-center gap-1 text-xs text-muted-foreground/80">
                                         <MapPin className="w-3 h-3" />
                                         <span>{lastAccess.city}{lastAccess.region ? `, ${lastAccess.region}` : ''}</span>
                                       </div>
-                                    )}
+                              }
                                   </div>
-                                )}
+                            }
                               </TableCell>
                               <TableCell className="text-muted-foreground text-sm">
                                 {new Date(onlineUser.online_at).toLocaleString('pt-BR', {
-                                  day: '2-digit',
-                                  month: '2-digit',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
+                              day: '2-digit',
+                              month: '2-digit',
+                              year: 'numeric',
+                              hour: '2-digit',
+                              minute: '2-digit'
+                            })}
                               </TableCell>
-                            </TableRow>
-                          );
-                        })}
+                            </TableRow>);
+
+                    })}
                       </TableBody>
                     </Table>
                   </div>}
@@ -1827,7 +1827,7 @@ export default function Admin() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {news.map(newsItem => <TableRow key={newsItem.id}>
+                      {news.map((newsItem) => <TableRow key={newsItem.id}>
                           <TableCell className="font-medium max-w-[200px] truncate">
                             {newsItem.title}
                           </TableCell>
@@ -1895,16 +1895,16 @@ export default function Admin() {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {products.map(product => (
-                        <TableRow key={product.id}>
+                      {products.map((product) =>
+                    <TableRow key={product.id}>
                           <TableCell>
-                            {product.image_url ? (
-                              <img src={product.image_url} alt={product.name} className="w-12 h-12 object-cover rounded-md" />
-                            ) : (
-                              <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center">
+                            {product.image_url ?
+                        <img src={product.image_url} alt={product.name} className="w-12 h-12 object-cover rounded-md" /> :
+
+                        <div className="w-12 h-12 bg-muted rounded-md flex items-center justify-center">
                                 <Package className="w-5 h-5 text-muted-foreground" />
                               </div>
-                            )}
+                        }
                           </TableCell>
                           <TableCell className="font-medium max-w-[200px] truncate">
                             {product.name}
@@ -1919,17 +1919,17 @@ export default function Admin() {
                           </TableCell>
                           <TableCell>
                             <button onClick={() => toggleProductActive(product)} className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium cursor-pointer transition-colors ${product.is_active ? 'bg-green-500/10 text-green-500 hover:bg-green-500/20' : 'bg-muted text-muted-foreground hover:bg-muted/80'}`}>
-                              {product.is_active ? (
-                                <>
+                              {product.is_active ?
+                          <>
                                   <ToggleRight className="w-3 h-3" />
                                   Ativo
-                                </>
-                              ) : (
-                                <>
+                                </> :
+
+                          <>
                                   <ToggleLeft className="w-3 h-3" />
                                   Inativo
                                 </>
-                              )}
+                          }
                             </button>
                           </TableCell>
                           <TableCell className="text-right">
@@ -1943,14 +1943,14 @@ export default function Admin() {
                             </div>
                           </TableCell>
                         </TableRow>
-                      ))}
-                      {products.length === 0 && (
-                        <TableRow>
+                    )}
+                      {products.length === 0 &&
+                    <TableRow>
                           <TableCell colSpan={6} className="text-center text-muted-foreground py-8">
                             Nenhum produto criado
                           </TableCell>
                         </TableRow>
-                      )}
+                    }
                     </TableBody>
                   </Table>
                 </div>
@@ -1977,14 +1977,14 @@ export default function Admin() {
                 </div>
               </CardHeader>
               <CardContent>
-                {socios.length === 0 ? (
-                  <div className="text-center text-muted-foreground py-8">
+                {socios.length === 0 ?
+              <div className="text-center text-muted-foreground py-8">
                     Nenhum sócio cadastrado
-                  </div>
-                ) : (
-                  <div className="space-y-6">
-                    {socios.map(socio => (
-                      <div key={socio.user_id} className="border border-border rounded-lg overflow-hidden">
+                  </div> :
+
+              <div className="space-y-6">
+                    {socios.map((socio) =>
+                <div key={socio.user_id} className="border border-border rounded-lg overflow-hidden">
                         {/* Socio Header */}
                         <div className="bg-secondary/30 px-4 py-3 flex items-center justify-between">
                           <div className="flex items-center gap-3">
@@ -2003,24 +2003,24 @@ export default function Admin() {
                                 Sócio 2.0
                               </Label>
                               <Switch
-                                id={`socio2-${socio.user_id}`}
-                                checked={socio.socio_2_enabled}
-                                onCheckedChange={async (checked) => {
-                                  const { error } = await supabase
-                                    .from('profiles')
-                                    .update({ socio_2_enabled: checked } as any)
-                                    .eq('id', socio.profile_id);
-                                  if (error) {
-                                    toast({ title: 'Erro', description: 'Falha ao atualizar Sócio 2.0', variant: 'destructive' });
-                                  } else {
-                                    setSocios(prev => prev.map(s => s.user_id === socio.user_id ? { ...s, socio_2_enabled: checked } : s));
-                                    toast({ title: checked ? '✅ Sócio 2.0 Ativado' : '⛔ Sócio 2.0 Desativado', description: `${socio.name || socio.email}` });
-                                  }
-                                }}
-                              />
-                              {socio.socio_2_enabled && (
-                                <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/30 border text-[10px]">2.0</Badge>
-                              )}
+                          id={`socio2-${socio.user_id}`}
+                          checked={socio.socio_2_enabled}
+                          onCheckedChange={async (checked) => {
+                            const { error } = await supabase.
+                            from('profiles').
+                            update({ socio_2_enabled: checked } as any).
+                            eq('id', socio.profile_id);
+                            if (error) {
+                              toast({ title: 'Erro', description: 'Falha ao atualizar Sócio 2.0', variant: 'destructive' });
+                            } else {
+                              setSocios((prev) => prev.map((s) => s.user_id === socio.user_id ? { ...s, socio_2_enabled: checked } : s));
+                              toast({ title: checked ? '✅ Sócio 2.0 Ativado' : '⛔ Sócio 2.0 Desativado', description: `${socio.name || socio.email}` });
+                            }
+                          }} />
+                        
+                              {socio.socio_2_enabled &&
+                        <Badge className="bg-amber-500/10 text-amber-400 border-amber-500/30 border text-[10px]">2.0</Badge>
+                        }
                             </div>
                             <div className="text-right">
                               <p className="text-xs text-muted-foreground">Sócio desde</p>
@@ -2037,8 +2037,8 @@ export default function Admin() {
                         </div>
                         
                         {/* Clients Table */}
-                        {socio.clients.length > 0 ? (
-                          <div className="overflow-x-auto">
+                        {socio.clients.length > 0 ?
+                  <div className="overflow-x-auto">
                             <Table>
                               <TableHeader>
                                 <TableRow>
@@ -2049,8 +2049,8 @@ export default function Admin() {
                                 </TableRow>
                               </TableHeader>
                               <TableBody>
-                                {socio.clients.map(client => (
-                                  <TableRow key={client.id}>
+                                {socio.clients.map((client) =>
+                        <TableRow key={client.id}>
                                     <TableCell className="font-medium">
                                       {client.name || '-'}
                                     </TableCell>
@@ -2061,32 +2061,32 @@ export default function Admin() {
                                       {new Date(client.created_at).toLocaleDateString('pt-BR')}
                                     </TableCell>
                                     <TableCell>
-                                      {client.has_access ? (
-                                        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-500">
+                                      {client.has_access ?
+                            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-green-500/10 text-green-500">
                                           <UserCheck className="w-3 h-3" />
                                           Ativo
-                                        </span>
-                                      ) : (
-                                        <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-500">
+                                        </span> :
+
+                            <span className="inline-flex items-center gap-1.5 px-2 py-1 rounded-full text-xs font-medium bg-red-500/10 text-red-500">
                                           <UserX className="w-3 h-3" />
                                           Bloqueado
                                         </span>
-                                      )}
+                            }
                                     </TableCell>
                                   </TableRow>
-                                ))}
+                        )}
                               </TableBody>
                             </Table>
-                          </div>
-                        ) : (
-                          <div className="text-center text-muted-foreground py-6 text-sm">
+                          </div> :
+
+                  <div className="text-center text-muted-foreground py-6 text-sm">
                             Nenhum cliente cadastrado por este sócio
                           </div>
-                        )}
+                  }
                       </div>
-                    ))}
-                  </div>
                 )}
+                  </div>
+              }
               </CardContent>
             </Card>
           </TabsContent>
@@ -2094,20 +2094,20 @@ export default function Admin() {
           {/* Partner Payments Tab */}
           <TabsContent value="partner-payments">
             {(() => {
-              // Credit package price mapping
-              const CREDIT_PRICES: Record<number, number> = { 1: 9.90, 5: 44.90, 10: 84.90, 20: 159.90 };
-              const getReaisValue = (credits: number) => CREDIT_PRICES[credits] || credits * 9.90;
-              const totalReais = partnerPayments.filter(p => p.type === 'purchase').reduce((sum, p) => sum + getReaisValue(p.amount), 0);
+            // Credit package price mapping
+            const CREDIT_PRICES: Record<number, number> = { 1: 9.90, 5: 44.90, 10: 84.90, 20: 159.90 };
+            const getReaisValue = (credits: number) => CREDIT_PRICES[credits] || credits * 9.90;
+            const totalReais = partnerPayments.filter((p) => p.type === 'purchase').reduce((sum, p) => sum + getReaisValue(p.amount), 0);
 
-              return (
-                <Card className="border-border">
+            return (
+              <Card className="border-border">
                   <CardHeader className="flex flex-row items-center justify-between">
                     <div>
                       <CardTitle className="text-foreground">Recargas dos Sócios</CardTitle>
                       <p className="text-sm text-muted-foreground mt-1">Histórico de créditos e recargas dos sócios</p>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-green-500/10 text-green-500">
-                      <DollarSign className="w-4 h-4" />
+                      
                       <span className="font-semibold">
                         R$ {totalReais.toFixed(2).replace('.', ',')}
                       </span>
@@ -2115,46 +2115,46 @@ export default function Admin() {
                     </div>
                   </CardHeader>
                   <CardContent>
-                    {socios.length === 0 && partnerPayments.length === 0 ? (
-                      <div className="text-center text-muted-foreground py-8">
+                    {socios.length === 0 && partnerPayments.length === 0 ?
+                  <div className="text-center text-muted-foreground py-8">
                         Nenhum sócio registrado
-                      </div>
-                    ) : (
-                      <div className="space-y-6">
+                      </div> :
+
+                  <div className="space-y-6">
                         {/* Summary per partner - all socios with credits */}
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {(() => {
-                            // Build data for all socios, not just those with payments
-                            const grouped: Record<string, { name: string | null; email: string; totalReais: number; totalCredits: number; count: number; balance: number }> = {};
-                            
-                            // Initialize with all socios
-                            socios.forEach(s => {
-                              grouped[s.user_id] = { 
-                                name: s.name, 
-                                email: s.email, 
-                                totalReais: 0, 
-                                totalCredits: 0, 
-                                count: 0,
-                                balance: socioCredits[s.user_id] || 0
-                              };
-                            });
-                            
-                             // Add payment data
-                            partnerPayments.forEach(p => {
-                              if (!grouped[p.user_id]) {
-                                grouped[p.user_id] = { name: p.partner_name, email: p.partner_email, totalReais: 0, totalCredits: 0, count: 0, balance: socioCredits[p.user_id] || 0 };
-                              }
-                              if (p.type === 'purchase') {
-                                grouped[p.user_id].totalReais += getReaisValue(p.amount);
-                                grouped[p.user_id].count += 1;
-                              }
-                              if (p.amount > 0) {
-                                grouped[p.user_id].totalCredits += p.amount;
-                              }
-                            });
-                            
-                            return Object.entries(grouped).map(([userId, data]) => (
-                              <div key={userId} className="border border-border rounded-lg p-4 bg-secondary/20">
+                        // Build data for all socios, not just those with payments
+                        const grouped: Record<string, {name: string | null;email: string;totalReais: number;totalCredits: number;count: number;balance: number;}> = {};
+
+                        // Initialize with all socios
+                        socios.forEach((s) => {
+                          grouped[s.user_id] = {
+                            name: s.name,
+                            email: s.email,
+                            totalReais: 0,
+                            totalCredits: 0,
+                            count: 0,
+                            balance: socioCredits[s.user_id] || 0
+                          };
+                        });
+
+                        // Add payment data
+                        partnerPayments.forEach((p) => {
+                          if (!grouped[p.user_id]) {
+                            grouped[p.user_id] = { name: p.partner_name, email: p.partner_email, totalReais: 0, totalCredits: 0, count: 0, balance: socioCredits[p.user_id] || 0 };
+                          }
+                          if (p.type === 'purchase') {
+                            grouped[p.user_id].totalReais += getReaisValue(p.amount);
+                          }
+                          if (p.amount > 0) {
+                            grouped[p.user_id].totalCredits += p.amount;
+                            grouped[p.user_id].count += 1;
+                          }
+                        });
+
+                        return Object.entries(grouped).map(([userId, data]) =>
+                        <div key={userId} className="border border-border rounded-lg p-4 bg-secondary/20">
                                 <div className="flex items-center gap-3 mb-2">
                                   <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center">
                                     <Handshake className="w-4 h-4 text-primary" />
@@ -2172,8 +2172,8 @@ export default function Admin() {
                                   {data.totalReais > 0 && <span className="font-bold text-green-500">R$ {data.totalReais.toFixed(2).replace('.', ',')}</span>}
                                 </div>
                               </div>
-                            ));
-                          })()}
+                        );
+                      })()}
                         </div>
 
                         {/* Full transactions list */}
@@ -2191,10 +2191,10 @@ export default function Admin() {
                               </TableRow>
                             </TableHeader>
                             <TableBody>
-                              {partnerPayments.map(payment => {
-                                const typeLabels: Record<string, string> = { purchase: 'Compra PIX', admin_grant: 'Admin', client_creation: 'Criação cliente', mission_reward: 'Missão' };
-                                return (
-                                <TableRow key={payment.id}>
+                              {partnerPayments.map((payment) => {
+                            const typeLabels: Record<string, string> = { purchase: 'Compra PIX', admin_grant: 'Admin', client_creation: 'Criação cliente', mission_reward: 'Missão' };
+                            return (
+                              <TableRow key={payment.id}>
                                   <TableCell>
                                     <div>
                                       <p className="font-medium text-sm">{payment.partner_name || 'Sem nome'}</p>
@@ -2211,11 +2211,11 @@ export default function Admin() {
                                     <Badge variant="outline" className="text-xs">{typeLabels[payment.type] || payment.type}</Badge>
                                   </TableCell>
                                   <TableCell>
-                                    {payment.type === 'purchase' ? (
-                                      <span className="font-semibold text-green-500">R$ {getReaisValue(payment.amount).toFixed(2).replace('.', ',')}</span>
-                                    ) : (
-                                      <span className="text-muted-foreground">-</span>
-                                    )}
+                                    {payment.type === 'purchase' ?
+                                  <span className="font-semibold text-green-500">R$ {getReaisValue(payment.amount).toFixed(2).replace('.', ',')}</span> :
+
+                                  <span className="text-muted-foreground">-</span>
+                                  }
                                   </TableCell>
                                   <TableCell className="text-xs text-muted-foreground font-mono">
                                     {payment.reference_id || '-'}
@@ -2223,18 +2223,18 @@ export default function Admin() {
                                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                                     {new Date(payment.created_at).toLocaleDateString('pt-BR')} {new Date(payment.created_at).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' })}
                                   </TableCell>
-                                </TableRow>
-                                );
-                              })}
+                                </TableRow>);
+
+                          })}
                             </TableBody>
                           </Table>
                         </div>
                       </div>
-                    )}
+                  }
                   </CardContent>
-                </Card>
-              );
-            })()}
+                </Card>);
+
+          })()}
           </TabsContent>
 
           <TabsContent value="register">
@@ -2247,118 +2247,118 @@ export default function Admin() {
               </CardHeader>
               <CardContent>
                 <form onSubmit={async (e) => {
-                  e.preventDefault();
-                  
-                  if (!registerName.trim() || !registerEmail.trim() || !registerPassword.trim()) {
-                    toast({
-                      title: 'Erro',
-                      description: 'Preencha todos os campos',
-                      variant: 'destructive'
-                    });
-                    return;
-                  }
+                e.preventDefault();
 
-                  if (registerPassword.length < 6) {
-                    toast({
-                      title: 'Erro',
-                      description: 'A senha deve ter no mínimo 6 caracteres',
-                      variant: 'destructive'
-                    });
-                    return;
-                  }
+                if (!registerName.trim() || !registerEmail.trim() || !registerPassword.trim()) {
+                  toast({
+                    title: 'Erro',
+                    description: 'Preencha todos os campos',
+                    variant: 'destructive'
+                  });
+                  return;
+                }
 
-                  setIsRegistering(true);
-                  
-                  try {
-                    const { data, error } = await supabase.functions.invoke('setup-users', {
-                      body: {
-                        action: 'create_user',
-                        email: registerEmail.trim().toLowerCase(),
-                        password: registerPassword,
-                        name: registerName.trim(),
-                        role: 'user',
-                        has_access: false
-                      }
-                    });
+                if (registerPassword.length < 6) {
+                  toast({
+                    title: 'Erro',
+                    description: 'A senha deve ter no mínimo 6 caracteres',
+                    variant: 'destructive'
+                  });
+                  return;
+                }
 
-                    if (error) throw error;
-                    
-                    if (data?.error) {
-                      throw new Error(data.error);
+                setIsRegistering(true);
+
+                try {
+                  const { data, error } = await supabase.functions.invoke('setup-users', {
+                    body: {
+                      action: 'create_user',
+                      email: registerEmail.trim().toLowerCase(),
+                      password: registerPassword,
+                      name: registerName.trim(),
+                      role: 'user',
+                      has_access: false
                     }
+                  });
 
-                    toast({
-                      title: 'Sucesso',
-                      description: `Usuário ${registerName} criado com sucesso!`
-                    });
-                    
-                    // Clear form
-                    setRegisterName('');
-                    setRegisterEmail('');
-                    setRegisterPassword('');
-                    
-                    // Refresh users list
-                    fetchData();
-                  } catch (err: any) {
-                    toast({
-                      title: 'Erro ao criar usuário',
-                      description: err.message || 'Tente novamente',
-                      variant: 'destructive'
-                    });
-                  } finally {
-                    setIsRegistering(false);
+                  if (error) throw error;
+
+                  if (data?.error) {
+                    throw new Error(data.error);
                   }
-                }} className="max-w-md space-y-4">
+
+                  toast({
+                    title: 'Sucesso',
+                    description: `Usuário ${registerName} criado com sucesso!`
+                  });
+
+                  // Clear form
+                  setRegisterName('');
+                  setRegisterEmail('');
+                  setRegisterPassword('');
+
+                  // Refresh users list
+                  fetchData();
+                } catch (err: any) {
+                  toast({
+                    title: 'Erro ao criar usuário',
+                    description: err.message || 'Tente novamente',
+                    variant: 'destructive'
+                  });
+                } finally {
+                  setIsRegistering(false);
+                }
+              }} className="max-w-md space-y-4">
                   <div className="space-y-2">
                     <Label htmlFor="register-name">Nome do Cliente *</Label>
                     <Input
-                      id="register-name"
-                      value={registerName}
-                      onChange={(e) => setRegisterName(e.target.value)}
-                      placeholder="Nome completo"
-                      className="bg-background/50 border-border"
-                      required
-                    />
+                    id="register-name"
+                    value={registerName}
+                    onChange={(e) => setRegisterName(e.target.value)}
+                    placeholder="Nome completo"
+                    className="bg-background/50 border-border"
+                    required />
+                  
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="register-email">Email *</Label>
                     <Input
-                      id="register-email"
-                      type="email"
-                      value={registerEmail}
-                      onChange={(e) => setRegisterEmail(e.target.value)}
-                      placeholder="email@exemplo.com"
-                      className="bg-background/50 border-border"
-                      required
-                    />
+                    id="register-email"
+                    type="email"
+                    value={registerEmail}
+                    onChange={(e) => setRegisterEmail(e.target.value)}
+                    placeholder="email@exemplo.com"
+                    className="bg-background/50 border-border"
+                    required />
+                  
                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="register-password">Senha *</Label>
                     <div className="relative">
                       <Input
-                        id="register-password"
-                        type={showRegisterPassword ? 'text' : 'password'}
-                        value={registerPassword}
-                        onChange={(e) => setRegisterPassword(e.target.value)}
-                        placeholder="Mínimo 6 caracteres"
-                        className="bg-background/50 border-border pr-10"
-                        required
-                        minLength={6}
-                      />
+                      id="register-password"
+                      type={showRegisterPassword ? 'text' : 'password'}
+                      value={registerPassword}
+                      onChange={(e) => setRegisterPassword(e.target.value)}
+                      placeholder="Mínimo 6 caracteres"
+                      className="bg-background/50 border-border pr-10"
+                      required
+                      minLength={6} />
+                    
                       <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="absolute right-0 top-0 h-full px-3"
-                        onClick={() => setShowRegisterPassword(!showRegisterPassword)}
-                      >
-                        {showRegisterPassword ? (
-                          <EyeOff className="w-4 h-4 text-muted-foreground" />
-                        ) : (
-                          <Eye className="w-4 h-4 text-muted-foreground" />
-                        )}
+                      type="button"
+                      variant="ghost"
+                      size="icon"
+                      className="absolute right-0 top-0 h-full px-3"
+                      onClick={() => setShowRegisterPassword(!showRegisterPassword)}>
+                      
+                        {showRegisterPassword ?
+                      <EyeOff className="w-4 h-4 text-muted-foreground" /> :
+
+                      <Eye className="w-4 h-4 text-muted-foreground" />
+                      }
                       </Button>
                     </div>
                     <p className="text-xs text-muted-foreground">
@@ -2367,17 +2367,17 @@ export default function Admin() {
                   </div>
                   
                   <Button type="submit" disabled={isRegistering} className="w-full">
-                    {isRegistering ? (
-                      <>
+                    {isRegistering ?
+                  <>
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                         Criando...
-                      </>
-                    ) : (
-                      <>
+                      </> :
+
+                  <>
                         <UserPlus className="w-4 h-4 mr-2" />
                         Criar Usuário
                       </>
-                    )}
+                  }
                   </Button>
                 </form>
                 
@@ -2419,72 +2419,72 @@ export default function Admin() {
                         </p>
                       </div>
                       <Switch
-                        checked={isMaintenanceMode}
-                        onCheckedChange={async (checked) => {
-                          setSavingMaintenance(true);
-                          const result = await toggleMaintenance(checked, maintenanceMessageInput);
-                          setSavingMaintenance(false);
-                          if (result.success) {
-                            toast({
-                              title: checked ? 'Manutenção Ativada' : 'Manutenção Desativada',
-                              description: checked 
-                                ? 'O site agora está em modo manutenção. Apenas admins podem acessar.'
-                                : 'O site voltou ao funcionamento normal.',
-                            });
-                          } else {
-                            toast({
-                              title: 'Erro',
-                              description: 'Falha ao alterar modo manutenção',
-                              variant: 'destructive'
-                            });
-                          }
-                        }}
-                        disabled={savingMaintenance}
-                      />
+                      checked={isMaintenanceMode}
+                      onCheckedChange={async (checked) => {
+                        setSavingMaintenance(true);
+                        const result = await toggleMaintenance(checked, maintenanceMessageInput);
+                        setSavingMaintenance(false);
+                        if (result.success) {
+                          toast({
+                            title: checked ? 'Manutenção Ativada' : 'Manutenção Desativada',
+                            description: checked ?
+                            'O site agora está em modo manutenção. Apenas admins podem acessar.' :
+                            'O site voltou ao funcionamento normal.'
+                          });
+                        } else {
+                          toast({
+                            title: 'Erro',
+                            description: 'Falha ao alterar modo manutenção',
+                            variant: 'destructive'
+                          });
+                        }
+                      }}
+                      disabled={savingMaintenance} />
+                    
                     </div>
 
                     <div className={`flex items-center gap-2 px-3 py-2 rounded-lg ${isMaintenanceMode ? 'bg-orange-500/10 text-orange-500' : 'bg-green-500/10 text-green-500'}`}>
-                      {isMaintenanceMode ? (
-                        <>
+                      {isMaintenanceMode ?
+                    <>
                           <Construction className="w-4 h-4" />
                           <span className="text-sm font-medium">Site em manutenção</span>
-                        </>
-                      ) : (
-                        <>
+                        </> :
+
+                    <>
                           <CheckCircle className="w-4 h-4" />
                           <span className="text-sm font-medium">Site funcionando normalmente</span>
                         </>
-                      )}
+                    }
                     </div>
 
                     <div className="space-y-2">
                       <Label htmlFor="maintenance-message">Mensagem de Manutenção</Label>
                       <Textarea
-                        id="maintenance-message"
-                        value={maintenanceMessageInput}
-                        onChange={(e) => setMaintenanceMessageInput(e.target.value)}
-                        placeholder="Digite a mensagem que será exibida aos usuários..."
-                        className="min-h-[100px]"
-                      />
+                      id="maintenance-message"
+                      value={maintenanceMessageInput}
+                      onChange={(e) => setMaintenanceMessageInput(e.target.value)}
+                      placeholder="Digite a mensagem que será exibida aos usuários..."
+                      className="min-h-[100px]" />
+                    
                       <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={async () => {
-                          setSavingMaintenance(true);
-                          const result = await toggleMaintenance(isMaintenanceMode, maintenanceMessageInput);
-                          setSavingMaintenance(false);
-                          if (result.success) {
-                            toast({
-                              title: 'Mensagem Atualizada',
-                              description: 'A mensagem de manutenção foi salva com sucesso.',
-                            });
-                          }
-                        }}
-                        disabled={savingMaintenance}
-                      >
-                        {savingMaintenance ? (
-                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        ) : null}
+                      variant="outline"
+                      size="sm"
+                      onClick={async () => {
+                        setSavingMaintenance(true);
+                        const result = await toggleMaintenance(isMaintenanceMode, maintenanceMessageInput);
+                        setSavingMaintenance(false);
+                        if (result.success) {
+                          toast({
+                            title: 'Mensagem Atualizada',
+                            description: 'A mensagem de manutenção foi salva com sucesso.'
+                          });
+                        }
+                      }}
+                      disabled={savingMaintenance}>
+                      
+                        {savingMaintenance ?
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" /> :
+                      null}
                         Salvar Mensagem
                       </Button>
                     </div>
@@ -2507,37 +2507,37 @@ export default function Admin() {
                       </p>
                     </div>
                     <Button
-                      variant="destructive"
-                      onClick={async () => {
-                        const confirmed = window.confirm('Tem certeza que deseja deletar todos os usuários órfãos? Esta ação não pode ser desfeita.');
-                        if (!confirmed) return;
-                        
-                        try {
-                          const { data, error } = await supabase.functions.invoke('cleanup-orphan-users', {
-                            body: { action: 'delete_orphans' }
-                          });
-                          
-                          if (error) throw error;
-                          
-                          if (data?.error) {
-                            throw new Error(data.error);
-                          }
-                          
-                          toast({
-                            title: 'Limpeza Concluída',
-                            description: `${data.deletedCount} usuário(s) órfão(s) deletado(s).${data.deletedEmails?.length > 0 ? ' Emails: ' + data.deletedEmails.join(', ') : ''}`,
-                          });
-                          fetchData();
-                        } catch (err: any) {
-                          console.error('Cleanup error:', err);
-                          toast({
-                            title: 'Erro',
-                            description: err.message || 'Falha ao deletar usuários órfãos',
-                            variant: 'destructive'
-                          });
+                    variant="destructive"
+                    onClick={async () => {
+                      const confirmed = window.confirm('Tem certeza que deseja deletar todos os usuários órfãos? Esta ação não pode ser desfeita.');
+                      if (!confirmed) return;
+
+                      try {
+                        const { data, error } = await supabase.functions.invoke('cleanup-orphan-users', {
+                          body: { action: 'delete_orphans' }
+                        });
+
+                        if (error) throw error;
+
+                        if (data?.error) {
+                          throw new Error(data.error);
                         }
-                      }}
-                    >
+
+                        toast({
+                          title: 'Limpeza Concluída',
+                          description: `${data.deletedCount} usuário(s) órfão(s) deletado(s).${data.deletedEmails?.length > 0 ? ' Emails: ' + data.deletedEmails.join(', ') : ''}`
+                        });
+                        fetchData();
+                      } catch (err: any) {
+                        console.error('Cleanup error:', err);
+                        toast({
+                          title: 'Erro',
+                          description: err.message || 'Falha ao deletar usuários órfãos',
+                          variant: 'destructive'
+                        });
+                      }
+                    }}>
+                    
                       <Trash2 className="w-4 h-4 mr-2" />
                       Limpar Usuários Órfãos
                     </Button>
@@ -2560,13 +2560,13 @@ export default function Admin() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="platform-name">Nome da Plataforma *</Label>
-              <Input id="platform-name" value={platformName} onChange={e => setPlatformName(e.target.value)} placeholder="Ex: Netflix, ChatGPT, Canva..." className="bg-background/50 border-border" />
+              <Input id="platform-name" value={platformName} onChange={(e) => setPlatformName(e.target.value)} placeholder="Ex: Netflix, ChatGPT, Canva..." className="bg-background/50 border-border" />
             </div>
 
             {/* Category Selection */}
             <div className="space-y-2">
               <Label htmlFor="platform-category">Categoria *</Label>
-              <select id="platform-category" value={platformCategory} onChange={e => setPlatformCategory(e.target.value as PlatformCategory)} className="w-full h-10 px-3 rounded-md border border-input bg-background text-foreground">
+              <select id="platform-category" value={platformCategory} onChange={(e) => setPlatformCategory(e.target.value as PlatformCategory)} className="w-full h-10 px-3 rounded-md border border-input bg-background text-foreground">
                 {Object.entries(CATEGORY_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
               </select>
             </div>
@@ -2587,72 +2587,72 @@ export default function Admin() {
             </div>
 
             {/* Conditional Fields based on Access Type */}
-            {platformAccessType === 'credentials' && (
-              <div className="space-y-3">
+            {platformAccessType === 'credentials' &&
+          <div className="space-y-3">
                 <div className="flex items-center justify-between">
                   <Label>Credenciais</Label>
                   <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setPlatformCredentials([...platformCredentials, { login: '', password: '' }])}
-                  >
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setPlatformCredentials([...platformCredentials, { login: '', password: '' }])}>
+                
                     <Plus className="w-4 h-4 mr-1" />
                     Adicionar
                   </Button>
                 </div>
-                {platformCredentials.map((cred, index) => (
-                  <div key={index} className="flex gap-2 items-start">
+                {platformCredentials.map((cred, index) =>
+            <div key={index} className="flex gap-2 items-start">
                     <div className="flex-1 grid grid-cols-2 gap-2">
                       <Input
-                        value={cred.login}
-                        onChange={e => {
-                          const updated = [...platformCredentials];
-                          updated[index].login = e.target.value;
-                          setPlatformCredentials(updated);
-                        }}
-                        placeholder="Login/Email"
-                        className="bg-background/50 border-border"
-                      />
+                  value={cred.login}
+                  onChange={(e) => {
+                    const updated = [...platformCredentials];
+                    updated[index].login = e.target.value;
+                    setPlatformCredentials(updated);
+                  }}
+                  placeholder="Login/Email"
+                  className="bg-background/50 border-border" />
+                
                       <Input
-                        value={cred.password}
-                        onChange={e => {
-                          const updated = [...platformCredentials];
-                          updated[index].password = e.target.value;
-                          setPlatformCredentials(updated);
-                        }}
-                        placeholder="Senha"
-                        className="bg-background/50 border-border"
-                      />
+                  value={cred.password}
+                  onChange={(e) => {
+                    const updated = [...platformCredentials];
+                    updated[index].password = e.target.value;
+                    setPlatformCredentials(updated);
+                  }}
+                  placeholder="Senha"
+                  className="bg-background/50 border-border" />
+                
                     </div>
-                    {platformCredentials.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        className="h-10 w-10 text-destructive hover:text-destructive"
-                        onClick={() => {
-                          setPlatformCredentials(platformCredentials.filter((_, i) => i !== index));
-                        }}
-                      >
+                    {platformCredentials.length > 1 &&
+              <Button
+                type="button"
+                variant="ghost"
+                size="icon"
+                className="h-10 w-10 text-destructive hover:text-destructive"
+                onClick={() => {
+                  setPlatformCredentials(platformCredentials.filter((_, i) => i !== index));
+                }}>
+                
                         <Trash2 className="w-4 h-4" />
                       </Button>
-                    )}
+              }
                   </div>
-                ))}
-              </div>
             )}
+              </div>
+          }
 
             <div className="space-y-2">
               <Label htmlFor="platform-website">
                 Link do Site {platformAccessType === 'link_only' ? '*' : ''}
               </Label>
-              <Input id="platform-website" value={platformWebsiteUrl} onChange={e => setPlatformWebsiteUrl(e.target.value)} placeholder="https://www.netflix.com" className="bg-background/50 border-border" />
+              <Input id="platform-website" value={platformWebsiteUrl} onChange={(e) => setPlatformWebsiteUrl(e.target.value)} placeholder="https://www.netflix.com" className="bg-background/50 border-border" />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="platform-status">Status</Label>
-              <select id="platform-status" value={platformStatus} onChange={e => setPlatformStatus(e.target.value as StreamingStatus)} className="w-full h-10 px-3 rounded-md border border-input bg-background text-foreground">
+              <select id="platform-status" value={platformStatus} onChange={(e) => setPlatformStatus(e.target.value as StreamingStatus)} className="w-full h-10 px-3 rounded-md border border-input bg-background text-foreground">
                 <option value="online">Online</option>
                 <option value="maintenance">Manutenção</option>
               </select>
@@ -2676,40 +2676,40 @@ export default function Admin() {
             </div>
 
             {/* Access Distribution - Only show when creating new platform */}
-            {!editingPlatform && (
-              <div className="space-y-3 border-t border-border pt-4">
+            {!editingPlatform &&
+          <div className="space-y-3 border-t border-border pt-4">
                 <Label className="text-sm font-medium flex items-center gap-2">
                   <Users className="w-4 h-4" />
                   Distribuir Acesso aos Usuários
                 </Label>
                 <div className="grid grid-cols-1 gap-2">
                   <button
-                    type="button"
-                    onClick={() => {
-                      setAccessDistribution('none');
-                      setSelectedUsersForAccess([]);
-                    }}
-                    className={`p-3 rounded-lg border text-left transition-all ${
-                      accessDistribution === 'none'
-                        ? 'border-primary bg-primary/10 text-primary'
-                        : 'border-border bg-background/50 text-muted-foreground hover:border-primary/50'
-                    }`}
-                  >
+                type="button"
+                onClick={() => {
+                  setAccessDistribution('none');
+                  setSelectedUsersForAccess([]);
+                }}
+                className={`p-3 rounded-lg border text-left transition-all ${
+                accessDistribution === 'none' ?
+                'border-primary bg-primary/10 text-primary' :
+                'border-border bg-background/50 text-muted-foreground hover:border-primary/50'}`
+                }>
+                
                     <span className="text-sm font-medium">Não distribuir automaticamente</span>
                     <p className="text-xs opacity-70">Você poderá liberar o acesso manualmente depois</p>
                   </button>
                   <button
-                    type="button"
-                    onClick={() => {
-                      setAccessDistribution('all_active');
-                      setSelectedUsersForAccess([]);
-                    }}
-                    className={`p-3 rounded-lg border text-left transition-all ${
-                      accessDistribution === 'all_active'
-                        ? 'border-green-500 bg-green-500/10 text-green-500'
-                        : 'border-border bg-background/50 text-muted-foreground hover:border-green-500/50'
-                    }`}
-                  >
+                type="button"
+                onClick={() => {
+                  setAccessDistribution('all_active');
+                  setSelectedUsersForAccess([]);
+                }}
+                className={`p-3 rounded-lg border text-left transition-all ${
+                accessDistribution === 'all_active' ?
+                'border-green-500 bg-green-500/10 text-green-500' :
+                'border-border bg-background/50 text-muted-foreground hover:border-green-500/50'}`
+                }>
+                
                     <span className="text-sm font-medium flex items-center gap-2">
                       <UserCheck className="w-4 h-4" />
                       Liberar para todos os usuários ativos ({getActiveUsers().length})
@@ -2717,65 +2717,65 @@ export default function Admin() {
                     <p className="text-xs opacity-70">Usuários com plano ativo receberão acesso automaticamente</p>
                   </button>
                   <button
-                    type="button"
-                    onClick={() => {
-                      setAccessDistribution('select');
-                      setSelectedUsersForAccess([]);
-                    }}
-                    className={`p-3 rounded-lg border text-left transition-all ${
-                      accessDistribution === 'select'
-                        ? 'border-purple-500 bg-purple-500/10 text-purple-400'
-                        : 'border-border bg-background/50 text-muted-foreground hover:border-purple-500/50'
-                    }`}
-                  >
+                type="button"
+                onClick={() => {
+                  setAccessDistribution('select');
+                  setSelectedUsersForAccess([]);
+                }}
+                className={`p-3 rounded-lg border text-left transition-all ${
+                accessDistribution === 'select' ?
+                'border-purple-500 bg-purple-500/10 text-purple-400' :
+                'border-border bg-background/50 text-muted-foreground hover:border-purple-500/50'}`
+                }>
+                
                     <span className="text-sm font-medium">Selecionar usuários específicos</span>
                     <p className="text-xs opacity-70">Escolha manualmente quem receberá acesso</p>
                   </button>
                 </div>
 
                 {/* User selection list - only show when 'select' is chosen */}
-                {accessDistribution === 'select' && (
-                  <div className="space-y-2">
+                {accessDistribution === 'select' &&
+            <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       <p className="text-sm text-muted-foreground">
                         Selecione os usuários:
                       </p>
                       <div className="flex gap-2">
                         <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => setSelectedUsersForAccess(getActiveUsers().map(u => u.id))}
-                        >
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setSelectedUsersForAccess(getActiveUsers().map((u) => u.id))}>
+                    
                           <CheckSquare className="w-4 h-4 mr-2" />
                           Todos ativos
                         </Button>
                         <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedUsersForAccess([])}
-                        >
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setSelectedUsersForAccess([])}>
+                    
                           Limpar
                         </Button>
                       </div>
                     </div>
                     <div className="border border-border rounded-lg divide-y divide-border max-h-[200px] overflow-y-auto">
-                      {users.map(user => {
-                        const isActive = getActiveUsers().some(u => u.id === user.id);
-                        return (
-                          <label
-                            key={user.id}
-                            className="flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors"
-                          >
+                      {users.map((user) => {
+                  const isActive = getActiveUsers().some((u) => u.id === user.id);
+                  return (
+                    <label
+                      key={user.id}
+                      className="flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors">
+                      
                             <Checkbox
-                              checked={selectedUsersForAccess.includes(user.id)}
-                              onCheckedChange={() => {
-                                setSelectedUsersForAccess(prev =>
-                                  prev.includes(user.id)
-                                    ? prev.filter(id => id !== user.id)
-                                    : [...prev, user.id]
-                                );
-                              }}
-                            />
+                        checked={selectedUsersForAccess.includes(user.id)}
+                        onCheckedChange={() => {
+                          setSelectedUsersForAccess((prev) =>
+                          prev.includes(user.id) ?
+                          prev.filter((id) => id !== user.id) :
+                          [...prev, user.id]
+                          );
+                        }} />
+                      
                             <div className="flex-1 min-w-0">
                               <span className="font-medium text-sm truncate block">
                                 {user.name || user.email}
@@ -2785,30 +2785,30 @@ export default function Admin() {
                               </span>
                             </div>
                             <span
-                              className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${
-                                isActive
-                                  ? 'bg-green-500/10 text-green-500'
-                                  : 'bg-red-500/10 text-red-500'
-                              }`}
-                            >
+                        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${
+                        isActive ?
+                        'bg-green-500/10 text-green-500' :
+                        'bg-red-500/10 text-red-500'}`
+                        }>
+                        
                               {isActive ? 'Ativo' : 'Inativo'}
                             </span>
-                          </label>
-                        );
-                      })}
-                      {users.length === 0 && (
-                        <p className="text-center text-muted-foreground py-8">
+                          </label>);
+
+                })}
+                      {users.length === 0 &&
+                <p className="text-center text-muted-foreground py-8">
                           Nenhum usuário cadastrado
                         </p>
-                      )}
+                }
                     </div>
                     <p className="text-sm text-muted-foreground text-center">
                       {selectedUsersForAccess.length} usuário(s) selecionado(s)
                     </p>
                   </div>
-                )}
+            }
               </div>
-            )}
+          }
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setPlatformDialogOpen(false)}>
@@ -2840,7 +2840,7 @@ export default function Admin() {
                 Duração do Acesso
               </Label>
               <div className="grid grid-cols-3 gap-2">
-                {ACCESS_DURATION_OPTIONS.map(option => <button key={option.label} type="button" onClick={() => {
+                {ACCESS_DURATION_OPTIONS.map((option) => <button key={option.label} type="button" onClick={() => {
                 setSelectedDuration(option.days);
                 setCustomDays('');
               }} className={`p-2 rounded-lg border text-sm font-medium transition-all ${selectedDuration === option.days && !customDays ? option.days === null ? 'border-purple-500 bg-purple-500/10 text-purple-400' : 'border-primary bg-primary/10 text-primary' : 'border-border bg-background/50 text-muted-foreground hover:border-primary/50'}`}>
@@ -2851,7 +2851,7 @@ export default function Admin() {
               
               {/* Custom Days Input */}
               <div className="flex items-center gap-2">
-                <Input type="number" placeholder="Dias personalizados" value={customDays} onChange={e => {
+                <Input type="number" placeholder="Dias personalizados" value={customDays} onChange={(e) => {
                 setCustomDays(e.target.value);
                 if (e.target.value) {
                   setSelectedDuration(parseInt(e.target.value));
@@ -2874,18 +2874,18 @@ export default function Admin() {
                   </div>
                 </div>
                 <button
-                  type="button"
-                  onClick={() => setUserIsSocio(!userIsSocio)}
-                  className={`relative w-11 h-6 rounded-full transition-colors ${userIsSocio ? 'bg-amber-500' : 'bg-muted'}`}
-                >
+                type="button"
+                onClick={() => setUserIsSocio(!userIsSocio)}
+                className={`relative w-11 h-6 rounded-full transition-colors ${userIsSocio ? 'bg-amber-500' : 'bg-muted'}`}>
+                
                   <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${userIsSocio ? 'translate-x-5' : 'translate-x-0'}`} />
                 </button>
               </div>
             </div>
 
             {/* Socio 2.0 Toggle - only show if user is socio */}
-            {userIsSocio && (
-              <div className="border border-border rounded-lg p-4 bg-gradient-to-r from-purple-500/5 to-pink-500/5">
+            {userIsSocio &&
+          <div className="border border-border rounded-lg p-4 bg-gradient-to-r from-purple-500/5 to-pink-500/5">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded-full bg-purple-500/20 flex items-center justify-center">
@@ -2897,15 +2897,15 @@ export default function Admin() {
                     </div>
                   </div>
                   <button
-                    type="button"
-                    onClick={() => setUserIsSocio2(!userIsSocio2)}
-                    className={`relative w-11 h-6 rounded-full transition-colors ${userIsSocio2 ? 'bg-purple-500' : 'bg-muted'}`}
-                  >
+                type="button"
+                onClick={() => setUserIsSocio2(!userIsSocio2)}
+                className={`relative w-11 h-6 rounded-full transition-colors ${userIsSocio2 ? 'bg-purple-500' : 'bg-muted'}`}>
+                
                     <span className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform ${userIsSocio2 ? 'translate-x-5' : 'translate-x-0'}`} />
                   </button>
                 </div>
               </div>
-            )}
+          }
 
             <div className="flex items-center justify-between">
               <p className="text-sm text-muted-foreground">
@@ -2923,19 +2923,19 @@ export default function Admin() {
             </div>
             
             <div className="border border-border rounded-lg max-h-[300px] overflow-y-auto">
-              {(['ai_tools', 'streamings', 'software', 'bonus_courses', 'loja'] as PlatformCategory[]).map(category => {
-                const categoryPlatforms = platforms.filter(p => p.category === category);
-                if (categoryPlatforms.length === 0) return null;
-                return (
-                  <div key={category}>
+              {(['ai_tools', 'streamings', 'software', 'bonus_courses', 'loja'] as PlatformCategory[]).map((category) => {
+              const categoryPlatforms = platforms.filter((p) => p.category === category);
+              if (categoryPlatforms.length === 0) return null;
+              return (
+                <div key={category}>
                     <div className="sticky top-0 bg-muted/80 backdrop-blur-sm px-3 py-2 border-b border-border">
                       <span className="text-xs font-semibold text-primary uppercase tracking-wide">
                         {CATEGORY_LABELS[category]} ({categoryPlatforms.length})
                       </span>
                     </div>
                     <div className="divide-y divide-border">
-                      {categoryPlatforms.map(platform => (
-                        <label key={platform.id} className="flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors">
+                      {categoryPlatforms.map((platform) =>
+                    <label key={platform.id} className="flex items-center gap-3 p-3 hover:bg-muted/50 cursor-pointer transition-colors">
                           <Checkbox checked={selectedPlatforms.includes(platform.id)} onCheckedChange={() => togglePlatformSelection(platform.id)} />
                           <div className="flex items-center gap-3 flex-1">
                             {platform.cover_image_url ? <img src={platform.cover_image_url} alt={platform.name} className="w-10 h-6 object-cover rounded" /> : <div className="w-10 h-6 bg-muted rounded flex items-center justify-center">
@@ -2947,11 +2947,11 @@ export default function Admin() {
                             {platform.status === 'online' ? 'Online' : 'Manutenção'}
                           </span>
                         </label>
-                      ))}
+                    )}
                     </div>
-                  </div>
-                );
-              })}
+                  </div>);
+
+            })}
               {platforms.length === 0 && <p className="text-center text-muted-foreground py-8">
                   Nenhuma plataforma cadastrada
                 </p>}
@@ -2987,11 +2987,11 @@ export default function Admin() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="news-title">Título *</Label>
-              <Input id="news-title" value={newsTitle} onChange={e => setNewsTitle(e.target.value)} placeholder="Ex: Manutenção programada..." className="bg-background/50 border-border" />
+              <Input id="news-title" value={newsTitle} onChange={(e) => setNewsTitle(e.target.value)} placeholder="Ex: Manutenção programada..." className="bg-background/50 border-border" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="news-content">Conteúdo *</Label>
-              <Textarea id="news-content" value={newsContent} onChange={e => setNewsContent(e.target.value)} placeholder="Descreva os detalhes do aviso..." className="bg-background/50 border-border min-h-[120px]" />
+              <Textarea id="news-content" value={newsContent} onChange={(e) => setNewsContent(e.target.value)} placeholder="Descreva os detalhes do aviso..." className="bg-background/50 border-border min-h-[120px]" />
             </div>
             <div className="flex items-center justify-between">
               <Label htmlFor="news-active" className="cursor-pointer">Publicar imediatamente</Label>
@@ -3022,70 +3022,70 @@ export default function Admin() {
           <div className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="product-name">Nome *</Label>
-              <Input id="product-name" value={productName} onChange={e => setProductName(e.target.value)} placeholder="Ex: Camiseta Premium..." className="bg-background/50 border-border" />
+              <Input id="product-name" value={productName} onChange={(e) => setProductName(e.target.value)} placeholder="Ex: Camiseta Premium..." className="bg-background/50 border-border" />
             </div>
             <div className="space-y-2">
               <Label htmlFor="product-description">Descrição</Label>
-              <Textarea id="product-description" value={productDescription} onChange={e => setProductDescription(e.target.value)} placeholder="Descreva o produto..." className="bg-background/50 border-border min-h-[80px]" />
+              <Textarea id="product-description" value={productDescription} onChange={(e) => setProductDescription(e.target.value)} placeholder="Descreva o produto..." className="bg-background/50 border-border min-h-[80px]" />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="product-original-price">Preço Original (R$)</Label>
-                <Input id="product-original-price" type="number" step="0.01" value={productOriginalPrice} onChange={e => setProductOriginalPrice(e.target.value)} placeholder="69.99" className="bg-background/50 border-border" />
+                <Input id="product-original-price" type="number" step="0.01" value={productOriginalPrice} onChange={(e) => setProductOriginalPrice(e.target.value)} placeholder="69.99" className="bg-background/50 border-border" />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="product-price">Preço Atual (R$) *</Label>
-                <Input id="product-price" type="number" step="0.01" value={productPrice} onChange={e => setProductPrice(e.target.value)} placeholder="29.99" className="bg-background/50 border-border" />
+                <Input id="product-price" type="number" step="0.01" value={productPrice} onChange={(e) => setProductPrice(e.target.value)} placeholder="29.99" className="bg-background/50 border-border" />
               </div>
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="product-stock">Estoque</Label>
-                <Input id="product-stock" type="number" value={productStock} onChange={e => setProductStock(e.target.value)} placeholder="0" className="bg-background/50 border-border" />
+                <Input id="product-stock" type="number" value={productStock} onChange={(e) => setProductStock(e.target.value)} placeholder="0" className="bg-background/50 border-border" />
               </div>
               <div className="space-y-2">
                 <Label className="text-muted-foreground text-xs">Desconto calculado</Label>
                 <div className="h-10 px-3 rounded-md border border-border bg-muted/50 flex items-center">
-                  {productOriginalPrice && productPrice && parseFloat(productOriginalPrice) > parseFloat(productPrice) ? (
-                    <span className="text-red-500 font-semibold">
+                  {productOriginalPrice && productPrice && parseFloat(productOriginalPrice) > parseFloat(productPrice) ?
+                <span className="text-red-500 font-semibold">
                       -{Math.round((1 - parseFloat(productPrice) / parseFloat(productOriginalPrice)) * 100)}%
-                    </span>
-                  ) : (
-                    <span className="text-muted-foreground">—</span>
-                  )}
+                    </span> :
+
+                <span className="text-muted-foreground">—</span>
+                }
                 </div>
               </div>
             </div>
             <div className="space-y-2">
               <Label>Imagem do Produto</Label>
               <div className="flex items-center gap-4">
-                {productImageUrl ? (
-                  <img src={productImageUrl} alt="Preview" className="w-16 h-16 object-cover rounded-md" />
-                ) : (
-                  <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center">
+                {productImageUrl ?
+              <img src={productImageUrl} alt="Preview" className="w-16 h-16 object-cover rounded-md" /> :
+
+              <div className="w-16 h-16 bg-muted rounded-md flex items-center justify-center">
                     <Package className="w-6 h-6 text-muted-foreground" />
                   </div>
-                )}
+              }
                 <div className="flex-1">
                   <input
-                    type="file"
-                    ref={productFileInputRef}
-                    onChange={handleProductImageUpload}
-                    accept="image/*"
-                    className="hidden"
-                  />
+                  type="file"
+                  ref={productFileInputRef}
+                  onChange={handleProductImageUpload}
+                  accept="image/*"
+                  className="hidden" />
+                
                   <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => productFileInputRef.current?.click()}
-                    disabled={uploadingProductImage}
-                  >
-                    {uploadingProductImage ? (
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                    ) : (
-                      <Upload className="w-4 h-4 mr-2" />
-                    )}
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => productFileInputRef.current?.click()}
+                  disabled={uploadingProductImage}>
+                  
+                    {uploadingProductImage ?
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" /> :
+
+                  <Upload className="w-4 h-4 mr-2" />
+                  }
                     {uploadingProductImage ? 'Enviando...' : 'Escolher imagem'}
                   </Button>
                 </div>
@@ -3127,13 +3127,13 @@ export default function Admin() {
             <div className="space-y-2">
               <Label htmlFor="block-reason">Motivo do bloqueio (opcional)</Label>
               <Textarea
-                id="block-reason"
-                value={blockReason}
-                onChange={(e) => setBlockReason(e.target.value)}
-                placeholder="Ex: Compartilhamento de conta detectado, Pagamento não confirmado, etc."
-                className="min-h-[100px]"
-                maxLength={500}
-              />
+              id="block-reason"
+              value={blockReason}
+              onChange={(e) => setBlockReason(e.target.value)}
+              placeholder="Ex: Compartilhamento de conta detectado, Pagamento não confirmado, etc."
+              className="min-h-[100px]"
+              maxLength={500} />
+            
               <p className="text-xs text-muted-foreground">
                 Este motivo será exibido ao usuário quando ele tentar fazer login.
               </p>
