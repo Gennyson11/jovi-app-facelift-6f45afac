@@ -157,7 +157,7 @@ const PricingSection = () => {
               
               {/* Current Price */}
               <p className="my-3 md:my-4">
-                <span className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-primary">R$247</span>
+                <span className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-primary">R$297</span>
                 <span className="text-lg md:text-xl text-foreground">/ano</span>
               </p>
               
