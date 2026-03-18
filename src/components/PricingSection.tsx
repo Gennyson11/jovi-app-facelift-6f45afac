@@ -162,7 +162,7 @@ const PricingSection = () => {
               </p>
               
               {/* Per month breakdown */}
-              <p className="text-primary text-sm md:text-base font-semibold">Apenas R$20,58/mês</p>
+              <p className="text-primary text-sm md:text-base font-semibold">Apenas R$24,75/mês</p>
             </div>
 
             {/* Benefits */}

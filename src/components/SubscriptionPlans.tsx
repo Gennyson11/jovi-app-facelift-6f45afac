@@ -125,7 +125,7 @@ export default function SubscriptionPlans({ subscriptionEnd }: SubscriptionPlans
               <span className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-primary">R$297</span>
               <span className="text-lg md:text-xl text-foreground">/ano</span>
             </p>
-            <p className="text-primary text-sm md:text-base font-semibold">Apenas R$20,58/mês</p>
+            <p className="text-primary text-sm md:text-base font-semibold">Apenas R$24,75/mês</p>
           </div>
           <ul className="mt-6 md:mt-8 space-y-3 md:space-y-4">
             {benefits.map((benefit) => (
