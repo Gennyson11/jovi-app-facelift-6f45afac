@@ -323,6 +323,36 @@ export default function Admin() {
     };
   }, [isAdmin]);
 
+  // Real-time listener for credit balance changes
+  useEffect(() => {
+    if (!isAdmin) return;
+
+    const creditsChannel = supabase
+      .channel('credits-realtime')
+      .on(
+        'postgres_changes',
+        {
+          event: '*',
+          schema: 'public',
+          table: 'user_credits'
+        },
+        (payload) => {
+          const record = payload.new as any;
+          if (record?.user_id && record?.balance !== undefined) {
+            setSocioCredits((prev) => ({
+              ...prev,
+              [record.user_id]: record.balance
+            }));
+          }
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(creditsChannel);
+    };
+  }, [isAdmin]);
+
   const fetchData = async () => {
     setLoading(true);
 
@@ -2125,7 +2155,7 @@ export default function Admin() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {(() => {
                         // Build data for all socios, not just those with payments
-                        const grouped: Record<string, {name: string | null;email: string;totalReais: number;totalCredits: number;count: number;balance: number;}> = {};
+                        const grouped: Record<string, {name: string | null;email: string;totalReais: number;totalEarned: number;totalSpent: number;count: number;balance: number;}> = {};
 
                         // Initialize with all socios
                         socios.forEach((s) => {
@@ -2133,7 +2163,8 @@ export default function Admin() {
                             name: s.name,
                             email: s.email,
                             totalReais: 0,
-                            totalCredits: 0,
+                            totalEarned: 0,
+                            totalSpent: 0,
                             count: 0,
                             balance: socioCredits[s.user_id] || 0
                           };
@@ -2142,14 +2173,16 @@ export default function Admin() {
                         // Add payment data
                         partnerPayments.forEach((p) => {
                           if (!grouped[p.user_id]) {
-                            grouped[p.user_id] = { name: p.partner_name, email: p.partner_email, totalReais: 0, totalCredits: 0, count: 0, balance: socioCredits[p.user_id] || 0 };
+                            grouped[p.user_id] = { name: p.partner_name, email: p.partner_email, totalReais: 0, totalEarned: 0, totalSpent: 0, count: 0, balance: socioCredits[p.user_id] || 0 };
                           }
                           if (p.type === 'purchase') {
                             grouped[p.user_id].totalReais += getReaisValue(p.amount);
                           }
                           if (p.amount > 0) {
-                            grouped[p.user_id].totalCredits += p.amount;
+                            grouped[p.user_id].totalEarned += p.amount;
                             grouped[p.user_id].count += 1;
+                          } else if (p.amount < 0) {
+                            grouped[p.user_id].totalSpent += Math.abs(p.amount);
                           }
                         });
 
@@ -2167,9 +2200,11 @@ export default function Admin() {
                                     {data.balance} crédito{data.balance !== 1 ? 's' : ''}
                                   </Badge>
                                 </div>
-                                <div className="flex justify-between items-center mt-3 pt-3 border-t border-border">
-                                  <span className="text-xs text-muted-foreground">{data.count} recarga{data.count !== 1 ? 's' : ''} • {data.totalCredits} crédito{data.totalCredits !== 1 ? 's' : ''} total</span>
-                                  {data.totalReais > 0 && <span className="font-bold text-green-500">R$ {data.totalReais.toFixed(2).replace('.', ',')}</span>}
+                                <div className="flex flex-col gap-1 mt-3 pt-3 border-t border-border">
+                                  <div className="flex justify-between items-center">
+                                    <span className="text-xs text-muted-foreground">{data.count} recarga{data.count !== 1 ? 's' : ''} • {data.totalEarned} recebido{data.totalEarned !== 1 ? 's' : ''} • {data.totalSpent} gasto{data.totalSpent !== 1 ? 's' : ''}</span>
+                                    {data.totalReais > 0 && <span className="font-bold text-green-500">R$ {data.totalReais.toFixed(2).replace('.', ',')}</span>}
+                                  </div>
                                 </div>
                               </div>
                         );
