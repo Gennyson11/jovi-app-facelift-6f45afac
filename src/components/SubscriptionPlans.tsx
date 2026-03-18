@@ -41,7 +41,7 @@ export default function SubscriptionPlans({ subscriptionEnd }: SubscriptionPlans
             <h4 className="text-xl md:text-2xl lg:text-3xl font-display font-bold text-accent mb-3 md:mb-4">MENSAL</h4>
             <p className="text-muted-foreground line-through text-base md:text-lg">R$897,00</p>
             <p className="my-3 md:my-4">
-              <span className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-primary">R$27</span>
+              <span className="text-4xl md:text-5xl lg:text-6xl font-display font-bold text-primary">R$37</span>
               <span className="text-lg md:text-xl text-foreground">/mês</span>
             </p>
           </div>
