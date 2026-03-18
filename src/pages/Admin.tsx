@@ -2125,7 +2125,7 @@ export default function Admin() {
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                           {(() => {
                         // Build data for all socios, not just those with payments
-                        const grouped: Record<string, {name: string | null;email: string;totalReais: number;totalCredits: number;count: number;balance: number;}> = {};
+                        const grouped: Record<string, {name: string | null;email: string;totalReais: number;totalEarned: number;totalSpent: number;count: number;balance: number;}> = {};
 
                         // Initialize with all socios
                         socios.forEach((s) => {
@@ -2133,7 +2133,8 @@ export default function Admin() {
                             name: s.name,
                             email: s.email,
                             totalReais: 0,
-                            totalCredits: 0,
+                            totalEarned: 0,
+                            totalSpent: 0,
                             count: 0,
                             balance: socioCredits[s.user_id] || 0
                           };
@@ -2142,14 +2143,16 @@ export default function Admin() {
                         // Add payment data
                         partnerPayments.forEach((p) => {
                           if (!grouped[p.user_id]) {
-                            grouped[p.user_id] = { name: p.partner_name, email: p.partner_email, totalReais: 0, totalCredits: 0, count: 0, balance: socioCredits[p.user_id] || 0 };
+                            grouped[p.user_id] = { name: p.partner_name, email: p.partner_email, totalReais: 0, totalEarned: 0, totalSpent: 0, count: 0, balance: socioCredits[p.user_id] || 0 };
                           }
                           if (p.type === 'purchase') {
                             grouped[p.user_id].totalReais += getReaisValue(p.amount);
                           }
                           if (p.amount > 0) {
-                            grouped[p.user_id].totalCredits += p.amount;
+                            grouped[p.user_id].totalEarned += p.amount;
                             grouped[p.user_id].count += 1;
+                          } else if (p.amount < 0) {
+                            grouped[p.user_id].totalSpent += Math.abs(p.amount);
                           }
                         });
 
