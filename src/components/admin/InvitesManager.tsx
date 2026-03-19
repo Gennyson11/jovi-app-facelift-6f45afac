@@ -236,7 +236,7 @@ export default function InvitesManager() {
     toast({
       title: 'Convite excluído'
     });
-    fetchData();
+    fetchData(false);
   };
 
   const copyInviteLink = (code: string) => {
