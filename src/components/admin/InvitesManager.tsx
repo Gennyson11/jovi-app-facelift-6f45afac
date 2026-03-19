@@ -130,26 +130,24 @@ export default function InvitesManager() {
     fetchData();
   }, []);
 
-  const normalizeInvites = (inviteRows: Invite[]) => {
-    const now = new Date();
-    return inviteRows.map((inv) => {
-      if (inv.status === 'active' && new Date(inv.expires_at) < now) {
-        return { ...inv, status: 'expired' };
-      }
-      return inv;
-    });
-  };
-
   const fetchData = async () => {
     setLoading(true);
     
     const [invitesRes, platformsRes] = await Promise.all([
-      supabase.from('invites').select('*').order('created_at', { ascending: true }),
+      supabase.from('invites').select('*').order('created_at', { ascending: false }),
       supabase.from('streaming_platforms').select('id, name, category').order('name')
     ]);
     
     if (invitesRes.data) {
-      setInvites(normalizeInvites(invitesRes.data as Invite[]));
+      // Update expired invites
+      const now = new Date();
+      const updatedInvites = invitesRes.data.map(inv => {
+        if (inv.status === 'active' && new Date(inv.expires_at) < now) {
+          return { ...inv, status: 'expired' };
+        }
+        return inv;
+      }) as Invite[];
+      setInvites(updatedInvites);
     }
     
     if (platformsRes.data) {
@@ -186,26 +184,18 @@ export default function InvitesManager() {
       
       const { data: userData } = await supabase.auth.getUser();
       
-      const { data, error } = await supabase
-        .from('invites')
-        .insert({
-          code,
-          expires_at: expiresAt.toISOString(),
-          created_by: userData.user?.id,
-          platform_ids: selectedPlatforms,
-          access_days: accessDays,
-          recipient_name: recipientName.trim() || null,
-          recipient_email: recipientEmail.trim() || null,
-          status: 'active'
-        })
-        .select()
-        .single();
+      const { error } = await supabase.from('invites').insert({
+        code,
+        expires_at: expiresAt.toISOString(),
+        created_by: userData.user?.id,
+        platform_ids: selectedPlatforms,
+        access_days: accessDays,
+        recipient_name: recipientName.trim() || null,
+        recipient_email: recipientEmail.trim() || null,
+        status: 'active'
+      });
       
       if (error) throw error;
-
-      if (data) {
-        setInvites((prev) => [...prev, ...normalizeInvites([data as Invite])]);
-      }
       
       toast({
         title: 'Convite criado!',
@@ -214,6 +204,7 @@ export default function InvitesManager() {
       
       setDialogOpen(false);
       resetForm();
+      fetchData();
     } catch (err: any) {
       console.error('Error creating invite:', err);
       toast({
