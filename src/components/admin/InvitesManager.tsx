@@ -349,7 +349,7 @@ export default function InvitesManager() {
       
       setEditAccessDialogOpen(false);
       setViewDialogOpen(false);
-      fetchData();
+      fetchData(false);
     } catch (err: any) {
       console.error('Error updating user access:', err);
       toast({
