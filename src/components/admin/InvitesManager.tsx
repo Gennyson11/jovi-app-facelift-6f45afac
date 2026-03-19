@@ -598,9 +598,14 @@ export default function InvitesManager() {
                 filteredInvites.map((invite) => (
                   <TableRow key={invite.id}>
                     <TableCell>
-                      <code className="px-2 py-1 bg-muted rounded text-sm font-mono">
-                        {invite.code}
-                      </code>
+                      <div className="space-y-2">
+                        <code className="inline-flex px-2 py-1 bg-muted rounded text-sm font-mono">
+                          {invite.code}
+                        </code>
+                        <p className="text-xs text-muted-foreground break-all">
+                          {getInviteLink(invite.code)}
+                        </p>
+                      </div>
                     </TableCell>
                     <TableCell>
                       {invite.recipient_name || invite.recipient_email || (
