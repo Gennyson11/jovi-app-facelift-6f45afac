@@ -205,7 +205,7 @@ export default function InvitesManager() {
       
       setDialogOpen(false);
       resetForm();
-      fetchData();
+      fetchData(false);
     } catch (err: any) {
       console.error('Error creating invite:', err);
       toast({
