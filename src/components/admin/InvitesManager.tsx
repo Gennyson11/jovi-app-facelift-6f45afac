@@ -130,8 +130,8 @@ export default function InvitesManager() {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (isInitial = true) => {
+    if (isInitial) setLoading(true);
     
     const [invitesRes, platformsRes] = await Promise.all([
       supabase.from('invites').select('*').order('created_at', { ascending: false }),
@@ -152,11 +152,12 @@ export default function InvitesManager() {
     
     if (platformsRes.data) {
       setPlatforms(platformsRes.data as Platform[]);
-      // Select all platforms by default for new invites
-      setSelectedPlatforms(platformsRes.data.map(p => p.id));
+      if (isInitial) {
+        setSelectedPlatforms(platformsRes.data.map(p => p.id));
+      }
     }
     
-    setLoading(false);
+    if (isInitial) setLoading(false);
   };
 
   const generateInviteCode = async (): Promise<string> => {
