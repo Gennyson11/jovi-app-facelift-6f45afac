@@ -165,6 +165,8 @@ export default function InvitesManager() {
     return data as string;
   };
 
+  const getInviteLink = (code: string) => `${window.location.origin}/convite/${code}`;
+
   const createInvite = async () => {
     if (selectedPlatforms.length === 0) {
       toast({
@@ -199,7 +201,7 @@ export default function InvitesManager() {
       
       toast({
         title: 'Convite criado!',
-        description: `Código: ${code}`
+        description: getInviteLink(code)
       });
       
       setDialogOpen(false);
@@ -239,7 +241,7 @@ export default function InvitesManager() {
   };
 
   const copyInviteLink = (code: string) => {
-    const link = `${window.location.origin}/convite/${code}`;
+    const link = getInviteLink(code);
     navigator.clipboard.writeText(link);
     toast({
       title: 'Link copiado!',
@@ -596,9 +598,14 @@ export default function InvitesManager() {
                 filteredInvites.map((invite) => (
                   <TableRow key={invite.id}>
                     <TableCell>
-                      <code className="px-2 py-1 bg-muted rounded text-sm font-mono">
-                        {invite.code}
-                      </code>
+                      <div className="space-y-2">
+                        <code className="inline-flex px-2 py-1 bg-muted rounded text-sm font-mono">
+                          {invite.code}
+                        </code>
+                        <p className="text-xs text-muted-foreground break-all">
+                          {getInviteLink(invite.code)}
+                        </p>
+                      </div>
                     </TableCell>
                     <TableCell>
                       {invite.recipient_name || invite.recipient_email || (
