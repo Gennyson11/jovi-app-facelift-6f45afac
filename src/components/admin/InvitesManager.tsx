@@ -185,7 +185,7 @@ export default function InvitesManager() {
       
       const { data: userData } = await supabase.auth.getUser();
       
-      const { error } = await supabase.from('invites').insert({
+      const { data: newInvite, error } = await supabase.from('invites').insert({
         code,
         expires_at: expiresAt.toISOString(),
         created_by: userData.user?.id,
@@ -194,9 +194,14 @@ export default function InvitesManager() {
         recipient_name: recipientName.trim() || null,
         recipient_email: recipientEmail.trim() || null,
         status: 'active'
-      });
+      }).select().single();
       
       if (error) throw error;
+      
+      // Add new invite to the top of the list immediately
+      if (newInvite) {
+        setInvites(prev => [newInvite as Invite, ...prev]);
+      }
       
       toast({
         title: 'Convite criado!',
@@ -205,7 +210,6 @@ export default function InvitesManager() {
       
       setDialogOpen(false);
       resetForm();
-      fetchData(false);
     } catch (err: any) {
       console.error('Error creating invite:', err);
       toast({
