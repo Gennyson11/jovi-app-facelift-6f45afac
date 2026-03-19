@@ -165,6 +165,8 @@ export default function InvitesManager() {
     return data as string;
   };
 
+  const getInviteLink = (code: string) => `${window.location.origin}/convite/${code}`;
+
   const createInvite = async () => {
     if (selectedPlatforms.length === 0) {
       toast({
@@ -199,7 +201,7 @@ export default function InvitesManager() {
       
       toast({
         title: 'Convite criado!',
-        description: `Código: ${code}`
+        description: getInviteLink(code)
       });
       
       setDialogOpen(false);
@@ -239,7 +241,7 @@ export default function InvitesManager() {
   };
 
   const copyInviteLink = (code: string) => {
-    const link = `${window.location.origin}/convite/${code}`;
+    const link = getInviteLink(code);
     navigator.clipboard.writeText(link);
     toast({
       title: 'Link copiado!',
