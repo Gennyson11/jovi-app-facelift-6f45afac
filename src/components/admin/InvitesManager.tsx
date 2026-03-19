@@ -439,7 +439,7 @@ export default function InvitesManager() {
       
       setEditInviteDialogOpen(false);
       setViewDialogOpen(false);
-      fetchData();
+      fetchData(false);
     } catch (err: any) {
       console.error('Error updating invite:', err);
       toast({
