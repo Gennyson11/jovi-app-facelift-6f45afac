@@ -130,8 +130,8 @@ export default function InvitesManager() {
     fetchData();
   }, []);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (isInitial = true) => {
+    if (isInitial) setLoading(true);
     
     const [invitesRes, platformsRes] = await Promise.all([
       supabase.from('invites').select('*').order('created_at', { ascending: false }),
@@ -152,11 +152,12 @@ export default function InvitesManager() {
     
     if (platformsRes.data) {
       setPlatforms(platformsRes.data as Platform[]);
-      // Select all platforms by default for new invites
-      setSelectedPlatforms(platformsRes.data.map(p => p.id));
+      if (isInitial) {
+        setSelectedPlatforms(platformsRes.data.map(p => p.id));
+      }
     }
     
-    setLoading(false);
+    if (isInitial) setLoading(false);
   };
 
   const generateInviteCode = async (): Promise<string> => {
@@ -184,7 +185,7 @@ export default function InvitesManager() {
       
       const { data: userData } = await supabase.auth.getUser();
       
-      const { error } = await supabase.from('invites').insert({
+      const { data: newInvite, error } = await supabase.from('invites').insert({
         code,
         expires_at: expiresAt.toISOString(),
         created_by: userData.user?.id,
@@ -193,9 +194,14 @@ export default function InvitesManager() {
         recipient_name: recipientName.trim() || null,
         recipient_email: recipientEmail.trim() || null,
         status: 'active'
-      });
+      }).select().single();
       
       if (error) throw error;
+      
+      // Add new invite to the top of the list immediately
+      if (newInvite) {
+        setInvites(prev => [newInvite as Invite, ...prev]);
+      }
       
       toast({
         title: 'Convite criado!',
@@ -204,7 +210,6 @@ export default function InvitesManager() {
       
       setDialogOpen(false);
       resetForm();
-      fetchData();
     } catch (err: any) {
       console.error('Error creating invite:', err);
       toast({
@@ -235,7 +240,7 @@ export default function InvitesManager() {
     toast({
       title: 'Convite excluído'
     });
-    fetchData();
+    fetchData(false);
   };
 
   const copyInviteLink = (code: string) => {
@@ -348,7 +353,7 @@ export default function InvitesManager() {
       
       setEditAccessDialogOpen(false);
       setViewDialogOpen(false);
-      fetchData();
+      fetchData(false);
     } catch (err: any) {
       console.error('Error updating user access:', err);
       toast({
@@ -438,7 +443,7 @@ export default function InvitesManager() {
       
       setEditInviteDialogOpen(false);
       setViewDialogOpen(false);
-      fetchData();
+      fetchData(false);
     } catch (err: any) {
       console.error('Error updating invite:', err);
       toast({
