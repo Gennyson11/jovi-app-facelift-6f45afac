@@ -47,6 +47,7 @@ interface UserProfile {
   created_at: string;
   access_expires_at: string | null;
   block_reason: string | null;
+  partner_id: string | null;
 }
 interface UserPlatformAccess {
   id: string;
