@@ -1630,6 +1630,13 @@ export default function Admin() {
                           <TableCell className="text-sm text-muted-foreground">
                             {new Date(userProfile.created_at).toLocaleDateString('pt-BR')}
                           </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {(() => {
+                              if (!userProfile.partner_id) return <span className="text-xs text-muted-foreground/60">—</span>;
+                              const addedBy = users.find(u => u.user_id === userProfile.partner_id);
+                              return <span className="text-xs">{addedBy?.name || addedBy?.email || 'Sócio'}</span>;
+                            })()}
+                          </TableCell>
                           <TableCell>
                             {(() => {
                           const lastAccess = userLastAccess[userProfile.user_id];
