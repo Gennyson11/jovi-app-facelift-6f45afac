@@ -61,28 +61,37 @@ Deno.serve(async (req) => {
         console.log(`Deleting expired user: ${profile.email} (expired at: ${profile.access_expires_at})`)
 
         // 1. Delete user_platform_access
-        await supabaseAdmin
-          .from('user_platform_access')
-          .delete()
-          .eq('user_id', profile.id)
+        await supabaseAdmin.from('user_platform_access').delete().eq('user_id', profile.id)
 
         // 2. Delete user_coins
-        await supabaseAdmin
-          .from('user_coins')
-          .delete()
-          .eq('user_id', profile.user_id)
+        await supabaseAdmin.from('user_coins').delete().eq('user_id', profile.user_id)
 
-        // 3. Delete user_roles
-        await supabaseAdmin
-          .from('user_roles')
-          .delete()
-          .eq('user_id', profile.user_id)
+        // 3. Delete user_missions
+        await supabaseAdmin.from('user_missions').delete().eq('user_id', profile.user_id)
 
-        // 4. Delete profile
-        const { error: profileError } = await supabaseAdmin
-          .from('profiles')
-          .delete()
-          .eq('id', profile.id)
+        // 4. Delete credit_transactions
+        await supabaseAdmin.from('credit_transactions').delete().eq('user_id', profile.user_id)
+
+        // 5. Delete user_credits
+        await supabaseAdmin.from('user_credits').delete().eq('user_id', profile.user_id)
+
+        // 6. Delete user_access_logs
+        await supabaseAdmin.from('user_access_logs').delete().eq('user_id', profile.user_id)
+
+        // 7. Delete security_audit_log
+        await supabaseAdmin.from('security_audit_log').delete().eq('user_id', profile.user_id)
+
+        // 8. Delete user_roles
+        await supabaseAdmin.from('user_roles').delete().eq('user_id', profile.user_id)
+
+        // 9. Clear partner_id references from other profiles
+        await supabaseAdmin.from('profiles').update({ partner_id: null }).eq('partner_id', profile.user_id)
+
+        // 10. Clear invites used_by references
+        await supabaseAdmin.from('invites').update({ used_by: null }).eq('used_by', profile.user_id)
+
+        // 11. Delete profile
+        const { error: profileError } = await supabaseAdmin.from('profiles').delete().eq('id', profile.id)
 
         if (profileError) {
           console.error(`Error deleting profile for ${profile.email}:`, profileError)
