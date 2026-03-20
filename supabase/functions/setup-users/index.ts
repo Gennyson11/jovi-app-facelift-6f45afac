@@ -335,7 +335,23 @@ serve(async (req) => {
 
       for (const profile of profilesToDelete) {
         try {
-          // Delete from auth.users (this will cascade to profiles due to foreign key)
+          // Clean up dependent records first to avoid FK constraint errors
+          await supabaseAdmin.from("user_platform_access").delete().eq("user_id", profile.id);
+          await supabaseAdmin.from("user_missions").delete().eq("user_id", profile.user_id);
+          await supabaseAdmin.from("user_coins").delete().eq("user_id", profile.user_id);
+          await supabaseAdmin.from("credit_transactions").delete().eq("user_id", profile.user_id);
+          await supabaseAdmin.from("user_credits").delete().eq("user_id", profile.user_id);
+          await supabaseAdmin.from("user_access_logs").delete().eq("user_id", profile.user_id);
+          await supabaseAdmin.from("security_audit_log").delete().eq("user_id", profile.user_id);
+          await supabaseAdmin.from("user_roles").delete().eq("user_id", profile.user_id);
+          // Clear partner_id references from other profiles
+          await supabaseAdmin.from("profiles").update({ partner_id: null }).eq("partner_id", profile.user_id);
+          // Clear invites used_by references
+          await supabaseAdmin.from("invites").update({ used_by: null }).eq("used_by", profile.user_id);
+          // Delete profile
+          await supabaseAdmin.from("profiles").delete().eq("id", profile.id);
+          
+          // Delete from auth.users
           const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(profile.user_id);
           
           if (deleteAuthError) {
