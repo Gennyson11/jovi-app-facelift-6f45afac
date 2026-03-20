@@ -1602,6 +1602,7 @@ export default function Admin() {
                         <TableHead>Nome</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Cadastro</TableHead>
+                        <TableHead>Adicionado por</TableHead>
                         <TableHead>IP / Localização</TableHead>
                         <TableHead>Streamings</TableHead>
                         <TableHead>Status</TableHead>
