@@ -47,6 +47,7 @@ interface UserProfile {
   created_at: string;
   access_expires_at: string | null;
   block_reason: string | null;
+  partner_id: string | null;
 }
 interface UserPlatformAccess {
   id: string;
@@ -1601,6 +1602,7 @@ export default function Admin() {
                         <TableHead>Nome</TableHead>
                         <TableHead>Email</TableHead>
                         <TableHead>Cadastro</TableHead>
+                        <TableHead>Adicionado por</TableHead>
                         <TableHead>IP / Localização</TableHead>
                         <TableHead>Streamings</TableHead>
                         <TableHead>Status</TableHead>
@@ -1627,6 +1629,13 @@ export default function Admin() {
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">
                             {new Date(userProfile.created_at).toLocaleDateString('pt-BR')}
+                          </TableCell>
+                          <TableCell className="text-sm text-muted-foreground">
+                            {(() => {
+                              if (!userProfile.partner_id) return <span className="text-xs text-muted-foreground/60">—</span>;
+                              const addedBy = users.find(u => u.user_id === userProfile.partner_id);
+                              return <span className="text-xs">{addedBy?.name || addedBy?.email || 'Sócio'}</span>;
+                            })()}
                           </TableCell>
                           <TableCell>
                             {(() => {
@@ -1722,7 +1731,7 @@ export default function Admin() {
                           </TableCell>
                         </TableRow>)}
                       {users.length === 0 && <TableRow>
-                          <TableCell colSpan={8} className="text-center text-muted-foreground py-8">
+                          <TableCell colSpan={9} className="text-center text-muted-foreground py-8">
                             Nenhum usuário cadastrado
                           </TableCell>
                         </TableRow>}
