@@ -282,7 +282,31 @@ serve(async (req) => {
       const authUserId = profileData.user_id;
       console.log("Deleting user with auth id:", authUserId, "email:", email, "by admin:", callerUserEmail);
 
-      // Delete from auth.users (this will cascade to profiles due to trigger/foreign key)
+      // Get profile id for tables that reference it
+      const { data: fullProfile } = await supabaseAdmin
+        .from("profiles")
+        .select("id")
+        .eq("user_id", authUserId)
+        .single();
+
+      const profileId = fullProfile?.id;
+
+      // Clean up all related tables before deleting auth user
+      await supabaseAdmin.from('user_platform_access').delete().eq('user_id', profileId || '');
+      await supabaseAdmin.from('user_coins').delete().eq('user_id', authUserId);
+      await supabaseAdmin.from('user_missions').delete().eq('user_id', authUserId);
+      await supabaseAdmin.from('credit_transactions').delete().eq('user_id', authUserId);
+      await supabaseAdmin.from('user_credits').delete().eq('user_id', authUserId);
+      await supabaseAdmin.from('user_access_logs').delete().eq('user_id', authUserId);
+      await supabaseAdmin.from('security_audit_log').delete().eq('user_id', authUserId);
+      await supabaseAdmin.from('user_roles').delete().eq('user_id', authUserId);
+      await supabaseAdmin.from('profiles').update({ partner_id: null }).eq('partner_id', authUserId);
+      await supabaseAdmin.from('invites').update({ used_by: null }).eq('used_by', authUserId);
+      await supabaseAdmin.from('profiles').delete().eq('user_id', authUserId);
+
+      console.log("Related data cleaned up, now deleting auth user...");
+
+      // Delete from auth.users
       const { error: deleteAuthError } = await supabaseAdmin.auth.admin.deleteUser(authUserId);
       
       if (deleteAuthError) {
