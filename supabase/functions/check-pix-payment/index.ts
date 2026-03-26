@@ -36,29 +36,40 @@ serve(async (req) => {
     const paymentData = await paymentRes.json();
 
     if (paymentData.status === "RECEIVED" || paymentData.status === "CONFIRMED") {
-      // Check if already credited
       const adminClient = createClient(
         Deno.env.get("SUPABASE_URL") ?? "",
         Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
       );
 
+      // Check if already credited BEFORE adding - prevents duplicates
       const { data: existingTx } = await adminClient
         .from("credit_transactions")
         .select("id")
         .eq("reference_id", paymentId)
         .eq("user_id", user.id)
+        .eq("type", "purchase")
         .maybeSingle();
 
-      if (!existingTx) {
-        // Add credits
-        await adminClient.rpc("add_credits", {
-          p_user_id: user.id,
-          p_amount: creditAmount,
-          p_type: "purchase",
-          p_description: `Compra PIX: ${creditAmount} crédito(s)`,
-          p_reference_id: paymentId,
+      if (existingTx) {
+        // Already credited, just return success without adding again
+        return new Response(JSON.stringify({
+          status: "CONFIRMED",
+          credited: true,
+          already_credited: true,
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+          status: 200,
         });
       }
+
+      // Add credits only if not already credited
+      await adminClient.rpc("add_credits", {
+        p_user_id: user.id,
+        p_amount: creditAmount,
+        p_type: "purchase",
+        p_description: `Compra PIX: ${creditAmount} crédito(s)`,
+        p_reference_id: paymentId,
+      });
 
       return new Response(JSON.stringify({
         status: "CONFIRMED",
