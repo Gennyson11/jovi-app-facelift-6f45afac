@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, Cloud, AlertTriangle, ShieldX } from 'lucide-react';
+import { Loader2, AlertTriangle, ShieldX } from 'lucide-react';
+import heroImage from '@/assets/hero-jovitools.jpg';
 import { z } from 'zod';
 
 const loginSchema = z.object({
