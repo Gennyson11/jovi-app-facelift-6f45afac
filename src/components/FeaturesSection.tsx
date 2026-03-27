@@ -26,14 +26,14 @@ const FeaturesSection = () => {
     <section className="py-12 md:py-20 px-4">
       <div className="max-w-6xl mx-auto">
         <h2 className="text-2xl md:text-3xl lg:text-4xl font-display font-bold text-center mb-10 md:mb-16">
-          <span className="text-primary">RECURSOS</span>
+          <span className="text-gradient-blue">RECURSOS</span>
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-8">
           {features.map((feature, index) => (
             <div
               key={feature.title}
-              className="group relative p-6 md:p-8 rounded-2xl card-glass border border-primary/20 hover:border-primary/50 transition-all duration-500 hover:glow-cyan"
+              className="group relative p-6 md:p-8 rounded-2xl card-glass-blue transition-all duration-500 hover:border-primary/40"
               style={{ animationDelay: `${index * 0.2}s` }}
             >
               {/* Icon */}
