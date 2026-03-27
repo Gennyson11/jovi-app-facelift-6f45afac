@@ -41,13 +41,13 @@ const HeroSection = ({ onAccessClick }: HeroSectionProps) => {
         </h1>
 
         {/* Hero Image with Play Button */}
-        <div className="relative my-4 sm:my-6 md:my-10 max-w-3xl mx-auto group px-1 sm:px-2">
+        <div className="relative my-4 sm:my-6 md:my-10 max-w-md sm:max-w-lg md:max-w-xl mx-auto group px-1 sm:px-2">
           {/* Animated glow background */}
           <div className="absolute -inset-1 sm:-inset-3 bg-gradient-to-r from-primary/50 via-accent/30 to-primary/50 rounded-2xl sm:rounded-3xl blur-xl sm:blur-2xl opacity-40 group-hover:opacity-60 transition-opacity duration-500 animate-pulse" />
           
           {/* Image container */}
-          <div className="relative rounded-xl sm:rounded-2xl overflow-hidden border border-primary/30 sm:border-2 sm:border-primary/40 shadow-2xl shadow-primary/20 cursor-pointer" onClick={() => setVideoOpen(true)}>
-            <img src={heroImage} alt="JoviTools - O Melhor Mercado de IA's" className="w-full transition-transform duration-700 group-hover:scale-105" />
+          <div className="relative rounded-xl sm:rounded-2xl overflow-hidden border border-primary/30 sm:border-2 sm:border-primary/40 shadow-2xl shadow-primary/20 cursor-pointer aspect-square" onClick={() => setVideoOpen(true)}>
+            <img src={heroImage} alt="JoviTools - O Melhor Mercado de IA's" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
             {/* Gradient overlays */}
             <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent pointer-events-none" />
             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 pointer-events-none" />
