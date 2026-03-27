@@ -41,7 +41,7 @@ const HeroSection = ({ onAccessClick }: HeroSectionProps) => {
         </h1>
 
         {/* Hero Image with Play Button */}
-        <div className="relative my-4 sm:my-6 md:my-10 max-w-3xl mx-auto group px-1 sm:px-2">
+        <div className="relative my-4 sm:my-6 md:my-10 max-w-md sm:max-w-lg md:max-w-xl mx-auto group px-1 sm:px-2">
           {/* Animated glow background */}
           <div className="absolute -inset-1 sm:-inset-3 bg-gradient-to-r from-primary/50 via-accent/30 to-primary/50 rounded-2xl sm:rounded-3xl blur-xl sm:blur-2xl opacity-40 group-hover:opacity-60 transition-opacity duration-500 animate-pulse" />
           
