@@ -93,8 +93,8 @@ export default function Auth() {
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
         <Card className="w-full max-w-md border-primary/20 bg-card/80 backdrop-blur-sm">
           <CardHeader className="text-center space-y-4">
-            <div className="mx-auto w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center">
-              <Cloud className="w-8 h-8 text-primary" />
+            <div className="mx-auto w-20 h-20 rounded-xl overflow-hidden">
+              <img src={heroImage} alt="JoviTools" className="w-full h-full object-cover" />
             </div>
             <div>
               <CardTitle className="text-2xl font-display text-foreground">
