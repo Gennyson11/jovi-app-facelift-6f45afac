@@ -220,8 +220,8 @@ export default function Credits() {
     if (user?.id) fetchData();
   }, [user?.id]);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async (silent = false) => {
+    if (!silent) setLoading(true);
     const [profileRes, creditsRes, transactionsRes, missionsRes, socioRes] = await Promise.all([
       supabase.from('profiles').select('id, email, name, avatar_url, socio_2_enabled').eq('user_id', user!.id).maybeSingle(),
       supabase.from('user_credits').select('balance').eq('user_id', user!.id).maybeSingle(),
@@ -377,7 +377,7 @@ export default function Credits() {
       if (data.status === 'CONFIRMED' || data.status === 'RECEIVED') {
         setPaymentConfirmed(true);
         toast({ title: '🎉 Pagamento Confirmado!', description: `+${pixData.creditAmount} créditos adicionados!` });
-        fetchData();
+        fetchData(true);
       }
     } catch (err: any) {
       // silently ignore polling errors
