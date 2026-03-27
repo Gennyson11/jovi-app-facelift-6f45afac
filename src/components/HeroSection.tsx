@@ -27,7 +27,7 @@ const HeroSection = ({ onAccessClick }: HeroSectionProps) => {
         {/* Logo Badge */}
         <div className="mb-4 sm:mb-6 inline-flex items-center gap-2 px-4 py-2 rounded-full bg-primary/10 border border-primary/30 text-primary text-xs sm:text-sm font-semibold tracking-wider uppercase">
           <span className="w-2 h-2 rounded-full bg-primary animate-pulse" />
-          O Melhor Mercado de IA's
+          O Melhor Rateio de IA's
         </div>
 
         {/* Main Heading */}
@@ -47,7 +47,7 @@ const HeroSection = ({ onAccessClick }: HeroSectionProps) => {
           
           {/* Image container */}
           <div className="relative rounded-xl sm:rounded-2xl overflow-hidden border border-primary/30 sm:border-2 sm:border-primary/40 shadow-2xl shadow-primary/20 cursor-pointer aspect-square" onClick={() => setVideoOpen(true)}>
-            <img src={heroImage} alt="JoviTools - O Melhor Mercado de IA's" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            <img src={heroImage} <img src={heroImage} alt="JoviTools - O Melhor Rateio de IA's" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" /> className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
             {/* Gradient overlays */}
             <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent pointer-events-none" />
             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 pointer-events-none" />
