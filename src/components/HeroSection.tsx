@@ -47,7 +47,7 @@ const HeroSection = ({ onAccessClick }: HeroSectionProps) => {
           
           {/* Image container */}
           <div className="relative rounded-xl sm:rounded-2xl overflow-hidden border border-primary/30 sm:border-2 sm:border-primary/40 shadow-2xl shadow-primary/20 cursor-pointer aspect-square" onClick={() => setVideoOpen(true)}>
-            <img src={heroImage} <img src={heroImage} alt="JoviTools - O Melhor Rateio de IA's" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" /> className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+            <img src={heroImage} alt="JoviTools - O Melhor Rateio de IAs" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
             {/* Gradient overlays */}
             <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent pointer-events-none" />
             <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-primary/5 pointer-events-none" />
