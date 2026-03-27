@@ -377,7 +377,7 @@ export default function Credits() {
       if (data.status === 'CONFIRMED' || data.status === 'RECEIVED') {
         setPaymentConfirmed(true);
         toast({ title: '🎉 Pagamento Confirmado!', description: `+${pixData.creditAmount} créditos adicionados!` });
-        fetchData();
+        fetchData(true);
       }
     } catch (err: any) {
       // silently ignore polling errors
