@@ -93,7 +93,7 @@ export default function Auth() {
       <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex items-center justify-center p-4">
         <Card className="w-full max-w-md border-primary/20 bg-card/80 backdrop-blur-sm">
           <CardHeader className="text-center space-y-4">
-            <div className="mx-auto w-32 h-32 rounded-xl overflow-hidden">
+            <div className="mx-auto w-32 h-32 rounded-xl overflow-hidden transition-all duration-500 hover:scale-110 hover:shadow-[0_0_30px_hsl(220_90%_56%/0.5)] cursor-pointer">
               <img src={heroImage} alt="JoviTools" className="w-full h-full object-cover" />
             </div>
             <div>
