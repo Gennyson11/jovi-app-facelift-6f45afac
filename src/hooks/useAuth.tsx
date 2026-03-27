@@ -81,6 +81,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           if (isMounted) {
             setRole(userRole);
           }
+          
+          // Refresh session to get a fresh token, then log access
+          const { data: refreshed } = await supabase.auth.refreshSession();
+          if (refreshed?.session?.access_token) {
+            logUserAccess(refreshed.session.access_token);
+          }
         }
       } finally {
         if (isMounted) {
