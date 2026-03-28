@@ -207,6 +207,7 @@ export default function Credits() {
   const [cpfInput, setCpfInput] = useState('');
   const [selectedPackage, setSelectedPackage] = useState<typeof CREDIT_PACKAGES[0] | null>(null);
   const [cpfStep, setCpfStep] = useState(true);
+  const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
 
   const { user, signOut, loading: authLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
@@ -216,8 +217,23 @@ export default function Credits() {
     if (!authLoading && !user) navigate('/login');
   }, [user, authLoading, navigate]);
 
+  // On mount, check for pending payments in localStorage
   useEffect(() => {
-    if (user?.id) fetchData();
+    if (user?.id) {
+      fetchData();
+      const pending = localStorage.getItem(`pending_pix_${user.id}`);
+      if (pending) {
+        try {
+          const parsed = JSON.parse(pending);
+          // Only resume if less than 30 minutes old
+          if (Date.now() - parsed.createdAt < 30 * 60 * 1000) {
+            setPendingPaymentId(parsed.paymentId);
+          } else {
+            localStorage.removeItem(`pending_pix_${user.id}`);
+          }
+        } catch { localStorage.removeItem(`pending_pix_${user.id}`); }
+      }
+    }
   }, [user?.id]);
 
   const fetchData = async (silent = false) => {
@@ -348,6 +364,15 @@ export default function Credits() {
       if (data.error) throw new Error(data.error);
 
       setPixData(data);
+      // Save pending payment to localStorage for resilience
+      if (user?.id && data.paymentId) {
+        localStorage.setItem(`pending_pix_${user.id}`, JSON.stringify({
+          paymentId: data.paymentId,
+          creditAmount: data.creditAmount,
+          createdAt: Date.now(),
+        }));
+        setPendingPaymentId(data.paymentId);
+      }
     } catch (err: any) {
       toast({ title: '❌ Erro', description: err.message || 'Erro ao gerar PIX', variant: 'destructive' });
       setPixModalOpen(false);
@@ -376,6 +401,8 @@ export default function Credits() {
 
       if (data.status === 'CONFIRMED' || data.status === 'RECEIVED') {
         setPaymentConfirmed(true);
+        setPendingPaymentId(null);
+        if (user?.id) localStorage.removeItem(`pending_pix_${user.id}`);
         toast({ title: '🎉 Pagamento Confirmado!', description: `+${pixData.creditAmount} créditos adicionados!` });
         fetchData(true);
       }
@@ -384,9 +411,9 @@ export default function Credits() {
     } finally {
       setCheckingPayment(false);
     }
-  }, [pixData, paymentConfirmed]);
+  }, [pixData, paymentConfirmed, user?.id]);
 
-  // Auto-poll payment status every 5 seconds
+  // Auto-poll payment status every 5 seconds (active modal)
   useEffect(() => {
     if (!pixData || paymentConfirmed || pixLoading) return;
     const interval = setInterval(() => {
@@ -394,6 +421,44 @@ export default function Credits() {
     }, 5000);
     return () => clearInterval(interval);
   }, [pixData, paymentConfirmed, pixLoading, handleCheckPayment]);
+
+  // Background polling for pending payments (even if modal is closed)
+  useEffect(() => {
+    if (!pendingPaymentId || !user?.id || paymentConfirmed || pixData) return;
+
+    const checkPending = async () => {
+      const pendingStr = localStorage.getItem(`pending_pix_${user.id}`);
+      if (!pendingStr) { setPendingPaymentId(null); return; }
+      
+      try {
+        const pending = JSON.parse(pendingStr);
+        // Stop after 30 minutes
+        if (Date.now() - pending.createdAt > 30 * 60 * 1000) {
+          localStorage.removeItem(`pending_pix_${user.id}`);
+          setPendingPaymentId(null);
+          return;
+        }
+
+        const { data, error } = await supabase.functions.invoke('check-pix-payment', {
+          body: { paymentId: pending.paymentId, creditAmount: pending.creditAmount },
+        });
+
+        if (!error && (data?.status === 'CONFIRMED' || data?.status === 'RECEIVED')) {
+          localStorage.removeItem(`pending_pix_${user.id}`);
+          setPendingPaymentId(null);
+          setPaymentConfirmed(true);
+          toast({ title: '🎉 Pagamento Confirmado!', description: `+${pending.creditAmount} créditos adicionados!` });
+          fetchData(true);
+        }
+      } catch {
+        // silently ignore
+      }
+    };
+
+    checkPending();
+    const interval = setInterval(checkPending, 10000);
+    return () => clearInterval(interval);
+  }, [pendingPaymentId, user?.id, paymentConfirmed, pixData]);
 
   const handleLogout = async () => {
     await signOut();
