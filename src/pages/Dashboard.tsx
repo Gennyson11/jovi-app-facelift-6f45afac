@@ -475,6 +475,11 @@ export default function Dashboard() {
 
         }
 
+        {/* Dashboard Banner */}
+        {hasAccess && <div className="mb-6 rounded-2xl overflow-hidden border border-primary/30 shadow-lg shadow-primary/20">
+            <img src={dashboardBanner} alt="JoviTools Banner" className="w-full h-auto object-cover" />
+          </div>}
+
         {/* Account Validity Card */}
         {hasAccess && userProfile && <div className="mb-6 p-4 rounded-xl bg-card border border-border">
             <div className="flex items-center justify-between">
