@@ -207,6 +207,7 @@ export default function Credits() {
   const [cpfInput, setCpfInput] = useState('');
   const [selectedPackage, setSelectedPackage] = useState<typeof CREDIT_PACKAGES[0] | null>(null);
   const [cpfStep, setCpfStep] = useState(true);
+  const [pendingPaymentId, setPendingPaymentId] = useState<string | null>(null);
 
   const { user, signOut, loading: authLoading, isAdmin } = useAuth();
   const navigate = useNavigate();
@@ -216,8 +217,23 @@ export default function Credits() {
     if (!authLoading && !user) navigate('/login');
   }, [user, authLoading, navigate]);
 
+  // On mount, check for pending payments in localStorage
   useEffect(() => {
-    if (user?.id) fetchData();
+    if (user?.id) {
+      fetchData();
+      const pending = localStorage.getItem(`pending_pix_${user.id}`);
+      if (pending) {
+        try {
+          const parsed = JSON.parse(pending);
+          // Only resume if less than 30 minutes old
+          if (Date.now() - parsed.createdAt < 30 * 60 * 1000) {
+            setPendingPaymentId(parsed.paymentId);
+          } else {
+            localStorage.removeItem(`pending_pix_${user.id}`);
+          }
+        } catch { localStorage.removeItem(`pending_pix_${user.id}`); }
+      }
+    }
   }, [user?.id]);
 
   const fetchData = async (silent = false) => {
