@@ -15,6 +15,7 @@ import JoviAIChat from '@/components/JoviAIChat';
 import { Veo3Chat } from '@/components/Veo3Chat';
 import SubscriptionPlans from '@/components/SubscriptionPlans';
 import whatsappBanner from '@/assets/whatsapp-banner.png';
+import dashboardBanner from '@/assets/dashboard-banner.png';
 
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
@@ -473,6 +474,11 @@ export default function Dashboard() {
             </div>)
 
         }
+
+        {/* Dashboard Banner */}
+        {hasAccess && <div className="mb-6 rounded-2xl overflow-hidden border border-primary/30 shadow-lg shadow-primary/20">
+            <img src={dashboardBanner} alt="JoviTools Banner" className="w-full h-auto object-cover" />
+          </div>}
 
         {/* Account Validity Card */}
         {hasAccess && userProfile && <div className="mb-6 p-4 rounded-xl bg-card border border-border">
