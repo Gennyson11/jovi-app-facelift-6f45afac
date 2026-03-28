@@ -9,7 +9,7 @@ const aiTools = [
 
 
 const streamingTools = [
-  "NETFLIX", "HBO MAX", "DISNEY+", "PARAMOUNT+", "PRIME VIDEO"
+  "JOVITOOLS FLIX FILMES & SERIES", "HBO MAX", "DISNEY+", "PARAMOUNT+", "PRIME VIDEO"
 ];
 
 const ToolsList = ({ tools }: { tools: string[] }) => (
