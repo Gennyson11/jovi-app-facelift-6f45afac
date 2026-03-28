@@ -46,7 +46,7 @@ const HeroSection = ({ onAccessClick }: HeroSectionProps) => {
           <div className="absolute -inset-1 sm:-inset-3 bg-gradient-to-r from-primary/50 via-accent/30 to-primary/50 rounded-2xl sm:rounded-3xl blur-xl sm:blur-2xl opacity-40 group-hover:opacity-60 transition-opacity duration-500 animate-pulse" />
           
           {/* Image container */}
-          <div className="relative rounded-xl sm:rounded-2xl overflow-hidden border border-primary/30 sm:border-2 sm:border-primary/40 shadow-2xl shadow-primary/20 cursor-pointer aspect-square" onClick={() => setVideoOpen(true)}>
+          <div className="relative rounded-xl sm:rounded-2xl overflow-hidden border border-primary/30 sm:border-2 sm:border-primary/40 shadow-2xl shadow-primary/20 cursor-pointer aspect-video" onClick={() => setVideoOpen(true)}>
             <img src={heroImage} alt="JoviTools - O Melhor Rateio de IAs" className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
             {/* Gradient overlays */}
             <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-transparent to-transparent pointer-events-none" />
