@@ -364,6 +364,15 @@ export default function Credits() {
       if (data.error) throw new Error(data.error);
 
       setPixData(data);
+      // Save pending payment to localStorage for resilience
+      if (user?.id && data.paymentId) {
+        localStorage.setItem(`pending_pix_${user.id}`, JSON.stringify({
+          paymentId: data.paymentId,
+          creditAmount: data.creditAmount,
+          createdAt: Date.now(),
+        }));
+        setPendingPaymentId(data.paymentId);
+      }
     } catch (err: any) {
       toast({ title: '❌ Erro', description: err.message || 'Erro ao gerar PIX', variant: 'destructive' });
       setPixModalOpen(false);
