@@ -9,7 +9,7 @@ const aiTools = [
 
 
 const streamingTools = [
-  "JOVIFLIX FILMES & SÉRIES", "CINDIE TV", "JOVI IPTV", "PARAMOUNT+", "PRIME VIDEO"
+  "JOVIFLIX FILMES & SÉRIES", "CINDIE TV", "JOVI IPTV"
 ];
 
 const ToolsList = ({ tools }: { tools: string[] }) => (
