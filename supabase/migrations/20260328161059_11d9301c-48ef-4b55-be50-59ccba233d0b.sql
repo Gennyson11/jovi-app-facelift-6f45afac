@@ -1,0 +1,1 @@
+DROP POLICY IF EXISTS "Users can update their own coins" ON public.user_coins;
