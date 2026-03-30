@@ -201,25 +201,6 @@ serve(async (req) => {
         }
       }
 
-      // Deduct 1 credit from the socio who created the client
-      if (isSocio && partner_id) {
-        try {
-          const { data: deductResult, error: deductError } = await supabaseAdmin.rpc('add_credits', {
-            p_user_id: partner_id,
-            p_amount: -1,
-            p_type: 'client_creation',
-            p_description: `Cadastro de cliente: ${name || email}`
-          });
-          if (deductError) {
-            console.error("Error deducting credit from socio:", deductError);
-          } else {
-            console.log("Deducted 1 credit from socio:", partner_id, "new balance:", deductResult);
-          }
-        } catch (creditErr) {
-          console.error("Credit deduction failed:", creditErr);
-        }
-      }
-
       return new Response(
         JSON.stringify({ success: true, message: userId === userData?.user?.id ? "User created" : "User updated", userId }),
         { headers: { ...corsHeaders, "Content-Type": "application/json" } }
