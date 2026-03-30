@@ -281,12 +281,17 @@ export default function Socios() {
         }
       }
 
-      toast({
-        title: 'Sucesso',
-        description: `Cliente "${clientName}" cadastrado com ${selectedPlan} dias de acesso (1 crédito utilizado)`
+      const planLabel = PLAN_OPTIONS.find(p => p.days === selectedPlan)?.label || `${selectedPlan} dias`;
+      
+      setCreatedClientData({
+        name: clientName,
+        email: clientEmail,
+        password: clientPassword,
+        plan: planLabel
       });
 
       setDialogOpen(false);
+      setSuccessDialogOpen(true);
       fetchClients();
     } catch (error: any) {
       console.error('Error creating client:', error);
