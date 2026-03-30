@@ -59,6 +59,11 @@ export default function Socios() {
   const [showEditPassword, setShowEditPassword] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
 
+  // Success Dialog (after creating client)
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [createdClientData, setCreatedClientData] = useState<{ name: string; email: string; password: string; plan: string } | null>(null);
+  const [copied, setCopied] = useState(false);
+
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
