@@ -904,7 +904,8 @@ export default function Socios() {
           {createdClientData && (
             <div className="space-y-4">
               <div className="rounded-lg bg-background/80 border border-border p-4 space-y-2 font-mono text-sm">
-                <p>🔐 <span className="font-semibold text-foreground">Dados do Cliente</span></p>
+                <p>👤 <span className="font-semibold text-foreground">Dados do Cliente</span></p>
+                <p className="text-muted-foreground">📛 Nome: <span className="text-foreground">{createdClientData.name}</span></p>
                 <p className="text-muted-foreground">📧 Email: <span className="text-foreground">{createdClientData.email}</span></p>
                 <p className="text-muted-foreground">🔑 Senha: <span className="text-foreground">{createdClientData.password}</span></p>
                 <p className="text-muted-foreground">📦 Plano: <span className="text-foreground">{createdClientData.plan}</span></p>
@@ -916,7 +917,7 @@ export default function Socios() {
                   variant="outline"
                   className="flex-1"
                   onClick={() => {
-                    const text = `🔐 *Dados do Cliente*\n\n📧 Email: ${createdClientData.email}\n🔑 Senha: ${createdClientData.password}\n📦 Plano: ${createdClientData.plan}\n🌐 Site: https://www.jovitools.online/dashboard`;
+                    const text = `👤 *Dados do Cliente*\n\n📛 Nome: ${createdClientData.name}\n📧 Email: ${createdClientData.email}\n🔑 Senha: ${createdClientData.password}\n📦 Plano: ${createdClientData.plan}\n🌐 Site: https://www.jovitools.online/dashboard`;
                     navigator.clipboard.writeText(text);
                     setCopied(true);
                     setTimeout(() => setCopied(false), 2000);
@@ -928,7 +929,7 @@ export default function Socios() {
                 <Button
                   className="flex-1 bg-green-600 hover:bg-green-700 text-white"
                   onClick={() => {
-                    const text = encodeURIComponent(`🔐 *Dados do Cliente*\n\n📧 Email: ${createdClientData.email}\n🔑 Senha: ${createdClientData.password}\n📦 Plano: ${createdClientData.plan}\n🌐 Site: https://www.jovitools.online/dashboard`);
+                    const text = encodeURIComponent(`👤 *Dados do Cliente*\n\n📛 Nome: ${createdClientData.name}\n📧 Email: ${createdClientData.email}\n🔑 Senha: ${createdClientData.password}\n📦 Plano: ${createdClientData.plan}\n🌐 Site: https://www.jovitools.online/dashboard`);
                     window.open(`https://wa.me/?text=${text}`, '_blank');
                   }}
                 >
