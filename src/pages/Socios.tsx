@@ -833,60 +833,54 @@ export default function Socios() {
         </DialogContent>
       </Dialog>
 
-      {/* Edit Client Dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+      {/* Success - Client Created Dialog */}
+      <Dialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
         <DialogContent className="bg-card border-border max-w-md">
           <DialogHeader>
-            <DialogTitle className="text-foreground">Editar Cliente: {editingClient?.name || 'sem nome'}</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="edit-email">Novo Email</Label>
-              <Input
-                id="edit-email"
-                type="email"
-                value={editEmail}
-                onChange={e => setEditEmail(e.target.value)}
-                placeholder="novo-email@exemplo.com"
-                className="bg-background/50 border-border"
-              />
-              <p className="text-xs text-muted-foreground">Deixe o email mascarado para não alterar</p>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="edit-password">Nova Senha</Label>
-              <div className="relative">
-                <Input
-                  id="edit-password"
-                  type={showEditPassword ? "text" : "password"}
-                  value={editPassword}
-                  onChange={e => setEditPassword(e.target.value)}
-                  placeholder="Mínimo 6 caracteres"
-                  className="bg-background/50 border-border pr-10"
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowEditPassword(!showEditPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
-                >
-                  {showEditPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+            <DialogTitle className="text-foreground flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                <UserCheck className="w-4 h-4 text-green-500" />
               </div>
-              <p className="text-xs text-muted-foreground">Deixe em branco para não alterar a senha</p>
+              Cliente Cadastrado!
+            </DialogTitle>
+          </DialogHeader>
+          {createdClientData && (
+            <div className="space-y-4">
+              <div className="rounded-lg bg-background/80 border border-border p-4 space-y-2 font-mono text-sm">
+                <p>🔐 <span className="font-semibold text-foreground">Dados do Cliente</span></p>
+                <p className="text-muted-foreground">📧 Email: <span className="text-foreground">{createdClientData.email}</span></p>
+                <p className="text-muted-foreground">🔑 Senha: <span className="text-foreground">{createdClientData.password}</span></p>
+                <p className="text-muted-foreground">📦 Plano: <span className="text-foreground">{createdClientData.plan}</span></p>
+                <p className="text-muted-foreground">🌐 Site: <span className="text-foreground">https://www.jovitools.online/dashboard</span></p>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    const text = `🔐 *Dados do Cliente*\n\n📧 Email: ${createdClientData.email}\n🔑 Senha: ${createdClientData.password}\n📦 Plano: ${createdClientData.plan}\n🌐 Site: https://www.jovitools.online/dashboard`;
+                    navigator.clipboard.writeText(text);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                >
+                  {copied ? <Check className="w-4 h-4 mr-2 text-green-500" /> : <Copy className="w-4 h-4 mr-2" />}
+                  {copied ? 'Copiado!' : 'Copiar'}
+                </Button>
+                <Button
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  onClick={() => {
+                    const text = encodeURIComponent(`🔐 *Dados do Cliente*\n\n📧 Email: ${createdClientData.email}\n🔑 Senha: ${createdClientData.password}\n📦 Plano: ${createdClientData.plan}\n🌐 Site: https://www.jovitools.online/dashboard`);
+                    window.open(`https://wa.me/?text=${text}`, '_blank');
+                  }}
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Enviar no WhatsApp
+                </Button>
+              </div>
             </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setEditDialogOpen(false)}>
-              Cancelar
-            </Button>
-            <Button 
-              onClick={updateClient} 
-              disabled={savingEdit}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700"
-            >
-              {savingEdit ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <Pencil className="w-4 h-4 mr-2" />}
-              Salvar Alterações
-            </Button>
-          </DialogFooter>
+          )}
         </DialogContent>
       </Dialog>
     </div>
