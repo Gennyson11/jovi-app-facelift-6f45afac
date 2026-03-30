@@ -10,7 +10,7 @@ import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Plus, Loader2, UserCheck, UserX, Clock, Calendar, Infinity, Users, Handshake, Eye, EyeOff, Coins, Trophy, Gift, Trash2, Pencil } from 'lucide-react';
+import { LogOut, Plus, Loader2, UserCheck, UserX, Clock, Calendar, Infinity, Users, Handshake, Eye, EyeOff, Coins, Trophy, Gift, Trash2, Pencil, Copy, MessageCircle, Check } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface ClientProfile {
@@ -58,6 +58,11 @@ export default function Socios() {
   const [editPassword, setEditPassword] = useState('');
   const [showEditPassword, setShowEditPassword] = useState(false);
   const [savingEdit, setSavingEdit] = useState(false);
+
+  // Success Dialog (after creating client)
+  const [successDialogOpen, setSuccessDialogOpen] = useState(false);
+  const [createdClientData, setCreatedClientData] = useState<{ name: string; email: string; password: string; plan: string } | null>(null);
+  const [copied, setCopied] = useState(false);
 
   const { user, signOut, loading: authLoading } = useAuth();
   const navigate = useNavigate();
@@ -276,12 +281,17 @@ export default function Socios() {
         }
       }
 
-      toast({
-        title: 'Sucesso',
-        description: `Cliente "${clientName}" cadastrado com ${selectedPlan} dias de acesso (1 crédito utilizado)`
+      const planLabel = PLAN_OPTIONS.find(p => p.days === selectedPlan)?.label || `${selectedPlan} dias`;
+      
+      setCreatedClientData({
+        name: clientName,
+        email: clientEmail,
+        password: clientPassword,
+        plan: planLabel
       });
 
       setDialogOpen(false);
+      setSuccessDialogOpen(true);
       fetchClients();
     } catch (error: any) {
       console.error('Error creating client:', error);
@@ -877,6 +887,57 @@ export default function Socios() {
               Salvar Alterações
             </Button>
           </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Success - Client Created Dialog */}
+      <Dialog open={successDialogOpen} onOpenChange={setSuccessDialogOpen}>
+        <DialogContent className="bg-card border-border max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-foreground flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-green-500/20 flex items-center justify-center">
+                <UserCheck className="w-4 h-4 text-green-500" />
+              </div>
+              Cliente Cadastrado!
+            </DialogTitle>
+          </DialogHeader>
+          {createdClientData && (
+            <div className="space-y-4">
+              <div className="rounded-lg bg-background/80 border border-border p-4 space-y-2 font-mono text-sm">
+                <p>🔐 <span className="font-semibold text-foreground">Dados do Cliente</span></p>
+                <p className="text-muted-foreground">📧 Email: <span className="text-foreground">{createdClientData.email}</span></p>
+                <p className="text-muted-foreground">🔑 Senha: <span className="text-foreground">{createdClientData.password}</span></p>
+                <p className="text-muted-foreground">📦 Plano: <span className="text-foreground">{createdClientData.plan}</span></p>
+                <p className="text-muted-foreground">🌐 Site: <span className="text-foreground">https://www.jovitools.online/dashboard</span></p>
+              </div>
+
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  className="flex-1"
+                  onClick={() => {
+                    const text = `🔐 *Dados do Cliente*\n\n📧 Email: ${createdClientData.email}\n🔑 Senha: ${createdClientData.password}\n📦 Plano: ${createdClientData.plan}\n🌐 Site: https://www.jovitools.online/dashboard`;
+                    navigator.clipboard.writeText(text);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                >
+                  {copied ? <Check className="w-4 h-4 mr-2 text-green-500" /> : <Copy className="w-4 h-4 mr-2" />}
+                  {copied ? 'Copiado!' : 'Copiar'}
+                </Button>
+                <Button
+                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
+                  onClick={() => {
+                    const text = encodeURIComponent(`🔐 *Dados do Cliente*\n\n📧 Email: ${createdClientData.email}\n🔑 Senha: ${createdClientData.password}\n📦 Plano: ${createdClientData.plan}\n🌐 Site: https://www.jovitools.online/dashboard`);
+                    window.open(`https://wa.me/?text=${text}`, '_blank');
+                  }}
+                >
+                  <MessageCircle className="w-4 h-4 mr-2" />
+                  Enviar no WhatsApp
+                </Button>
+              </div>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
     </div>
