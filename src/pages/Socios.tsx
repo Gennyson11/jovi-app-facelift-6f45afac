@@ -266,20 +266,8 @@ export default function Socios() {
       if (functionError) throw functionError;
       if (!functionData?.userId) throw new Error('Falha ao criar usuário');
 
-      // Deduct 1 credit
-      if (user) {
-        const { error: creditError } = await supabase.rpc('add_credits', {
-          p_user_id: user.id,
-          p_amount: -1,
-          p_type: 'client_creation',
-          p_description: `Cadastro de cliente: ${clientName}`
-        });
-        if (creditError) {
-          console.error('Error deducting credit:', creditError);
-        } else {
-          setSocioCredits(prev => prev - 1);
-        }
-      }
+      // Credit is deducted server-side in the edge function
+      setSocioCredits(prev => prev - 1);
 
       const planLabel = PLAN_OPTIONS.find(p => p.days === selectedPlan)?.label || `${selectedPlan} dias`;
       
