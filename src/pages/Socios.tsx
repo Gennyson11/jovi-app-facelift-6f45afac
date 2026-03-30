@@ -915,7 +915,7 @@ export default function Socios() {
               <div className="flex gap-2">
                 <Button
                   variant="outline"
-                  className="flex-1"
+                  className="w-full"
                   onClick={() => {
                     const text = `👤 *Dados do Cliente*\n\n📛 Nome: ${createdClientData.name}\n📧 Email: ${createdClientData.email}\n🔑 Senha: ${createdClientData.password}\n📦 Plano: ${createdClientData.plan}\n🌐 Site: https://www.jovitools.online/dashboard`;
                     navigator.clipboard.writeText(text);
@@ -925,16 +925,6 @@ export default function Socios() {
                 >
                   {copied ? <Check className="w-4 h-4 mr-2 text-green-500" /> : <Copy className="w-4 h-4 mr-2" />}
                   {copied ? 'Copiado!' : 'Copiar'}
-                </Button>
-                <Button
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white"
-                  onClick={() => {
-                    const text = encodeURIComponent(`👤 *Dados do Cliente*\n\n📛 Nome: ${createdClientData.name}\n📧 Email: ${createdClientData.email}\n🔑 Senha: ${createdClientData.password}\n📦 Plano: ${createdClientData.plan}\n🌐 Site: https://www.jovitools.online/dashboard`);
-                    window.open(`https://wa.me/?text=${text}`, '_blank');
-                  }}
-                >
-                  <MessageCircle className="w-4 h-4 mr-2" />
-                  Enviar no WhatsApp
                 </Button>
               </div>
             </div>
