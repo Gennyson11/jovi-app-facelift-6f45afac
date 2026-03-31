@@ -1,6 +1,6 @@
 import { Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PLANS } from "@/hooks/useSubscription";
+import { useNavigate } from "react-router-dom";
 
 const benefits = [
   "Acesso +15 Ferramentas Premium",
