@@ -201,6 +201,7 @@ export type Database = {
           id: string
           name: string | null
           partner_id: string | null
+          registration_source: string | null
           socio_2_enabled: boolean
           updated_at: string
           user_id: string
@@ -216,6 +217,7 @@ export type Database = {
           id?: string
           name?: string | null
           partner_id?: string | null
+          registration_source?: string | null
           socio_2_enabled?: boolean
           updated_at?: string
           user_id: string
@@ -231,6 +233,7 @@ export type Database = {
           id?: string
           name?: string | null
           partner_id?: string | null
+          registration_source?: string | null
           socio_2_enabled?: boolean
           updated_at?: string
           user_id?: string
