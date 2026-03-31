@@ -13,6 +13,16 @@ const HeroSection = ({ onAccessClick }: HeroSectionProps) => {
 
   return (
     <section className="relative min-h-screen flex flex-col items-center justify-center px-3 sm:px-4 py-12 sm:py-20 overflow-hidden">
+      {/* Top Navigation Bar */}
+      <div className="absolute top-0 left-0 right-0 z-50 flex items-center justify-end px-4 sm:px-8 py-4">
+        <Button
+          variant="outline"
+          onClick={onAccessClick}
+          className="font-display font-bold"
+        >
+          Fazer Login
+        </Button>
+      </div>
       {/* Deep blue background effects */}
       <div className="absolute inset-0 bg-gradient-to-b from-background via-background/95 to-background pointer-events-none" />
       
