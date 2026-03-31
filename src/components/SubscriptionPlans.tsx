@@ -149,18 +149,6 @@ export default function SubscriptionPlans({ subscriptionEnd }: SubscriptionPlans
         </div>
       </div>
 
-      {subscriptionEnd && (
-        <p className="text-center text-sm text-muted-foreground mt-6">
-          Sua assinatura renova em{' '}
-          <span className="text-foreground font-medium">
-            {new Date(subscriptionEnd).toLocaleDateString('pt-BR', {
-              day: '2-digit',
-              month: 'long',
-              year: 'numeric',
-            })}
-          </span>
-        </p>
-      )}
     </div>
   );
 }
