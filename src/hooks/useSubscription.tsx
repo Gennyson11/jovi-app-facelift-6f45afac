@@ -6,20 +6,20 @@ export const PLANS = {
   monthly: {
     name: 'Mensal',
     price: 37,
-    checkout_url: 'https://t.me/JoviTools_bot',
+    checkout_url: 'https://pay.cakto.com.br/z4jkfp5_580328',
     interval: '/mês',
   },
   quarterly: {
     name: 'Trimestral',
     price: 97,
-    checkout_url: 'https://t.me/JoviTools_bot',
+    checkout_url: 'https://pay.cakto.com.br/scp6yiy_590727',
     interval: '/trimestre',
     perMonth: 'R$32,33/mês',
   },
   annual: {
     name: 'Anual',
     price: 297,
-    checkout_url: 'https://t.me/JoviTools_bot',
+    checkout_url: 'https://pay.cakto.com.br/rjwpjtb_686697',
     interval: '/ano',
     perMonth: 'R$24,75/mês',
   },

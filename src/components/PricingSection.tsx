@@ -1,5 +1,6 @@
 import { Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { PLANS } from "@/hooks/useSubscription";
 
 const benefits = [
   "Acesso +15 Ferramentas Premium",
@@ -59,7 +60,7 @@ const PricingSection = () => {
               variant="default"
               size="lg"
               className="w-full mt-6 md:mt-8 font-display font-bold text-base md:text-lg py-5 md:py-6"
-              onClick={() => window.open('https://t.me/JoviTools_bot', '_blank')}>
+              onClick={() => window.open(PLANS.monthly.checkout_url, '_blank')}>
               ASSINAR AGORA
             </Button>
 
@@ -105,7 +106,7 @@ const PricingSection = () => {
               variant="default"
               size="lg"
               className="w-full mt-8 font-display font-bold text-lg py-6"
-              onClick={() => window.open('https://t.me/JoviTools_bot', '_blank')}>
+              onClick={() => window.open(PLANS.quarterly.checkout_url, '_blank')}>
               ASSINAR AGORA
             </Button>
 
@@ -151,7 +152,7 @@ const PricingSection = () => {
               variant="default"
               size="lg"
               className="w-full mt-6 md:mt-8 font-display font-bold text-base md:text-lg py-5 md:py-6"
-              onClick={() => window.open('https://t.me/JoviTools_bot', '_blank')}>
+              onClick={() => window.open(PLANS.annual.checkout_url, '_blank')}>
               ASSINAR AGORA
             </Button>
 
