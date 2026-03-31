@@ -461,7 +461,7 @@ export default function Dashboard() {
             </div>)
         }
 
-        {/* Dashboard Banner */}
+        {hasAccess && <>
         {hasAccess && <div className="mb-6 rounded-2xl overflow-hidden border border-primary/30 shadow-lg shadow-primary/20">
             <img src={dashboardBanner} alt="JoviTools Banner" className="w-full h-auto object-cover" />
           </div>}
@@ -867,6 +867,7 @@ export default function Dashboard() {
               </div>
             </div>;
         })}
+        </>}
       </main>
       </div>
 
