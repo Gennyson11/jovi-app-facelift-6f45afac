@@ -61,7 +61,7 @@ const PricingSection = () => {
               variant="default"
               size="lg"
               className="w-full mt-6 md:mt-8 font-display font-bold text-base md:text-lg py-5 md:py-6"
-              onClick={() => window.open(PLANS.monthly.checkout_url, '_blank')}>
+              onClick={() => navigate('/login')}>
               ASSINAR AGORA
             </Button>
 
