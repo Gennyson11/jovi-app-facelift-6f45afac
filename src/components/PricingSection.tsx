@@ -10,6 +10,7 @@ const benefits = [
 ];
 
 const PricingSection = () => {
+  const navigate = useNavigate();
   return (
     <section className="py-16 md:py-24 px-4" id="pricing">
       <div className="max-w-7xl mx-auto">
