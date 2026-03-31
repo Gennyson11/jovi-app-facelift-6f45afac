@@ -113,6 +113,7 @@ Deno.serve(async (req) => {
           .update({
             has_access: true,
             access_expires_at: newExpiry.toISOString(),
+            registration_source: "cakto",
             updated_at: now.toISOString(),
           })
           .eq("id", profile.id);

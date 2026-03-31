@@ -1632,6 +1632,7 @@ export default function Admin() {
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground">
                             {(() => {
+                              if (userProfile.registration_source === 'cakto') return <span className="text-xs text-green-500 font-medium">Cakto</span>;
                               if (!userProfile.partner_id) return <span className="text-xs text-primary font-medium">Admin</span>;
                               const addedBy = users.find(u => u.user_id === userProfile.partner_id);
                               return <span className="text-xs">{addedBy?.name || addedBy?.email || 'Sócio'}</span>;
