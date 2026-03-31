@@ -1,6 +1,6 @@
 import { Check, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { PLANS } from "@/hooks/useSubscription";
+import { useNavigate } from "react-router-dom";
 
 const benefits = [
   "Acesso +15 Ferramentas Premium",
@@ -10,6 +10,7 @@ const benefits = [
 ];
 
 const PricingSection = () => {
+  const navigate = useNavigate();
   return (
     <section className="py-16 md:py-24 px-4" id="pricing">
       <div className="max-w-7xl mx-auto">
@@ -60,7 +61,7 @@ const PricingSection = () => {
               variant="default"
               size="lg"
               className="w-full mt-6 md:mt-8 font-display font-bold text-base md:text-lg py-5 md:py-6"
-              onClick={() => window.open(PLANS.monthly.checkout_url, '_blank')}>
+              onClick={() => navigate('/login')}>
               ASSINAR AGORA
             </Button>
 
@@ -106,7 +107,7 @@ const PricingSection = () => {
               variant="default"
               size="lg"
               className="w-full mt-8 font-display font-bold text-lg py-6"
-              onClick={() => window.open(PLANS.quarterly.checkout_url, '_blank')}>
+              onClick={() => navigate('/login')}>
               ASSINAR AGORA
             </Button>
 
@@ -152,7 +153,7 @@ const PricingSection = () => {
               variant="default"
               size="lg"
               className="w-full mt-6 md:mt-8 font-display font-bold text-base md:text-lg py-5 md:py-6"
-              onClick={() => window.open(PLANS.annual.checkout_url, '_blank')}>
+              onClick={() => navigate('/login')}>
               ASSINAR AGORA
             </Button>
 
