@@ -159,7 +159,15 @@ export default function DashboardSidebar({
                   )}
                 >
                   <item.icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-primary-foreground")} />
-                  {!isCollapsed && <span>{item.label}</span>}
+                  {!isCollapsed && (
+                    <span className="flex-1 text-left">{item.label}</span>
+                  )}
+                  {!isCollapsed && onlineCount > 0 && ['ai_tools', 'streamings', 'software'].includes(item.category) && (
+                    <span className="flex items-center gap-1 text-xs text-emerald-400">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      {onlineCount}
+                    </span>
+                  )}
                 </button>
               );
             })}
