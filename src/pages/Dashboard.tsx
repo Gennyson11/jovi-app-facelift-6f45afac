@@ -138,6 +138,7 @@ export default function Dashboard() {
 
   // Track user presence for real-time monitoring
   usePresence(user?.id, user?.email, user?.email?.split('@')[0] || null);
+  const { onlineCount } = useOnlineUsers();
 
   // Ref to track if data has been fetched for the current user
   const hasFetchedRef = useRef(false);

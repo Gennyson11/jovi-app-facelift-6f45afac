@@ -36,6 +36,7 @@ interface DashboardSidebarProps {
   isSocio?: boolean;
   isSocio2?: boolean;
   isAdmin?: boolean;
+  onlineCount?: number;
 }
 
 const DASHBOARD_ITEMS_BASE = [
