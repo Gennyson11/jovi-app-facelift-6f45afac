@@ -162,12 +162,6 @@ export default function DashboardSidebar({
                   {!isCollapsed && (
                     <span className="flex-1 text-left">{item.label}</span>
                   )}
-                  {!isCollapsed && onlineCount > 0 && ['ai_tools', 'streamings', 'software'].includes(item.category) && (
-                    <span className="flex items-center gap-1 text-xs text-emerald-400">
-                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                      {onlineCount}
-                    </span>
-                  )}
                 </button>
               );
             })}
