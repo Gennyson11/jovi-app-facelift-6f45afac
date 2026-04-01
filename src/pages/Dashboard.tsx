@@ -787,8 +787,8 @@ export default function Dashboard() {
                       {categoryPlatforms.length} {categoryPlatforms.length === 1 ? 'plataforma' : 'plataformas'}
                     </p>
                     {onlineCount > 0 && (
-                      <span className="flex items-center gap-1 text-xs text-emerald-400">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      <span className="flex items-center gap-1.5 text-xs font-semibold text-emerald-400 bg-emerald-400/10 border border-emerald-400/20 rounded-full px-3 py-1">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
                         {onlineCount} usuários online
                       </span>
                     )}
