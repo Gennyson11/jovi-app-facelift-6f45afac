@@ -2208,7 +2208,7 @@ export default function Admin() {
                                     <p className="text-xs text-muted-foreground truncate">{data.email}</p>
                                   </div>
                                   <Badge variant="outline" className="shrink-0">
-                                    Saldo: {data.balance}
+                                    Saldo: {Math.max(0, data.balance)}
                                   </Badge>
                                 </div>
                                 <div className="flex flex-col gap-1 mt-3 pt-3 border-t border-border">
