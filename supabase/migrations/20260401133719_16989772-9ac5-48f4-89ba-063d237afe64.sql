@@ -1,0 +1,1 @@
+UPDATE profiles SET has_access = true, access_expires_at = now() + interval '365 days', registration_source = 'cakto', updated_at = now() WHERE email = 'carloszecavendas@gmail.com';
