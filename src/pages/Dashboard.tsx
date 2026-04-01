@@ -789,7 +789,7 @@ export default function Dashboard() {
                     {onlineCount > 0 && ['ai_tools', 'streamings', 'software'].includes(categoryKey) && (
                       <span className="flex items-center gap-1 text-xs text-emerald-400">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                        {onlineCount} online
+                        {onlineCount} usuários online
                       </span>
                     )}
                   </div>
