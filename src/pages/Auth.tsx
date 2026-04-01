@@ -185,6 +185,7 @@ export default function Auth() {
                     value={email} 
                     onChange={e => setEmail(e.target.value)} 
                     className="bg-background/50 border-border" 
+                    autoComplete="email"
                     required 
                   />
                 </div>
