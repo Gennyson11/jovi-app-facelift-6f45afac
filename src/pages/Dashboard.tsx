@@ -782,9 +782,17 @@ export default function Dashboard() {
                   <h2 className="text-xl font-display font-bold text-foreground">
                     {config.label}
                   </h2>
-                  <p className="text-sm text-muted-foreground">
-                    {categoryPlatforms.length} {categoryPlatforms.length === 1 ? 'plataforma' : 'plataformas'}
-                  </p>
+                  <div className="flex items-center gap-3">
+                    <p className="text-sm text-muted-foreground">
+                      {categoryPlatforms.length} {categoryPlatforms.length === 1 ? 'plataforma' : 'plataformas'}
+                    </p>
+                    {onlineCount > 0 && ['ai_tools', 'streamings', 'software'].includes(categoryKey) && (
+                      <span className="flex items-center gap-1 text-xs text-emerald-400">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                        {onlineCount} online
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
 
