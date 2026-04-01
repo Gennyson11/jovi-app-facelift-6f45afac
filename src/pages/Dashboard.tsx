@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import { supabase } from '@/integrations/supabase/client';
-import { usePresence } from '@/hooks/usePresence';
+import { usePresence, useOnlineUsers } from '@/hooks/usePresence';
 import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -138,6 +138,7 @@ export default function Dashboard() {
 
   // Track user presence for real-time monitoring
   usePresence(user?.id, user?.email, user?.email?.split('@')[0] || null);
+  const { onlineCount } = useOnlineUsers();
 
   // Ref to track if data has been fetched for the current user
   const hasFetchedRef = useRef(false);
@@ -361,7 +362,7 @@ export default function Dashboard() {
   const filteredCategoryOrder = activeCategory ? CATEGORY_ORDER.filter((cat) => cat === activeCategory) : CATEGORY_ORDER;
   return <div className="min-h-screen bg-gradient-to-br from-background via-background to-primary/5 flex w-full">
       {/* Sidebar */}
-      <DashboardSidebar userProfile={userProfile} onLogout={handleLogout} activeCategory={activeCategory} onCategorySelect={setActiveCategory} isSocio={isSocio} isSocio2={isSocio2} isAdmin={isAdmin} />
+      <DashboardSidebar userProfile={userProfile} onLogout={handleLogout} activeCategory={activeCategory} onCategorySelect={setActiveCategory} isSocio={isSocio} isSocio2={isSocio2} isAdmin={isAdmin} onlineCount={onlineCount} />
 
       {/* Main Content Area */}
       <div className="flex-1 min-w-0">

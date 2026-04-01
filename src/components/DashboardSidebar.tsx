@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Users } from 'lucide-react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { 
   Wrench, 
@@ -36,6 +37,7 @@ interface DashboardSidebarProps {
   isSocio?: boolean;
   isSocio2?: boolean;
   isAdmin?: boolean;
+  onlineCount?: number;
 }
 
 const DASHBOARD_ITEMS_BASE = [
@@ -64,7 +66,8 @@ export default function DashboardSidebar({
   onCategorySelect,
   isSocio = false,
   isSocio2 = false,
-  isAdmin = false
+  isAdmin = false,
+  onlineCount = 0
 }: DashboardSidebarProps) {
   const [isCollapsed, setIsCollapsed] = useState(false);
   const [isMobileOpen, setIsMobileOpen] = useState(false);
@@ -156,7 +159,15 @@ export default function DashboardSidebar({
                   )}
                 >
                   <item.icon className={cn("h-5 w-5 flex-shrink-0", isActive && "text-primary-foreground")} />
-                  {!isCollapsed && <span>{item.label}</span>}
+                  {!isCollapsed && (
+                    <span className="flex-1 text-left">{item.label}</span>
+                  )}
+                  {!isCollapsed && onlineCount > 0 && ['ai_tools', 'streamings', 'software'].includes(item.category) && (
+                    <span className="flex items-center gap-1 text-xs text-emerald-400">
+                      <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                      {onlineCount}
+                    </span>
+                  )}
                 </button>
               );
             })}
