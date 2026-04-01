@@ -15,7 +15,7 @@ import JoviAIChat from '@/components/JoviAIChat';
 import { Veo3Chat } from '@/components/Veo3Chat';
 import SubscriptionPlans from '@/components/SubscriptionPlans';
 import whatsappBanner from '@/assets/whatsapp-banner.png';
-import dashboardBanner from '@/assets/jovitools-banner.png';
+import dashboardBanner from '@/assets/dashboard-banner.png';
 
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
@@ -463,22 +463,8 @@ export default function Dashboard() {
         }
 
         {hasAccess && <>
-        {hasAccess && <div className="mb-6 rounded-2xl overflow-hidden border-2 border-primary/40 shadow-2xl shadow-primary/30 relative group">
-            {/* Animated glow border effect */}
-            <div className="absolute -inset-0.5 bg-gradient-to-r from-primary via-accent to-primary rounded-2xl blur-sm opacity-60 group-hover:opacity-100 transition-opacity duration-700 animate-pulse z-0" />
-            <div className="relative z-10 rounded-2xl overflow-hidden">
-              <img src={dashboardBanner} alt="JoviTools Banner" className="w-full h-auto object-cover transition-transform duration-700 group-hover:scale-105" />
-              {/* Gradient overlay */}
-              <div className="absolute inset-0 bg-gradient-to-t from-background/60 via-transparent to-primary/10 pointer-events-none" />
-              <div className="absolute inset-0 bg-gradient-to-r from-primary/5 via-transparent to-accent/5 pointer-events-none" />
-              {/* Scan line effect */}
-              <div className="absolute inset-0 opacity-10 pointer-events-none" style={{ backgroundImage: 'repeating-linear-gradient(0deg, transparent, transparent 2px, hsl(220 90% 56% / 0.1) 2px, hsl(220 90% 56% / 0.1) 4px)', backgroundSize: '100% 4px' }} />
-              {/* Corner accents */}
-              <div className="absolute top-0 left-0 w-16 h-16 border-t-2 border-l-2 border-primary/60 rounded-tl-2xl" />
-              <div className="absolute top-0 right-0 w-16 h-16 border-t-2 border-r-2 border-accent/40 rounded-tr-2xl" />
-              <div className="absolute bottom-0 left-0 w-16 h-16 border-b-2 border-l-2 border-accent/40 rounded-bl-2xl" />
-              <div className="absolute bottom-0 right-0 w-16 h-16 border-b-2 border-r-2 border-primary/60 rounded-br-2xl" />
-            </div>
+        {hasAccess && <div className="mb-6 rounded-2xl overflow-hidden border border-primary/30 shadow-lg shadow-primary/20">
+            <img src={dashboardBanner} alt="JoviTools Banner" className="w-full h-auto object-cover" />
           </div>}
 
         {/* Account Validity Card */}
