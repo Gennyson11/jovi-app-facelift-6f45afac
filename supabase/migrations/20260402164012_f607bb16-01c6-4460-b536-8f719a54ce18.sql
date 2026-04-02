@@ -1,0 +1,1 @@
+UPDATE user_credits SET balance = 0 WHERE user_id = '65d5248e-a5c9-484e-9914-908e8fb0c81e';
