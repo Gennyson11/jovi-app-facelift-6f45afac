@@ -7,7 +7,7 @@ const MusicPlayer = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
-  const [volume, setVolume] = useState(0.5);
+  const [volume, setVolume] = useState(0.4);
   const [isMuted, setIsMuted] = useState(true);
 
   const togglePlay = useCallback(() => {
@@ -33,7 +33,7 @@ const MusicPlayer = () => {
     audio.addEventListener('loadedmetadata', onLoaded);
     audio.addEventListener('ended', onEnded);
 
-    audio.volume = 0.5;
+    audio.volume = 0.4;
     audio.muted = false;
     const tryPlay = audio.play();
     if (tryPlay) {
@@ -53,7 +53,7 @@ const MusicPlayer = () => {
     const unmuteOnClick = () => {
       if (audio.muted && !audio.paused) {
         audio.muted = false;
-        audio.volume = 0.5;
+        audio.volume = 0.4;
         setIsMuted(false);
       }
       document.removeEventListener('click', unmuteOnClick);
@@ -100,7 +100,7 @@ const MusicPlayer = () => {
     const audio = audioRef.current;
     if (!audio) return;
     if (isMuted) {
-      audio.volume = volume || 0.5;
+      audio.volume = volume || 0.4;
       setIsMuted(false);
     } else {
       audio.volume = 0;
