@@ -45,6 +45,14 @@ const ToolsSection = () => {
             </div>
 
 
+            {/* SEO Tools */}
+            <div>
+              <h3 className="text-base md:text-lg font-display font-bold text-primary mb-6 md:mb-8">
+                SEO
+              </h3>
+              <ToolsList tools={seoTools} />
+            </div>
+
             {/* Streaming Tools */}
             <div>
               <h3 className="text-base md:text-lg font-display font-bold text-primary mb-6 md:mb-8">
