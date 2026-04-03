@@ -9,7 +9,7 @@ const aiTools = [
 
 
 const seoTools = [
-  "SPYFU", "ADSPARO"
+  "SPYFU", "ADSPARO", "SPINNER PT/BR"
 ];
 
 const streamingTools = [
