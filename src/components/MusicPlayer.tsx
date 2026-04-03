@@ -100,7 +100,7 @@ const MusicPlayer = () => {
     const audio = audioRef.current;
     if (!audio) return;
     if (isMuted) {
-      audio.volume = volume || 0.5;
+      audio.volume = volume || 0.4;
       setIsMuted(false);
     } else {
       audio.volume = 0;
