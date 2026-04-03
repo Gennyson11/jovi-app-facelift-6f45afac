@@ -53,7 +53,7 @@ const MusicPlayer = () => {
     const unmuteOnClick = () => {
       if (audio.muted && !audio.paused) {
         audio.muted = false;
-        audio.volume = 0.5;
+        audio.volume = 0.4;
         setIsMuted(false);
       }
       document.removeEventListener('click', unmuteOnClick);
