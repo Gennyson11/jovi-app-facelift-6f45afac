@@ -74,7 +74,65 @@ serve(async (req) => {
 
     console.log("User verified:", callerUserEmail, "roles:", userRoles);
 
-    const { action, email, password, role, partner_id, name, has_access, access_expires_at, client_profile_id, new_email, new_password } = await req.json();
+    const body = await req.json();
+    const { action, email, password, role, partner_id, name, has_access, access_expires_at, client_profile_id, new_email, new_password } = body;
+
+    // Input validation
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const validRoles = ["admin", "user", "socio"];
+    const validActions = ["create_user", "update_password", "delete_user", "delete_users_without_access", "delete_orphan_auth_users", "delete_client", "update_client", "delete_auth_user_by_id"];
+
+    if (!action || !validActions.includes(action)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid action" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (email && !emailRegex.test(email)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid email format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (role && !validRoles.includes(role)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid role" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (partner_id && !uuidRegex.test(partner_id)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid partner_id format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (client_profile_id && !uuidRegex.test(client_profile_id)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid client_profile_id format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (new_email && !emailRegex.test(new_email)) {
+      return new Response(
+        JSON.stringify({ error: "Invalid new_email format" }),
+        { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // Sócios can only create users with 'user' role
+    if (isSocio && !isAdmin && role && role !== "user") {
+      return new Response(
+        JSON.stringify({ error: "Forbidden - Partners can only create users with 'user' role" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     console.log("Setup action:", action, "email:", email, "partner_id:", partner_id, "by user:", callerUserEmail, "isAdmin:", isAdmin, "isSocio:", isSocio);
 
     if (action === "create_user") {
