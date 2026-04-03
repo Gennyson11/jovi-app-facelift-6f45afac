@@ -61,7 +61,7 @@ const MusicPlayer = () => {
   return (
     <>
       <audio ref={audioRef} src="/audio/no-role-modelz.mp3" preload="metadata" />
-      <div className="fixed bottom-20 right-4 z-50 w-[340px] rounded-2xl bg-[#2a2a2a]/95 backdrop-blur-md shadow-2xl border border-white/10 p-3 select-none">
+      <div className="fixed bottom-24 right-4 z-50 w-[340px] rounded-2xl bg-[#2a2a2a]/95 backdrop-blur-md shadow-2xl border border-white/10 p-3 select-none">
         <div className="flex items-center gap-3">
           {/* Album Cover */}
           <img
