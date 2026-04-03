@@ -8,6 +8,10 @@ const aiTools = [
 ];
 
 
+const seoTools = [
+  "SPYFU", "ADSPARO"
+];
+
 const streamingTools = [
   "JOVIFLIX FILMES & SÉRIES", "CINDIE TV", "JOVI IPTV"
 ];
