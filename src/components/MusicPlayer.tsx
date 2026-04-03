@@ -24,7 +24,11 @@ const MusicPlayer = () => {
     if (!audio) return;
 
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const onLoaded = () => setDuration(audio.duration);
+    const onLoaded = () => {
+      setDuration(audio.duration);
+      // Autoplay on load
+      audio.play().then(() => setIsPlaying(true)).catch(() => {});
+    };
     const onEnded = () => setIsPlaying(false);
 
     audio.addEventListener('timeupdate', onTimeUpdate);
