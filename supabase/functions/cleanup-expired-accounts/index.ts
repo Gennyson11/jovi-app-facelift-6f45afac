@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
 
     const now = new Date().toISOString()
 
-    // Find expired accounts
+    // Find expired accounts that still have access
     const { data: expiredProfiles, error: fetchError } = await supabaseAdmin
       .from('profiles')
       .select('id, user_id, email, name, access_expires_at')
@@ -45,82 +45,53 @@ Deno.serve(async (req) => {
         JSON.stringify({ 
           success: true, 
           message: 'No expired accounts found',
-          deleted_count: 0 
+          blocked_count: 0 
         }),
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       )
     }
 
-    console.log(`Found ${expiredProfiles.length} expired accounts to delete`)
+    console.log(`Found ${expiredProfiles.length} expired accounts to block`)
 
-    const deletedAccounts: string[] = []
+    const blockedAccounts: string[] = []
     const errors: string[] = []
 
     for (const profile of expiredProfiles) {
       try {
-        console.log(`Deleting expired user: ${profile.email} (expired at: ${profile.access_expires_at})`)
+        console.log(`Blocking expired user: ${profile.email} (expired at: ${profile.access_expires_at})`)
 
-        // 1. Delete user_platform_access
+        // 1. Remove platform access
         await supabaseAdmin.from('user_platform_access').delete().eq('user_id', profile.id)
 
-        // 2. Delete user_coins
-        await supabaseAdmin.from('user_coins').delete().eq('user_id', profile.user_id)
+        // 2. Revoke access (block the account)
+        const { error: updateError } = await supabaseAdmin
+          .from('profiles')
+          .update({ 
+            has_access: false,
+            updated_at: now
+          })
+          .eq('id', profile.id)
 
-        // 3. Delete user_missions
-        await supabaseAdmin.from('user_missions').delete().eq('user_id', profile.user_id)
-
-        // 4. Delete credit_transactions
-        await supabaseAdmin.from('credit_transactions').delete().eq('user_id', profile.user_id)
-
-        // 5. Delete user_credits
-        await supabaseAdmin.from('user_credits').delete().eq('user_id', profile.user_id)
-
-        // 6. Delete user_access_logs
-        await supabaseAdmin.from('user_access_logs').delete().eq('user_id', profile.user_id)
-
-        // 7. Delete security_audit_log
-        await supabaseAdmin.from('security_audit_log').delete().eq('user_id', profile.user_id)
-
-        // 8. Delete user_roles
-        await supabaseAdmin.from('user_roles').delete().eq('user_id', profile.user_id)
-
-        // 9. Clear partner_id references from other profiles
-        await supabaseAdmin.from('profiles').update({ partner_id: null }).eq('partner_id', profile.user_id)
-
-        // 10. Clear invites used_by references
-        await supabaseAdmin.from('invites').update({ used_by: null }).eq('used_by', profile.user_id)
-
-        // 11. Delete profile
-        const { error: profileError } = await supabaseAdmin.from('profiles').delete().eq('id', profile.id)
-
-        if (profileError) {
-          console.error(`Error deleting profile for ${profile.email}:`, profileError)
-          errors.push(`${profile.email}: ${profileError.message}`)
+        if (updateError) {
+          console.error(`Error blocking profile for ${profile.email}:`, updateError)
+          errors.push(`${profile.email}: ${updateError.message}`)
           continue
         }
 
-        // 5. Delete from auth.users
-        const { error: authError } = await supabaseAdmin.auth.admin.deleteUser(profile.user_id)
-
-        if (authError) {
-          console.error(`Error deleting auth user for ${profile.email}:`, authError)
-          errors.push(`${profile.email}: auth deletion failed - ${authError.message}`)
-        } else {
-          console.log(`Successfully deleted user: ${profile.email}`)
-          deletedAccounts.push(profile.email)
-        }
+        console.log(`Successfully blocked user: ${profile.email}`)
+        blockedAccounts.push(profile.email)
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : 'Unknown error'
-        console.error(`Exception deleting ${profile.email}:`, err)
+        console.error(`Exception blocking ${profile.email}:`, err)
         errors.push(`${profile.email}: ${errorMessage}`)
       }
     }
 
     const result = {
       success: true,
-      message: `Cleanup completed. Deleted ${deletedAccounts.length} expired accounts.`,
-      deleted_count: deletedAccounts.length,
-      deleted_emails: deletedAccounts,
+      message: `Cleanup completed. Blocked ${blockedAccounts.length} expired accounts.`,
+      blocked_count: blockedAccounts.length,
+      blocked_emails: blockedAccounts,
       errors: errors.length > 0 ? errors : undefined
     }
 
