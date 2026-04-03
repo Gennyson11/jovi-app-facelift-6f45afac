@@ -50,6 +50,13 @@ function MaintenanceWrapper({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+const MusicPlayerWrapper = () => {
+  const location = useLocation();
+  const showOn = ['/', '/dashboard', '/socios'];
+  if (!showOn.includes(location.pathname)) return null;
+  return <MusicPlayer />;
+};
+
 const AppRoutes = () => (
   <MaintenanceWrapper>
     <Routes>
@@ -65,6 +72,7 @@ const AppRoutes = () => (
       <Route path="/creditos" element={<Credits />} />
       <Route path="*" element={<NotFound />} />
     </Routes>
+    <MusicPlayerWrapper />
   </MaintenanceWrapper>
 );
 
