@@ -25,6 +25,8 @@ const Index = () => {
           </p>
         </div>
       </footer>
+
+      <MusicPlayer />
     </div>
   );
 };
