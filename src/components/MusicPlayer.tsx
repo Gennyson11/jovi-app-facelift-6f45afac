@@ -8,7 +8,7 @@ const MusicPlayer = () => {
   const [duration, setDuration] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const [volume, setVolume] = useState(0.5);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
 
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
