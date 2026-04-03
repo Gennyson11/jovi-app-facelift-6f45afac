@@ -21,28 +21,54 @@ const MusicPlayer = () => {
     setIsPlaying(!isPlaying);
   }, [isPlaying]);
 
+  // Autoplay: try with sound first, fallback to muted
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const onLoaded = () => {
-      setDuration(audio.duration);
-      // Autoplay muted (browsers allow muted autoplay)
-      audio.muted = true;
-      audio.volume = 0;
-      audio.play().then(() => setIsPlaying(true)).catch(() => {});
-    };
+    const onLoaded = () => setDuration(audio.duration);
     const onEnded = () => setIsPlaying(false);
 
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('loadedmetadata', onLoaded);
     audio.addEventListener('ended', onEnded);
 
+    // Try autoplay with sound
+    audio.volume = 0.5;
+    audio.muted = false;
+    const tryPlay = audio.play();
+    if (tryPlay) {
+      tryPlay.then(() => {
+        setIsPlaying(true);
+        setIsMuted(false);
+      }).catch(() => {
+        // Browser blocked — try muted
+        audio.muted = true;
+        audio.volume = 0;
+        audio.play().then(() => {
+          setIsPlaying(true);
+          setIsMuted(true);
+        }).catch(() => {});
+      });
+    }
+
+    // On first user click anywhere, unmute if muted
+    const unmuteOnClick = () => {
+      if (audio.muted && !audio.paused) {
+        audio.muted = false;
+        audio.volume = 0.5;
+        setIsMuted(false);
+      }
+      document.removeEventListener('click', unmuteOnClick);
+    };
+    document.addEventListener('click', unmuteOnClick);
+
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('loadedmetadata', onLoaded);
       audio.removeEventListener('ended', onEnded);
+      document.removeEventListener('click', unmuteOnClick);
     };
   }, []);
 
