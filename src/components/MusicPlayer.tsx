@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Play, Pause, SkipBack, SkipForward } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX } from 'lucide-react';
 
 const MusicPlayer = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -7,6 +7,8 @@ const MusicPlayer = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
+  const [volume, setVolume] = useState(0.5);
+  const [isMuted, setIsMuted] = useState(false);
 
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
@@ -60,6 +62,28 @@ const MusicPlayer = () => {
     audio.currentTime = pct * duration;
   };
 
+  const handleVolumeChange = (e: React.MouseEvent<HTMLDivElement>) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    setVolume(pct);
+    audio.volume = pct;
+    setIsMuted(pct === 0);
+  };
+
+  const toggleMute = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isMuted) {
+      audio.volume = volume || 0.5;
+      setIsMuted(false);
+    } else {
+      audio.volume = 0;
+      setIsMuted(true);
+    }
+  };
+
   if (!isVisible) return null;
 
   return (
@@ -92,9 +116,25 @@ const MusicPlayer = () => {
               </div>
             </div>
 
-            <div className="flex justify-between mt-1">
+            <div className="flex items-center justify-between mt-1">
               <span className="text-white/40 text-[10px]">{formatTime(currentTime)}</span>
               <span className="text-white/40 text-[10px]">-{formatTime(remaining)}</span>
+            </div>
+
+            {/* Volume */}
+            <div className="flex items-center gap-1.5 mt-1">
+              <button onClick={toggleMute} className="text-white/50 hover:text-white/80 transition-colors">
+                {isMuted ? <VolumeX className="w-3 h-3" /> : <Volume2 className="w-3 h-3" />}
+              </button>
+              <div
+                className="flex-1 h-1 bg-white/20 rounded-full cursor-pointer group"
+                onClick={handleVolumeChange}
+              >
+                <div
+                  className="h-full bg-white/50 rounded-full transition-all duration-150"
+                  style={{ width: `${isMuted ? 0 : volume * 100}%` }}
+                />
+              </div>
             </div>
           </div>
 
