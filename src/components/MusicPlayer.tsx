@@ -62,6 +62,28 @@ const MusicPlayer = () => {
     audio.currentTime = pct * duration;
   };
 
+  const handleVolumeChange = (e: React.MouseEvent<HTMLDivElement>) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const pct = Math.max(0, Math.min(1, (e.clientX - rect.left) / rect.width));
+    setVolume(pct);
+    audio.volume = pct;
+    setIsMuted(pct === 0);
+  };
+
+  const toggleMute = () => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    if (isMuted) {
+      audio.volume = volume || 0.5;
+      setIsMuted(false);
+    } else {
+      audio.volume = 0;
+      setIsMuted(true);
+    }
+  };
+
   if (!isVisible) return null;
 
   return (
