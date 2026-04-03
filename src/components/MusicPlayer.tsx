@@ -33,7 +33,7 @@ const MusicPlayer = () => {
     audio.addEventListener('loadedmetadata', onLoaded);
     audio.addEventListener('ended', onEnded);
 
-    audio.volume = 0.5;
+    audio.volume = 0.4;
     audio.muted = false;
     const tryPlay = audio.play();
     if (tryPlay) {
