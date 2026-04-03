@@ -8,7 +8,7 @@ const MusicPlayer = () => {
   const [duration, setDuration] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const [volume, setVolume] = useState(0.5);
-  const [isMuted, setIsMuted] = useState(false);
+  const [isMuted, setIsMuted] = useState(true);
 
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
@@ -28,7 +28,9 @@ const MusicPlayer = () => {
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
     const onLoaded = () => {
       setDuration(audio.duration);
-      // Autoplay on load
+      // Autoplay muted (browsers allow muted autoplay)
+      audio.muted = true;
+      audio.volume = 0;
       audio.play().then(() => setIsPlaying(true)).catch(() => {});
     };
     const onEnded = () => setIsPlaying(false);
