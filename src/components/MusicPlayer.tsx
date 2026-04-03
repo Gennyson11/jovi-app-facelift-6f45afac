@@ -28,7 +28,9 @@ const MusicPlayer = () => {
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
     const onLoaded = () => {
       setDuration(audio.duration);
-      // Autoplay on load
+      // Autoplay muted (browsers allow muted autoplay)
+      audio.muted = true;
+      audio.volume = 0;
       audio.play().then(() => setIsPlaying(true)).catch(() => {});
     };
     const onEnded = () => setIsPlaying(false);
