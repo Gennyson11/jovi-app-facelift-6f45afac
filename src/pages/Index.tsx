@@ -4,7 +4,7 @@ import FeaturesSection from "@/components/FeaturesSection";
 import ToolsSection from "@/components/ToolsSection";
 import PricingSection from "@/components/PricingSection";
 import FAQSection from "@/components/FAQSection";
-import MusicPlayer from "@/components/MusicPlayer";
+
 
 const Index = () => {
   const navigate = useNavigate();
@@ -26,7 +26,7 @@ const Index = () => {
         </div>
       </footer>
 
-      <MusicPlayer />
+      
     </div>
   );
 };
