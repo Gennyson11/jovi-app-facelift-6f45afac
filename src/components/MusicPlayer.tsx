@@ -35,39 +35,13 @@ const MusicPlayer = () => {
 
     audio.volume = 0.4;
     audio.muted = false;
-    const tryPlay = audio.play();
-    if (tryPlay) {
-      tryPlay.then(() => {
-        setIsPlaying(true);
-        setIsMuted(false);
-      }).catch(() => {
-        audio.muted = true;
-        audio.volume = 0;
-        audio.play().then(() => {
-          setIsPlaying(true);
-          setIsMuted(true);
-        }).catch(() => {});
-      });
-    }
-
-    const unmuteOnInteraction = () => {
-      if (audio.muted && !audio.paused) {
-        audio.muted = false;
-        audio.volume = 0.4;
-        setIsMuted(false);
-      }
-      document.removeEventListener('click', unmuteOnInteraction);
-      document.removeEventListener('touchstart', unmuteOnInteraction);
-    };
-    document.addEventListener('click', unmuteOnInteraction);
-    document.addEventListener('touchstart', unmuteOnInteraction);
+    setIsMuted(false);
+    setIsPlaying(false);
 
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('loadedmetadata', onLoaded);
       audio.removeEventListener('ended', onEnded);
-      document.removeEventListener('click', unmuteOnInteraction);
-      document.removeEventListener('touchstart', unmuteOnInteraction);
     };
   }, []);
 
