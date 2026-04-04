@@ -740,18 +740,6 @@ export default function Dashboard() {
                             </button>
                           </div>
 
-                          {/* Ver mais detalhes */}
-                          <button
-                        className="w-full text-center text-muted-foreground text-sm hover:text-foreground transition-colors flex items-center justify-center gap-1"
-                        onClick={() => {
-                          window.open('https://bit.ly/whatsapp-suportejt', '_blank');
-                        }}>
-                        
-                            Ver mais detalhes
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                            </svg>
-                          </button>
                         </div>
                       </div>
                     </div>);
