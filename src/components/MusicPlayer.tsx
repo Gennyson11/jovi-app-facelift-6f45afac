@@ -66,7 +66,8 @@ const MusicPlayer = () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('loadedmetadata', onLoaded);
       audio.removeEventListener('ended', onEnded);
-      document.removeEventListener('click', unmuteOnClick);
+      document.removeEventListener('click', unmuteOnInteraction);
+      document.removeEventListener('touchstart', unmuteOnInteraction);
     };
   }, []);
 
