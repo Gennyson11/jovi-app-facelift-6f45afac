@@ -50,15 +50,17 @@ const MusicPlayer = () => {
       });
     }
 
-    const unmuteOnClick = () => {
+    const unmuteOnInteraction = () => {
       if (audio.muted && !audio.paused) {
         audio.muted = false;
         audio.volume = 0.4;
         setIsMuted(false);
       }
-      document.removeEventListener('click', unmuteOnClick);
+      document.removeEventListener('click', unmuteOnInteraction);
+      document.removeEventListener('touchstart', unmuteOnInteraction);
     };
-    document.addEventListener('click', unmuteOnClick);
+    document.addEventListener('click', unmuteOnInteraction);
+    document.addEventListener('touchstart', unmuteOnInteraction);
 
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
