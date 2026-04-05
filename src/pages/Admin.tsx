@@ -222,6 +222,7 @@ export default function Admin() {
   const [blockReasonDialogOpen, setBlockReasonDialogOpen] = useState(false);
   const [blockingUser, setBlockingUser] = useState<UserProfile | null>(null);
   const [blockReason, setBlockReason] = useState('');
+  const [blockDuration, setBlockDuration] = useState<string>('permanent');
 
   // User Registration (Cadastro)
   const [registerName, setRegisterName] = useState('');
@@ -509,6 +510,7 @@ export default function Admin() {
   const openBlockDialog = (userProfile: UserProfile) => {
     setBlockingUser(userProfile);
     setBlockReason('');
+    setBlockDuration('permanent');
     setBlockReasonDialogOpen(true);
   };
 
@@ -516,12 +518,23 @@ export default function Admin() {
   const blockUserWithReason = async () => {
     if (!blockingUser) return;
 
+    let blockExpiresAt: string | null = null;
+    if (blockDuration !== 'permanent') {
+      const days = parseInt(blockDuration);
+      if (!isNaN(days) && days > 0) {
+        const expDate = new Date();
+        expDate.setDate(expDate.getDate() + days);
+        blockExpiresAt = expDate.toISOString();
+      }
+    }
+
     const { error } = await supabase.
     from('profiles').
     update({
       has_access: false,
-      block_reason: blockReason.trim() || null
-    }).
+      block_reason: blockReason.trim() || null,
+      block_expires_at: blockExpiresAt
+    } as any).
     eq('id', blockingUser.id);
 
     if (error) {
