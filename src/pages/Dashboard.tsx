@@ -465,6 +465,31 @@ export default function Dashboard() {
                 <p className="text-sm font-medium text-destructive/80 mb-1">Motivo do bloqueio:</p>
                 <p className="text-foreground font-semibold">{userProfile.block_reason}</p>
               </div>
+              {userProfile.block_expires_at ? (
+                <div className="max-w-md mx-auto bg-muted/50 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-muted-foreground">
+                    ⏰ Bloqueio expira em: <span className="font-semibold text-foreground">
+                      {(() => {
+                        const exp = new Date(userProfile.block_expires_at);
+                        const now = new Date();
+                        const diffMs = exp.getTime() - now.getTime();
+                        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                        const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
+                        if (diffDays > 1) return `${diffDays} dias`;
+                        if (diffHours > 1) return `${diffHours} horas`;
+                        return 'em breve';
+                      })()}
+                    </span>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {new Date(userProfile.block_expires_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-destructive/80 font-medium mb-4">
+                  ⛔ Bloqueio permanente
+                </p>
+              )}
               <p className="text-muted-foreground text-sm mb-4">
                 Entre em contato com o administrador para mais informações ou para solicitar a liberação do seu acesso.
               </p>
