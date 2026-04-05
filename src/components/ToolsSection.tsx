@@ -39,7 +39,7 @@ const ToolsSection = () => {
     <section className="py-12 md:py-20 px-4 relative">
       <div className="max-w-6xl mx-auto relative z-10">
         <div className="rounded-xl border border-primary/20 bg-card/30 p-6 md:p-8 lg:p-12">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 md:gap-12">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 md:gap-12">
             {/* AI Tools */}
             <div>
               <h3 className="text-base md:text-lg font-display font-bold text-primary mb-6 md:mb-8">
