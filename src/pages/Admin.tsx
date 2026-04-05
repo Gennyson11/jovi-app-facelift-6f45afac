@@ -222,6 +222,7 @@ export default function Admin() {
   const [blockReasonDialogOpen, setBlockReasonDialogOpen] = useState(false);
   const [blockingUser, setBlockingUser] = useState<UserProfile | null>(null);
   const [blockReason, setBlockReason] = useState('');
+  const [blockDuration, setBlockDuration] = useState<string>('permanent');
 
   // User Registration (Cadastro)
   const [registerName, setRegisterName] = useState('');
@@ -509,6 +510,7 @@ export default function Admin() {
   const openBlockDialog = (userProfile: UserProfile) => {
     setBlockingUser(userProfile);
     setBlockReason('');
+    setBlockDuration('permanent');
     setBlockReasonDialogOpen(true);
   };
 
@@ -516,12 +518,23 @@ export default function Admin() {
   const blockUserWithReason = async () => {
     if (!blockingUser) return;
 
+    let blockExpiresAt: string | null = null;
+    if (blockDuration !== 'permanent') {
+      const days = parseInt(blockDuration);
+      if (!isNaN(days) && days > 0) {
+        const expDate = new Date();
+        expDate.setDate(expDate.getDate() + days);
+        blockExpiresAt = expDate.toISOString();
+      }
+    }
+
     const { error } = await supabase.
     from('profiles').
     update({
       has_access: false,
-      block_reason: blockReason.trim() || null
-    }).
+      block_reason: blockReason.trim() || null,
+      block_expires_at: blockExpiresAt
+    } as any).
     eq('id', blockingUser.id);
 
     if (error) {
@@ -3179,9 +3192,37 @@ export default function Admin() {
               placeholder="Ex: Compartilhamento de conta detectado, Pagamento não confirmado, etc."
               className="min-h-[100px]"
               maxLength={500} />
-            
               <p className="text-xs text-muted-foreground">
                 Este motivo será exibido ao usuário quando ele tentar fazer login.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Duração do banimento</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { value: 'permanent', label: 'Permanente' },
+                  { value: '1', label: '1 dia' },
+                  { value: '3', label: '3 dias' },
+                  { value: '7', label: '7 dias' },
+                  { value: '15', label: '15 dias' },
+                  { value: '30', label: '30 dias' },
+                ].map((opt) => (
+                  <Button
+                    key={opt.value}
+                    type="button"
+                    variant={blockDuration === opt.value ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setBlockDuration(opt.value)}
+                    className={blockDuration === opt.value ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground' : ''}
+                  >
+                    {opt.label}
+                  </Button>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {blockDuration === 'permanent' 
+                  ? 'O bloqueio será permanente até liberação manual.' 
+                  : `O bloqueio expira automaticamente após ${blockDuration} dia(s).`}
               </p>
             </div>
           </div>

@@ -194,6 +194,7 @@ export type Database = {
         Row: {
           access_expires_at: string | null
           avatar_url: string | null
+          block_expires_at: string | null
           block_reason: string | null
           created_at: string
           email: string
@@ -210,6 +211,7 @@ export type Database = {
         Insert: {
           access_expires_at?: string | null
           avatar_url?: string | null
+          block_expires_at?: string | null
           block_reason?: string | null
           created_at?: string
           email: string
@@ -226,6 +228,7 @@ export type Database = {
         Update: {
           access_expires_at?: string | null
           avatar_url?: string | null
+          block_expires_at?: string | null
           block_reason?: string | null
           created_at?: string
           email?: string

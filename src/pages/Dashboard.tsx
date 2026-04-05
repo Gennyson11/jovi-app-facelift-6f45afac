@@ -71,6 +71,7 @@ interface UserProfile {
   access_expires_at: string | null;
   avatar_url: string | null;
   block_reason: string | null;
+  block_expires_at: string | null;
   partner_id: string | null;
 }
 interface News {
@@ -337,11 +338,28 @@ export default function Dashboard() {
       setSelectedPlatform(platform);
     }
   };
+  // Check if block has expired and auto-unblock
+  const isBlockExpired = userProfile?.block_reason && userProfile?.block_expires_at && new Date(userProfile.block_expires_at) < new Date();
+
+  // Auto-unblock if block expired
+  useEffect(() => {
+    if (isBlockExpired && userProfile) {
+      supabase.from('profiles').update({
+        has_access: false,
+        block_reason: null,
+        block_expires_at: null
+      } as any).eq('id', userProfile.id).then(() => {
+        window.location.reload();
+      });
+    }
+  }, [isBlockExpired]);
+
   if (authLoading || loading) {
     return <div className="min-h-screen bg-background flex items-center justify-center">
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>;
   }
+
   const hasAccess = isAdmin || subscribed || userProfile?.has_access && !isAccessExpired();
   const accessExpired = !subscribed && userProfile?.has_access && isAccessExpired();
 
@@ -447,6 +465,31 @@ export default function Dashboard() {
                 <p className="text-sm font-medium text-destructive/80 mb-1">Motivo do bloqueio:</p>
                 <p className="text-foreground font-semibold">{userProfile.block_reason}</p>
               </div>
+              {userProfile.block_expires_at ? (
+                <div className="max-w-md mx-auto bg-muted/50 rounded-lg p-3 mb-4">
+                  <p className="text-sm text-muted-foreground">
+                    ⏰ Bloqueio expira em: <span className="font-semibold text-foreground">
+                      {(() => {
+                        const exp = new Date(userProfile.block_expires_at);
+                        const now = new Date();
+                        const diffMs = exp.getTime() - now.getTime();
+                        const diffDays = Math.ceil(diffMs / (1000 * 60 * 60 * 24));
+                        const diffHours = Math.ceil(diffMs / (1000 * 60 * 60));
+                        if (diffDays > 1) return `${diffDays} dias`;
+                        if (diffHours > 1) return `${diffHours} horas`;
+                        return 'em breve';
+                      })()}
+                    </span>
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    {new Date(userProfile.block_expires_at).toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit' })}
+                  </p>
+                </div>
+              ) : (
+                <p className="text-sm text-destructive/80 font-medium mb-4">
+                  ⛔ Bloqueio permanente
+                </p>
+              )}
               <p className="text-muted-foreground text-sm mb-4">
                 Entre em contato com o administrador para mais informações ou para solicitar a liberação do seu acesso.
               </p>
