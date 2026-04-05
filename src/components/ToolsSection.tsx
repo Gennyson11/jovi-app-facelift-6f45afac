@@ -64,6 +64,14 @@ const ToolsSection = () => {
               </h3>
               <ToolsList tools={streamingTools} />
             </div>
+
+            {/* Bonus */}
+            <div>
+              <h3 className="text-base md:text-lg font-display font-bold text-primary mb-6 md:mb-8">
+                BÔNUS
+              </h3>
+              <ToolsList tools={bonusTools} />
+            </div>
           </div>
         </div>
       </div>
