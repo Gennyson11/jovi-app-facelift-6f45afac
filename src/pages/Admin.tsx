@@ -3192,9 +3192,37 @@ export default function Admin() {
               placeholder="Ex: Compartilhamento de conta detectado, Pagamento não confirmado, etc."
               className="min-h-[100px]"
               maxLength={500} />
-            
               <p className="text-xs text-muted-foreground">
                 Este motivo será exibido ao usuário quando ele tentar fazer login.
+              </p>
+            </div>
+            <div className="space-y-2">
+              <Label>Duração do banimento</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {[
+                  { value: 'permanent', label: 'Permanente' },
+                  { value: '1', label: '1 dia' },
+                  { value: '3', label: '3 dias' },
+                  { value: '7', label: '7 dias' },
+                  { value: '15', label: '15 dias' },
+                  { value: '30', label: '30 dias' },
+                ].map((opt) => (
+                  <Button
+                    key={opt.value}
+                    type="button"
+                    variant={blockDuration === opt.value ? 'default' : 'outline'}
+                    size="sm"
+                    onClick={() => setBlockDuration(opt.value)}
+                    className={blockDuration === opt.value ? 'bg-destructive hover:bg-destructive/90 text-destructive-foreground' : ''}
+                  >
+                    {opt.label}
+                  </Button>
+                ))}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {blockDuration === 'permanent' 
+                  ? 'O bloqueio será permanente até liberação manual.' 
+                  : `O bloqueio expira automaticamente após ${blockDuration} dia(s).`}
               </p>
             </div>
           </div>
