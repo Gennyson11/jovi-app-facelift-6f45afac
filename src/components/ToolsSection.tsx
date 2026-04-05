@@ -17,7 +17,7 @@ const streamingTools = [
 ];
 
 const bonusTools = [
-  "CURSOS EXCLUSIVOS", "MATERIAIS PREMIUM", "TEMPLATES PRO"
+  "CURSOS EXCLUSIVOS", "MATERIAIS PREMIUM", "TEMPLATES PRO", "MÉTODOS"
 ];
 
 const ToolsList = ({ tools }: { tools: string[] }) => (
