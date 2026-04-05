@@ -343,6 +343,22 @@ export default function Dashboard() {
         <Loader2 className="w-8 h-8 animate-spin text-primary" />
       </div>;
   }
+  // Check if block has expired and auto-unblock
+  const isBlockExpired = userProfile?.block_reason && userProfile?.block_expires_at && new Date(userProfile.block_expires_at) < new Date();
+
+  // Auto-unblock if block expired
+  useEffect(() => {
+    if (isBlockExpired && userProfile) {
+      supabase.from('profiles').update({
+        has_access: false,
+        block_reason: null,
+        block_expires_at: null
+      } as any).eq('id', userProfile.id).then(() => {
+        window.location.reload();
+      });
+    }
+  }, [isBlockExpired]);
+
   const hasAccess = isAdmin || subscribed || userProfile?.has_access && !isAccessExpired();
   const accessExpired = !subscribed && userProfile?.has_access && isAccessExpired();
 
