@@ -1,0 +1,1 @@
+DELETE FROM public.user_roles WHERE user_id = '1dc85bb7-84a6-42d3-bbe1-4224876b910a' AND role = 'socio';
