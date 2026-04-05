@@ -494,7 +494,7 @@ export default function Dashboard() {
                 Entre em contato com o administrador para mais informações ou para solicitar a liberação do seu acesso.
               </p>
               <Button
-            onClick={() => window.open('https://bit.ly/whatsapp-suportejt', '_blank')}
+            onClick={() => window.open('https://wa.me/558499889568?text=preciso%20de%20suporte!', '_blank')}
             className="bg-green-500 hover:bg-green-600 text-white">
             
                 Falar com Suporte via WhatsApp
