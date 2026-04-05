@@ -16,6 +16,10 @@ const streamingTools = [
   "JOVIFLIX FILMES & SÉRIES", "CINDIE TV", "JOVI IPTV"
 ];
 
+const bonusTools = [
+  "CURSOS EXCLUSIVOS", "MATERIAIS PREMIUM", "TEMPLATES PRO"
+];
+
 const ToolsList = ({ tools }: { tools: string[] }) => (
   <ul className="space-y-3">
     {tools.map((tool) => (
