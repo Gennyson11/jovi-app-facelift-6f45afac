@@ -338,11 +338,6 @@ export default function Dashboard() {
       setSelectedPlatform(platform);
     }
   };
-  if (authLoading || loading) {
-    return <div className="min-h-screen bg-background flex items-center justify-center">
-        <Loader2 className="w-8 h-8 animate-spin text-primary" />
-      </div>;
-  }
   // Check if block has expired and auto-unblock
   const isBlockExpired = userProfile?.block_reason && userProfile?.block_expires_at && new Date(userProfile.block_expires_at) < new Date();
 
@@ -358,6 +353,12 @@ export default function Dashboard() {
       });
     }
   }, [isBlockExpired]);
+
+  if (authLoading || loading) {
+    return <div className="min-h-screen bg-background flex items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>;
+  }
 
   const hasAccess = isAdmin || subscribed || userProfile?.has_access && !isAccessExpired();
   const accessExpired = !subscribed && userProfile?.has_access && isAccessExpired();
