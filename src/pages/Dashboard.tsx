@@ -71,6 +71,7 @@ interface UserProfile {
   access_expires_at: string | null;
   avatar_url: string | null;
   block_reason: string | null;
+  block_expires_at: string | null;
   partner_id: string | null;
 }
 interface News {
