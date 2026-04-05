@@ -16,6 +16,10 @@ const streamingTools = [
   "JOVIFLIX FILMES & SÉRIES", "CINDIE TV", "JOVI IPTV"
 ];
 
+const bonusTools = [
+  "CURSOS EXCLUSIVOS", "MATERIAIS PREMIUM", "TEMPLATES PRO"
+];
+
 const ToolsList = ({ tools }: { tools: string[] }) => (
   <ul className="space-y-3">
     {tools.map((tool) => (
@@ -59,6 +63,14 @@ const ToolsSection = () => {
                 STREAMINGS
               </h3>
               <ToolsList tools={streamingTools} />
+            </div>
+
+            {/* Bonus */}
+            <div>
+              <h3 className="text-base md:text-lg font-display font-bold text-primary mb-6 md:mb-8">
+                BÔNUS
+              </h3>
+              <ToolsList tools={bonusTools} />
             </div>
           </div>
         </div>
