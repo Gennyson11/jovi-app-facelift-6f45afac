@@ -836,6 +836,17 @@ export default function Socios() {
               />
             </div>
             <div className="space-y-2">
+              <Label htmlFor="client-whatsapp">WhatsApp</Label>
+              <Input
+                id="client-whatsapp"
+                type="tel"
+                value={clientWhatsapp}
+                onChange={e => setClientWhatsapp(e.target.value)}
+                placeholder="11999999999"
+                className="bg-background/50 border-border"
+              />
+            </div>
+            <div className="space-y-2">
               <Label htmlFor="client-password">Senha *</Label>
               <div className="relative">
                 <Input
