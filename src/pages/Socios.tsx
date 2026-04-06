@@ -174,10 +174,9 @@ export default function Socios() {
   const fetchClients = async () => {
     if (!user) return;
     
-    // Usar a view partner_client_view que mascara dados sensíveis
     const { data, error } = await supabase
-      .from('partner_client_view')
-      .select('*')
+      .from('profiles')
+      .select('id, user_id, email, whatsapp, name, has_access, created_at, access_expires_at, partner_id')
       .eq('partner_id', user.id)
       .order('created_at', { ascending: false });
     
