@@ -16,8 +16,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 interface ClientProfile {
   id: string;
   user_id: string;
-  masked_email: string | null;
-  masked_whatsapp: string | null;
+  email: string;
+  whatsapp: string | null;
   name: string | null;
   has_access: boolean | null;
   created_at: string | null;
@@ -174,10 +174,9 @@ export default function Socios() {
   const fetchClients = async () => {
     if (!user) return;
     
-    // Usar a view partner_client_view que mascara dados sensíveis
     const { data, error } = await supabase
-      .from('partner_client_view')
-      .select('*')
+      .from('profiles')
+      .select('id, user_id, email, whatsapp, name, has_access, created_at, access_expires_at, partner_id')
       .eq('partner_id', user.id)
       .order('created_at', { ascending: false });
     
@@ -428,7 +427,7 @@ export default function Socios() {
 
   const openEditDialog = (client: ClientProfile) => {
     setEditingClient(client);
-    setEditEmail(client.masked_email || '');
+    setEditEmail(client.email || '');
     setEditPassword('');
     setShowEditPassword(false);
     setEditDialogOpen(true);
@@ -710,10 +709,10 @@ export default function Socios() {
                           {client.name || '-'}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {client.masked_email || '-'}
+                          {client.email || '-'}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {client.masked_whatsapp || '-'}
+                          {client.whatsapp || '-'}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {formatDate(client.created_at)}
