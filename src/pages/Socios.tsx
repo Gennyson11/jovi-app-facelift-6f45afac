@@ -776,7 +776,7 @@ export default function Socios() {
                   })}
                   {clients.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground py-12">
+                      <TableCell colSpan={7} className="text-center text-muted-foreground py-12">
                         <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
                         <p>Você ainda não cadastrou nenhum cliente</p>
                         <p className="text-sm mt-1">Clique em "Novo Cliente" para começar</p>
