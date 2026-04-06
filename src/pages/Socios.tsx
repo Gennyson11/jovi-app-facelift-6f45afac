@@ -51,6 +51,12 @@ export default function Socios() {
   const [deletingClientId, setDeletingClientId] = useState<string | null>(null);
   const [confirmDeleteClient, setConfirmDeleteClient] = useState<ClientProfile | null>(null);
   
+  // Re-enable access dialog
+  const [reenableDialogOpen, setReenableDialogOpen] = useState(false);
+  const [reenableClient, setReenableClient] = useState<ClientProfile | null>(null);
+  const [reenablePlan, setReenablePlan] = useState<number>(30);
+  const [reenabling, setReenabling] = useState(false);
+  
   // Edit Client Dialog
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<ClientProfile | null>(null);
