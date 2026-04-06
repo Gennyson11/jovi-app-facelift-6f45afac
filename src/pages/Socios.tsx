@@ -266,6 +266,7 @@ export default function Socios() {
           role: 'user',
           partner_id: user?.id,
           name: clientName,
+          whatsapp: clientWhatsapp || undefined,
           has_access: true,
           access_expires_at: expirationDate.toISOString()
         }
