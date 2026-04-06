@@ -51,6 +51,12 @@ export default function Socios() {
   const [deletingClientId, setDeletingClientId] = useState<string | null>(null);
   const [confirmDeleteClient, setConfirmDeleteClient] = useState<ClientProfile | null>(null);
   
+  // Re-enable access dialog
+  const [reenableDialogOpen, setReenableDialogOpen] = useState(false);
+  const [reenableClient, setReenableClient] = useState<ClientProfile | null>(null);
+  const [reenablePlan, setReenablePlan] = useState<number>(30);
+  const [reenabling, setReenabling] = useState(false);
+  
   // Edit Client Dialog
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editingClient, setEditingClient] = useState<ClientProfile | null>(null);
@@ -306,25 +312,80 @@ export default function Socios() {
   };
 
   const toggleClientAccess = async (clientId: string, currentAccess: boolean) => {
-    const { error } = await supabase
-      .from('profiles')
-      .update({ has_access: !currentAccess })
-      .eq('id', clientId);
+    if (currentAccess) {
+      // Blocking - no credit needed
+      const { error } = await supabase
+        .from('profiles')
+        .update({ has_access: false })
+        .eq('id', clientId);
 
-    if (error) {
+      if (error) {
+        toast({ title: 'Erro', description: 'Falha ao bloquear acesso', variant: 'destructive' });
+        return;
+      }
+      toast({ title: 'Sucesso', description: 'Acesso bloqueado' });
+      fetchClients();
+    } else {
+      // Re-enabling - show confirmation dialog
+      const client = clients.find(c => c.id === clientId);
+      if (client) {
+        setReenableClient(client);
+        setReenablePlan(30);
+        setReenableDialogOpen(true);
+      }
+    }
+  };
+
+  const confirmReenableAccess = async () => {
+    if (!reenableClient || !user) return;
+
+    if (socioCredits < 1) {
       toast({
-        title: 'Erro',
-        description: 'Falha ao atualizar acesso',
+        title: 'Créditos insuficientes',
+        description: 'Você precisa de pelo menos 1 crédito para liberar acesso.',
         variant: 'destructive'
       });
       return;
     }
 
-    toast({
-      title: 'Sucesso',
-      description: currentAccess ? 'Acesso bloqueado' : 'Acesso liberado'
-    });
-    fetchClients();
+    setReenabling(true);
+    try {
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + reenablePlan);
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          has_access: true,
+          access_expires_at: expirationDate.toISOString()
+        })
+        .eq('id', reenableClient.id);
+
+      if (error) throw error;
+
+      // Deduct 1 credit
+      const { error: creditError } = await supabase.rpc('add_credits', {
+        p_user_id: user.id,
+        p_amount: -1,
+        p_type: 'client_reactivation',
+        p_description: `Reativação de cliente: ${reenableClient.name || 'sem nome'}`
+      });
+
+      if (creditError) {
+        console.error('Error deducting credit:', creditError);
+      } else {
+        setSocioCredits(prev => prev - 1);
+      }
+
+      toast({ title: 'Sucesso', description: 'Acesso liberado com sucesso!' });
+      setReenableDialogOpen(false);
+      setReenableClient(null);
+      fetchClients();
+    } catch (error: any) {
+      toast({ title: 'Erro', description: error.message || 'Falha ao liberar acesso', variant: 'destructive' });
+    } finally {
+      setReenabling(false);
+    }
   };
 
   const deleteClient = async (client: ClientProfile) => {
@@ -929,6 +990,68 @@ export default function Socios() {
               </div>
             </div>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Re-enable Access Confirmation Dialog */}
+      <Dialog open={reenableDialogOpen} onOpenChange={setReenableDialogOpen}>
+        <DialogContent className="bg-card border-border max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-foreground flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
+                <UserCheck className="w-4 h-4 text-amber-500" />
+              </div>
+              Liberar Acesso
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Deseja liberar o acesso para <span className="font-semibold text-foreground">{reenableClient?.name || 'este cliente'}</span>?
+            </p>
+            
+            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
+              <div className="flex items-center gap-2 text-amber-500 text-sm font-medium">
+                <Coins className="w-4 h-4" />
+                <span>Será consumido 1 crédito da sua conta</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Saldo atual: <span className="font-semibold text-foreground">{socioCredits} créditos</span>
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-foreground">Selecione o plano</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {PLAN_OPTIONS.map(option => (
+                  <button
+                    key={option.days}
+                    type="button"
+                    onClick={() => setReenablePlan(option.days)}
+                    className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
+                      reenablePlan === option.days
+                        ? 'border-amber-500 bg-amber-500/10 text-amber-500'
+                        : 'border-border bg-background/50 text-muted-foreground hover:border-amber-500/50'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReenableDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={confirmReenableAccess} 
+              disabled={reenabling || socioCredits < 1}
+              className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
+            >
+              {reenabling ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <UserCheck className="w-4 h-4 mr-2" />}
+              Confirmar e Liberar
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
     </div>
