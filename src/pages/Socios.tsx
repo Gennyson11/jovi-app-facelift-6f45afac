@@ -312,25 +312,80 @@ export default function Socios() {
   };
 
   const toggleClientAccess = async (clientId: string, currentAccess: boolean) => {
-    const { error } = await supabase
-      .from('profiles')
-      .update({ has_access: !currentAccess })
-      .eq('id', clientId);
+    if (currentAccess) {
+      // Blocking - no credit needed
+      const { error } = await supabase
+        .from('profiles')
+        .update({ has_access: false })
+        .eq('id', clientId);
 
-    if (error) {
+      if (error) {
+        toast({ title: 'Erro', description: 'Falha ao bloquear acesso', variant: 'destructive' });
+        return;
+      }
+      toast({ title: 'Sucesso', description: 'Acesso bloqueado' });
+      fetchClients();
+    } else {
+      // Re-enabling - show confirmation dialog
+      const client = clients.find(c => c.id === clientId);
+      if (client) {
+        setReenableClient(client);
+        setReenablePlan(30);
+        setReenableDialogOpen(true);
+      }
+    }
+  };
+
+  const confirmReenableAccess = async () => {
+    if (!reenableClient || !user) return;
+
+    if (socioCredits < 1) {
       toast({
-        title: 'Erro',
-        description: 'Falha ao atualizar acesso',
+        title: 'Créditos insuficientes',
+        description: 'Você precisa de pelo menos 1 crédito para liberar acesso.',
         variant: 'destructive'
       });
       return;
     }
 
-    toast({
-      title: 'Sucesso',
-      description: currentAccess ? 'Acesso bloqueado' : 'Acesso liberado'
-    });
-    fetchClients();
+    setReenabling(true);
+    try {
+      const expirationDate = new Date();
+      expirationDate.setDate(expirationDate.getDate() + reenablePlan);
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          has_access: true,
+          access_expires_at: expirationDate.toISOString()
+        })
+        .eq('id', reenableClient.id);
+
+      if (error) throw error;
+
+      // Deduct 1 credit
+      const { error: creditError } = await supabase.rpc('add_credits', {
+        p_user_id: user.id,
+        p_amount: -1,
+        p_type: 'client_reactivation',
+        p_description: `Reativação de cliente: ${reenableClient.name || 'sem nome'}`
+      });
+
+      if (creditError) {
+        console.error('Error deducting credit:', creditError);
+      } else {
+        setSocioCredits(prev => prev - 1);
+      }
+
+      toast({ title: 'Sucesso', description: 'Acesso liberado com sucesso!' });
+      setReenableDialogOpen(false);
+      setReenableClient(null);
+      fetchClients();
+    } catch (error: any) {
+      toast({ title: 'Erro', description: error.message || 'Falha ao liberar acesso', variant: 'destructive' });
+    } finally {
+      setReenabling(false);
+    }
   };
 
   const deleteClient = async (client: ClientProfile) => {
