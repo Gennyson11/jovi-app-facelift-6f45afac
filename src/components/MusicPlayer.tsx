@@ -20,7 +20,7 @@ const tracks: Track[] = [
     title: "Feet Don't Fail Me Now",
     artist: "Joy Crookes",
     src: "/audio/feet-dont-fail-me-now.mp3",
-    cover: "/images/album-cover.jpg",
+    cover: "/images/joy-crookes-cover.png",
     startAt: 40,
   },
 ];
