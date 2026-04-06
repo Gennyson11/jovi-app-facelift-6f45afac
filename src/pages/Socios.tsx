@@ -693,6 +693,7 @@ export default function Socios() {
                   <TableRow>
                     <TableHead>Nome</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>WhatsApp</TableHead>
                     <TableHead>Cadastro</TableHead>
                     <TableHead>Validade</TableHead>
                     <TableHead>Status</TableHead>
