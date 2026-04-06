@@ -693,6 +693,7 @@ export default function Socios() {
                   <TableRow>
                     <TableHead>Nome</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>WhatsApp</TableHead>
                     <TableHead>Cadastro</TableHead>
                     <TableHead>Validade</TableHead>
                     <TableHead>Status</TableHead>
@@ -710,6 +711,9 @@ export default function Socios() {
                         </TableCell>
                         <TableCell className="text-muted-foreground">
                           {client.masked_email || '-'}
+                        </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {client.masked_whatsapp || '-'}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {formatDate(client.created_at)}
@@ -772,7 +776,7 @@ export default function Socios() {
                   })}
                   {clients.length === 0 && (
                     <TableRow>
-                      <TableCell colSpan={6} className="text-center text-muted-foreground py-12">
+                      <TableCell colSpan={7} className="text-center text-muted-foreground py-12">
                         <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
                         <p>Você ainda não cadastrou nenhum cliente</p>
                         <p className="text-sm mt-1">Clique em "Novo Cliente" para começar</p>
