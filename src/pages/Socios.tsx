@@ -992,6 +992,68 @@ export default function Socios() {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Re-enable Access Confirmation Dialog */}
+      <Dialog open={reenableDialogOpen} onOpenChange={setReenableDialogOpen}>
+        <DialogContent className="bg-card border-border max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-foreground flex items-center gap-2">
+              <div className="w-8 h-8 rounded-full bg-amber-500/20 flex items-center justify-center">
+                <UserCheck className="w-4 h-4 text-amber-500" />
+              </div>
+              Liberar Acesso
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              Deseja liberar o acesso para <span className="font-semibold text-foreground">{reenableClient?.name || 'este cliente'}</span>?
+            </p>
+            
+            <div className="p-3 rounded-lg bg-amber-500/10 border border-amber-500/30">
+              <div className="flex items-center gap-2 text-amber-500 text-sm font-medium">
+                <Coins className="w-4 h-4" />
+                <span>Será consumido 1 crédito da sua conta</span>
+              </div>
+              <p className="text-xs text-muted-foreground mt-1">
+                Saldo atual: <span className="font-semibold text-foreground">{socioCredits} créditos</span>
+              </p>
+            </div>
+
+            <div className="space-y-2">
+              <Label className="text-foreground">Selecione o plano</Label>
+              <div className="grid grid-cols-3 gap-2">
+                {PLAN_OPTIONS.map(option => (
+                  <button
+                    key={option.days}
+                    type="button"
+                    onClick={() => setReenablePlan(option.days)}
+                    className={`px-4 py-2 rounded-lg border text-sm font-medium transition-all ${
+                      reenablePlan === option.days
+                        ? 'border-amber-500 bg-amber-500/10 text-amber-500'
+                        : 'border-border bg-background/50 text-muted-foreground hover:border-amber-500/50'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setReenableDialogOpen(false)}>
+              Cancelar
+            </Button>
+            <Button 
+              onClick={confirmReenableAccess} 
+              disabled={reenabling || socioCredits < 1}
+              className="bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700"
+            >
+              {reenabling ? <Loader2 className="w-4 h-4 animate-spin mr-2" /> : <UserCheck className="w-4 h-4 mr-2" />}
+              Confirmar e Liberar
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
