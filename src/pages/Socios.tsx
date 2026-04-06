@@ -712,6 +712,9 @@ export default function Socios() {
                         <TableCell className="text-muted-foreground">
                           {client.masked_email || '-'}
                         </TableCell>
+                        <TableCell className="text-muted-foreground">
+                          {client.masked_whatsapp || '-'}
+                        </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {formatDate(client.created_at)}
                         </TableCell>
