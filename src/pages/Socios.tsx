@@ -274,9 +274,8 @@ export default function Socios() {
 
       // Deduct 1 credit
       if (user) {
-        const { error: creditError } = await supabase.rpc('add_credits', {
+        const { error: creditError } = await supabase.rpc('deduct_socio_credit', {
           p_user_id: user.id,
-          p_amount: -1,
           p_type: 'client_creation',
           p_description: `Cadastro de cliente: ${clientName}`
         });
@@ -364,9 +363,8 @@ export default function Socios() {
       if (error) throw error;
 
       // Deduct 1 credit
-      const { error: creditError } = await supabase.rpc('add_credits', {
+      const { error: creditError } = await supabase.rpc('deduct_socio_credit', {
         p_user_id: user.id,
-        p_amount: -1,
         p_type: 'client_reactivation',
         p_description: `Reativação de cliente: ${reenableClient.name || 'sem nome'}`
       });
