@@ -16,8 +16,8 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 interface ClientProfile {
   id: string;
   user_id: string;
-  masked_email: string | null;
-  masked_whatsapp: string | null;
+  email: string;
+  whatsapp: string | null;
   name: string | null;
   has_access: boolean | null;
   created_at: string | null;
