@@ -42,6 +42,7 @@ export default function Socios() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
+  const [clientWhatsapp, setClientWhatsapp] = useState('');
   const [clientPassword, setClientPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<number>(30);
