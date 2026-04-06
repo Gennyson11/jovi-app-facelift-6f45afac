@@ -87,6 +87,7 @@ const MusicPlayer = () => {
     setIsPlaying(!isPlaying);
   }, [isPlaying]);
 
+  // Set up audio event listeners once
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -94,15 +95,9 @@ const MusicPlayer = () => {
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
     const onLoaded = () => {
       setDuration(audio.duration);
-      const track = tracks[currentTrackIndex];
-      if (track.startAt && !hasSetStart) {
-        audio.currentTime = track.startAt;
-        setHasSetStart(true);
-      }
     };
     const onEnded = () => {
       setIsPlaying(false);
-      nextTrack();
     };
 
     audio.addEventListener('timeupdate', onTimeUpdate);
@@ -112,14 +107,13 @@ const MusicPlayer = () => {
     audio.volume = 0.4;
     audio.muted = false;
     setIsMuted(false);
-    setIsPlaying(false);
 
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('loadedmetadata', onLoaded);
       audio.removeEventListener('ended', onEnded);
     };
-  }, [currentTrackIndex, hasSetStart, nextTrack]);
+  }, []);
 
   const formatTime = (t: number) => {
     if (!isFinite(t)) return '0:00';
