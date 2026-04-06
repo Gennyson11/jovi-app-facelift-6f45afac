@@ -1,5 +1,29 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Play, Pause, Volume2, VolumeX, X } from 'lucide-react';
+import { Play, Pause, Volume2, VolumeX, X, SkipBack, SkipForward } from 'lucide-react';
+
+interface Track {
+  title: string;
+  artist: string;
+  src: string;
+  cover: string;
+  startAt?: number;
+}
+
+const tracks: Track[] = [
+  {
+    title: "No Role Modelz",
+    artist: "J. Cole",
+    src: "/audio/no-role-modelz.mp3",
+    cover: "/images/album-cover.jpg",
+  },
+  {
+    title: "Feet Don't Fail Me Now",
+    artist: "Joy Crookes",
+    src: "/audio/feet-dont-fail-me-now.mp3",
+    cover: "/images/album-cover.jpg",
+    startAt: 40,
+  },
+];
 
 const MusicPlayer = () => {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -9,6 +33,48 @@ const MusicPlayer = () => {
   const [isVisible, setIsVisible] = useState(true);
   const [volume, setVolume] = useState(0.4);
   const [isMuted, setIsMuted] = useState(true);
+  const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
+  const [hasSetStart, setHasSetStart] = useState(false);
+
+  const currentTrack = tracks[currentTrackIndex];
+
+  const switchTrack = useCallback((index: number) => {
+    const audio = audioRef.current;
+    if (!audio) return;
+    const wasPlaying = isPlaying;
+    audio.pause();
+    setCurrentTrackIndex(index);
+    setHasSetStart(false);
+    setCurrentTime(0);
+    setDuration(0);
+
+    // Load new track after state update
+    setTimeout(() => {
+      const a = audioRef.current;
+      if (!a) return;
+      a.load();
+      a.onloadedmetadata = () => {
+        const track = tracks[index];
+        if (track.startAt) {
+          a.currentTime = track.startAt;
+        }
+        setDuration(a.duration);
+        setHasSetStart(true);
+        if (wasPlaying) {
+          a.play();
+          setIsPlaying(true);
+        }
+      };
+    }, 0);
+  }, [isPlaying]);
+
+  const nextTrack = useCallback(() => {
+    switchTrack((currentTrackIndex + 1) % tracks.length);
+  }, [currentTrackIndex, switchTrack]);
+
+  const prevTrack = useCallback(() => {
+    switchTrack((currentTrackIndex - 1 + tracks.length) % tracks.length);
+  }, [currentTrackIndex, switchTrack]);
 
   const togglePlay = useCallback(() => {
     const audio = audioRef.current;
@@ -26,8 +92,18 @@ const MusicPlayer = () => {
     if (!audio) return;
 
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
-    const onLoaded = () => setDuration(audio.duration);
-    const onEnded = () => setIsPlaying(false);
+    const onLoaded = () => {
+      setDuration(audio.duration);
+      const track = tracks[currentTrackIndex];
+      if (track.startAt && !hasSetStart) {
+        audio.currentTime = track.startAt;
+        setHasSetStart(true);
+      }
+    };
+    const onEnded = () => {
+      setIsPlaying(false);
+      nextTrack();
+    };
 
     audio.addEventListener('timeupdate', onTimeUpdate);
     audio.addEventListener('loadedmetadata', onLoaded);
@@ -43,7 +119,7 @@ const MusicPlayer = () => {
       audio.removeEventListener('loadedmetadata', onLoaded);
       audio.removeEventListener('ended', onEnded);
     };
-  }, []);
+  }, [currentTrackIndex, hasSetStart, nextTrack]);
 
   const formatTime = (t: number) => {
     if (!isFinite(t)) return '0:00';
@@ -89,7 +165,7 @@ const MusicPlayer = () => {
 
   return (
     <>
-      <audio ref={audioRef} src="/audio/no-role-modelz.mp3" preload="metadata" />
+      <audio ref={audioRef} src={currentTrack.src} preload="metadata" />
       <div className="fixed bottom-24 right-4 z-50 w-[340px] rounded-xl card-glass-blue border border-primary/30 p-3 select-none shadow-[0_0_30px_hsl(220_90%_56%/0.2)]">
         {/* Close button */}
         <button
@@ -106,15 +182,15 @@ const MusicPlayer = () => {
         <div className="flex items-center gap-3">
           {/* Album Cover */}
           <img
-            src="/images/album-cover.jpg"
+            src={currentTrack.cover}
             alt="Album cover"
             className="w-14 h-14 rounded-lg object-cover flex-shrink-0 border border-primary/20 shadow-[0_0_15px_hsl(220_90%_56%/0.15)]"
           />
 
           {/* Info + Controls */}
           <div className="flex-1 min-w-0">
-            <p className="text-foreground text-sm font-semibold truncate font-display">No Role Modelz</p>
-            <p className="text-muted-foreground text-xs truncate">J. Cole</p>
+            <p className="text-foreground text-sm font-semibold truncate font-display">{currentTrack.title}</p>
+            <p className="text-muted-foreground text-xs truncate">{currentTrack.artist}</p>
 
             {/* Progress bar */}
             <div
@@ -151,17 +227,31 @@ const MusicPlayer = () => {
             </div>
           </div>
 
-          {/* Play button */}
-          <button
-            onClick={togglePlay}
-            className="w-10 h-10 rounded-full bg-primary flex items-center justify-center flex-shrink-0 hover:scale-105 transition-all shadow-[0_0_20px_hsl(220_90%_56%/0.4)] hover:shadow-[0_0_30px_hsl(220_90%_56%/0.6)]"
-          >
-            {isPlaying ? (
-              <Pause className="w-5 h-5 text-primary-foreground fill-primary-foreground" />
-            ) : (
-              <Play className="w-5 h-5 text-primary-foreground fill-primary-foreground ml-0.5" />
-            )}
-          </button>
+          {/* Playback controls */}
+          <div className="flex flex-col items-center gap-1 flex-shrink-0">
+            <button
+              onClick={prevTrack}
+              className="w-7 h-7 rounded-full bg-secondary/50 flex items-center justify-center hover:bg-secondary transition-colors"
+            >
+              <SkipBack className="w-3.5 h-3.5 text-foreground fill-foreground" />
+            </button>
+            <button
+              onClick={togglePlay}
+              className="w-10 h-10 rounded-full bg-primary flex items-center justify-center hover:scale-105 transition-all shadow-[0_0_20px_hsl(220_90%_56%/0.4)] hover:shadow-[0_0_30px_hsl(220_90%_56%/0.6)]"
+            >
+              {isPlaying ? (
+                <Pause className="w-5 h-5 text-primary-foreground fill-primary-foreground" />
+              ) : (
+                <Play className="w-5 h-5 text-primary-foreground fill-primary-foreground ml-0.5" />
+              )}
+            </button>
+            <button
+              onClick={nextTrack}
+              className="w-7 h-7 rounded-full bg-secondary/50 flex items-center justify-center hover:bg-secondary transition-colors"
+            >
+              <SkipForward className="w-3.5 h-3.5 text-foreground fill-foreground" />
+            </button>
+          </div>
         </div>
       </div>
     </>
