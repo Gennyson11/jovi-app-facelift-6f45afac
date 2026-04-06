@@ -629,6 +629,10 @@ export type Database = {
           success: boolean
         }[]
       }
+      deduct_socio_credit: {
+        Args: { p_description?: string; p_type: string; p_user_id: string }
+        Returns: number
+      }
       generate_invite_code: { Args: never; Returns: string }
       get_partner_contact: {
         Args: { p_user_id: string }
