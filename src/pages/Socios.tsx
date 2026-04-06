@@ -42,6 +42,7 @@ export default function Socios() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [clientName, setClientName] = useState('');
   const [clientEmail, setClientEmail] = useState('');
+  const [clientWhatsapp, setClientWhatsapp] = useState('');
   const [clientPassword, setClientPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState<number>(30);
@@ -197,6 +198,7 @@ export default function Socios() {
   const openNewClientDialog = () => {
     setClientName('');
     setClientEmail('');
+    setClientWhatsapp('');
     setClientPassword('');
     setSelectedPlan(30);
     setShowPassword(false);
@@ -264,6 +266,7 @@ export default function Socios() {
           role: 'user',
           partner_id: user?.id,
           name: clientName,
+          whatsapp: clientWhatsapp || undefined,
           has_access: true,
           access_expires_at: expirationDate.toISOString()
         }
@@ -830,6 +833,17 @@ export default function Socios() {
                 value={clientEmail}
                 onChange={e => setClientEmail(e.target.value)}
                 placeholder="email@exemplo.com"
+                className="bg-background/50 border-border"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="client-whatsapp">WhatsApp</Label>
+              <Input
+                id="client-whatsapp"
+                type="tel"
+                value={clientWhatsapp}
+                onChange={e => setClientWhatsapp(e.target.value)}
+                placeholder="11999999999"
                 className="bg-background/50 border-border"
               />
             </div>

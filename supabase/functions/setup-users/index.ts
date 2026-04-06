@@ -75,7 +75,7 @@ serve(async (req) => {
     console.log("User verified:", callerUserEmail, "roles:", userRoles);
 
     const body = await req.json();
-    const { action, email, password, role, partner_id, name, has_access, access_expires_at, client_profile_id, new_email, new_password } = body;
+    const { action, email, password, role, partner_id, name, whatsapp, has_access, access_expires_at, client_profile_id, new_email, new_password } = body;
 
     // Input validation
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -201,10 +201,11 @@ serve(async (req) => {
       }
 
       // Update profile with partner_id and other data if provided (using service role bypasses RLS)
-      if (userId && (partner_id || name || has_access !== undefined || access_expires_at)) {
+      if (userId && (partner_id || name || whatsapp || has_access !== undefined || access_expires_at)) {
         const updateData: Record<string, any> = {};
         if (partner_id) updateData.partner_id = partner_id;
         if (name) updateData.name = name;
+        if (whatsapp) updateData.whatsapp = whatsapp;
         if (has_access !== undefined) updateData.has_access = has_access;
         if (access_expires_at) updateData.access_expires_at = access_expires_at;
 
