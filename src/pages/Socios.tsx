@@ -427,7 +427,7 @@ export default function Socios() {
 
   const openEditDialog = (client: ClientProfile) => {
     setEditingClient(client);
-    setEditEmail(client.masked_email || '');
+    setEditEmail(client.email || '');
     setEditPassword('');
     setShowEditPassword(false);
     setEditDialogOpen(true);
@@ -709,10 +709,10 @@ export default function Socios() {
                           {client.name || '-'}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {client.masked_email || '-'}
+                          {client.email || '-'}
                         </TableCell>
                         <TableCell className="text-muted-foreground">
-                          {client.masked_whatsapp || '-'}
+                          {client.whatsapp || '-'}
                         </TableCell>
                         <TableCell className="text-sm text-muted-foreground">
                           {formatDate(client.created_at)}
