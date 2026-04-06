@@ -198,6 +198,7 @@ export default function Socios() {
   const openNewClientDialog = () => {
     setClientName('');
     setClientEmail('');
+    setClientWhatsapp('');
     setClientPassword('');
     setSelectedPlan(30);
     setShowPassword(false);
