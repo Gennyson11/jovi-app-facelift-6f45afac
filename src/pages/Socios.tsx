@@ -247,6 +247,28 @@ export default function Socios() {
         return;
       }
 
+      // Deduct 1 credit BEFORE creating the client
+      if (!user) throw new Error('Usuário não autenticado');
+      
+      const { error: creditError } = await supabase.rpc('deduct_socio_credit', {
+        p_user_id: user.id,
+        p_type: 'client_creation',
+        p_description: `Cadastro de cliente: ${clientName}`
+      });
+      
+      if (creditError) {
+        console.error('Error deducting credit:', creditError);
+        toast({
+          title: 'Erro ao descontar crédito',
+          description: creditError.message || 'Não foi possível descontar o crédito. Cliente não foi criado.',
+          variant: 'destructive'
+        });
+        setSavingClient(false);
+        return;
+      }
+      
+      setSocioCredits(prev => prev - 1);
+
       // Calculate expiration date
       const expirationDate = new Date();
       expirationDate.setDate(expirationDate.getDate() + selectedPlan);
@@ -273,20 +295,6 @@ export default function Socios() {
 
       if (functionError) throw functionError;
       if (!functionData?.userId) throw new Error('Falha ao criar usuário');
-
-      // Deduct 1 credit
-      if (user) {
-        const { error: creditError } = await supabase.rpc('deduct_socio_credit', {
-          p_user_id: user.id,
-          p_type: 'client_creation',
-          p_description: `Cadastro de cliente: ${clientName}`
-        });
-        if (creditError) {
-          console.error('Error deducting credit:', creditError);
-        } else {
-          setSocioCredits(prev => prev - 1);
-        }
-      }
 
       const planLabel = PLAN_OPTIONS.find(p => p.days === selectedPlan)?.label || `${selectedPlan} dias`;
       
