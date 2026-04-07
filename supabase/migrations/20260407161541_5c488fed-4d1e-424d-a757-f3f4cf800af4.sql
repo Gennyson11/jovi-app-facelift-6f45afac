@@ -1,0 +1,2 @@
+UPDATE user_credits SET balance = balance - 1 WHERE user_id = '65d5248e-a5c9-484e-9914-908e8fb0c81e';
+INSERT INTO credit_transactions (user_id, amount, type, description) VALUES ('65d5248e-a5c9-484e-9914-908e8fb0c81e', -1, 'client_creation', 'Cadastro de cliente: Mario (correção manual)');
