@@ -15,7 +15,7 @@ import JoviAIChat from '@/components/JoviAIChat';
 import { Veo3Chat } from '@/components/Veo3Chat';
 import SubscriptionPlans from '@/components/SubscriptionPlans';
 import whatsappBanner from '@/assets/whatsapp-banner.png';
-import dashboardBanner from '@/assets/dashboard-banner.gif';
+import dashboardBanner from '@/assets/dashboard-banner-v2.gif';
 
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
