@@ -506,8 +506,8 @@ export default function Dashboard() {
         }
 
         {hasAccess && <>
-        {hasAccess && <div className="mb-6 rounded-2xl overflow-hidden border border-primary/30 shadow-lg shadow-primary/20">
-            <img src={dashboardBanner} alt="JoviTools Banner" className="w-full h-auto object-cover" />
+{hasAccess && <div className="mb-6 rounded-2xl overflow-hidden border border-primary/30 shadow-lg shadow-primary/20 bg-background">
+            <img src={dashboardBanner} alt="JoviTools Banner" className="w-full h-auto object-cover block" style={{ margin: '-1px 0', padding: 0 }} />
           </div>}
 
         {/* Account Validity Card */}
