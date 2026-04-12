@@ -25,7 +25,7 @@ const MusicPlayer = () => {
   const [duration, setDuration] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const [volume, setVolume] = useState(0.4);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [hasSetStart, setHasSetStart] = useState(false);
 
@@ -89,11 +89,18 @@ const MusicPlayer = () => {
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
     const onLoaded = () => {
       setDuration(audio.duration);
-      // Start muted to bypass autoplay policy
       audio.volume = 0.4;
-      audio.muted = true;
-      setIsMuted(true);
-      audio.play().then(() => setIsPlaying(true)).catch(() => {});
+      audio.muted = false;
+      setIsMuted(false);
+      // Try with sound first, fallback to muted
+      audio.play().then(() => {
+        setIsPlaying(true);
+      }).catch(() => {
+        // Browser blocked unmuted autoplay, start muted
+        audio.muted = true;
+        setIsMuted(true);
+        audio.play().then(() => setIsPlaying(true)).catch(() => {});
+      });
     };
     const onEnded = () => {
       audio.currentTime = 0;
