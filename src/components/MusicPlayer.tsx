@@ -11,17 +11,10 @@ interface Track {
 
 const tracks: Track[] = [
   {
-    title: "No Role Modelz",
-    artist: "J. Cole",
-    src: "/audio/no-role-modelz.mp3",
+    title: "JoviTools No Topo",
+    artist: "JoviTools",
+    src: "/audio/jovitools-no-topo.mp3",
     cover: "/images/album-cover.jpg",
-  },
-  {
-    title: "Feet Don't Fail Me Now",
-    artist: "Joy Crookes",
-    src: "/audio/feet-dont-fail-me-now.mp3",
-    cover: "/images/joy-crookes-cover.png",
-    startAt: 40,
   },
 ];
 
