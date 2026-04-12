@@ -24,7 +24,7 @@ const MusicPlayer = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
-  const [volume, setVolume] = useState(0.4);
+  const [volume, setVolume] = useState(0.3);
   const [isMuted, setIsMuted] = useState(true);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [hasSetStart, setHasSetStart] = useState(false);
@@ -88,18 +88,17 @@ const MusicPlayer = () => {
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
     const onLoaded = () => {
       setDuration(audio.duration);
+      // Autoplay on load
+      audio.volume = 0.3;
+      audio.muted = false;
+      setIsMuted(false);
+      audio.play().then(() => setIsPlaying(true)).catch(() => {});
     };
     const onEnded = () => {
-      setIsPlaying(false);
+      // Loop the track
+      audio.currentTime = 0;
+      audio.play().then(() => setIsPlaying(true)).catch(() => {});
     };
-
-    audio.addEventListener('timeupdate', onTimeUpdate);
-    audio.addEventListener('loadedmetadata', onLoaded);
-    audio.addEventListener('ended', onEnded);
-
-    audio.volume = 0.4;
-    audio.muted = false;
-    setIsMuted(false);
 
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
