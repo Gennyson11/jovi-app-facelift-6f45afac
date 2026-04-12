@@ -90,7 +90,7 @@ const MusicPlayer = () => {
     const onLoaded = () => {
       setDuration(audio.duration);
       // Start muted to bypass autoplay policy
-      audio.volume = 0.3;
+      audio.volume = 0.4;
       audio.muted = true;
       setIsMuted(true);
       audio.play().then(() => setIsPlaying(true)).catch(() => {});
