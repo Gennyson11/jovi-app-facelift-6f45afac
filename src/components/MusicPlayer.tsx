@@ -25,7 +25,7 @@ const MusicPlayer = () => {
   const [duration, setDuration] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
   const [volume, setVolume] = useState(0.4);
-  const [isMuted, setIsMuted] = useState(true);
+  const [isMuted, setIsMuted] = useState(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [hasSetStart, setHasSetStart] = useState(false);
 
