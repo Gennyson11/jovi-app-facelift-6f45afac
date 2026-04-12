@@ -81,6 +81,7 @@ const MusicPlayer = () => {
   }, [isPlaying]);
 
   // Set up audio event listeners once
+  // Autoplay muted, then unmute on first user interaction
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
@@ -88,14 +89,13 @@ const MusicPlayer = () => {
     const onTimeUpdate = () => setCurrentTime(audio.currentTime);
     const onLoaded = () => {
       setDuration(audio.duration);
-      // Autoplay on load
+      // Start muted to bypass autoplay policy
       audio.volume = 0.3;
-      audio.muted = false;
-      setIsMuted(false);
+      audio.muted = true;
+      setIsMuted(true);
       audio.play().then(() => setIsPlaying(true)).catch(() => {});
     };
     const onEnded = () => {
-      // Loop the track
       audio.currentTime = 0;
       audio.play().then(() => setIsPlaying(true)).catch(() => {});
     };
@@ -104,10 +104,27 @@ const MusicPlayer = () => {
     audio.addEventListener('loadedmetadata', onLoaded);
     audio.addEventListener('ended', onEnded);
 
+    // Unmute on first user interaction anywhere on the page
+    const unmute = () => {
+      if (audio.muted) {
+        audio.muted = false;
+        setIsMuted(false);
+      }
+      document.removeEventListener('click', unmute);
+      document.removeEventListener('touchstart', unmute);
+      document.removeEventListener('keydown', unmute);
+    };
+    document.addEventListener('click', unmute);
+    document.addEventListener('touchstart', unmute);
+    document.addEventListener('keydown', unmute);
+
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('loadedmetadata', onLoaded);
       audio.removeEventListener('ended', onEnded);
+      document.removeEventListener('click', unmute);
+      document.removeEventListener('touchstart', unmute);
+      document.removeEventListener('keydown', unmute);
     };
   }, []);
 
