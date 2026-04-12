@@ -24,7 +24,7 @@ const MusicPlayer = () => {
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [isVisible, setIsVisible] = useState(true);
-  const [volume, setVolume] = useState(0.3);
+  const [volume, setVolume] = useState(0.4);
   const [isMuted, setIsMuted] = useState(true);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [hasSetStart, setHasSetStart] = useState(false);
@@ -90,7 +90,7 @@ const MusicPlayer = () => {
     const onLoaded = () => {
       setDuration(audio.duration);
       // Start muted to bypass autoplay policy
-      audio.volume = 0.3;
+      audio.volume = 0.4;
       audio.muted = true;
       setIsMuted(true);
       audio.play().then(() => setIsPlaying(true)).catch(() => {});
