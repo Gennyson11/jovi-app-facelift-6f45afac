@@ -100,6 +100,10 @@ const MusicPlayer = () => {
       audio.play().then(() => setIsPlaying(true)).catch(() => {});
     };
 
+    audio.addEventListener('timeupdate', onTimeUpdate);
+    audio.addEventListener('loadedmetadata', onLoaded);
+    audio.addEventListener('ended', onEnded);
+
     return () => {
       audio.removeEventListener('timeupdate', onTimeUpdate);
       audio.removeEventListener('loadedmetadata', onLoaded);
