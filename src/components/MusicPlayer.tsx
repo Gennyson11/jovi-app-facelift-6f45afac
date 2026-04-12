@@ -108,9 +108,6 @@ const MusicPlayer = () => {
       audio.removeEventListener('ended', onEnded);
     };
   }, []);
-      document.removeEventListener('keydown', unmute);
-    };
-  }, []);
 
   const formatTime = (t: number) => {
     if (!isFinite(t)) return '0:00';
