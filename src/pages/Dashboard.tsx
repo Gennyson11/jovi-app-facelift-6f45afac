@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import JoviAIChat from '@/components/JoviAIChat';
+import TutoriaisSection from '@/components/TutoriaisSection';
 import { Veo3Chat } from '@/components/Veo3Chat';
 import SubscriptionPlans from '@/components/SubscriptionPlans';
 import whatsappBanner from '@/assets/whatsapp-banner.png';
@@ -690,6 +691,9 @@ export default function Dashboard() {
           </div>
         }
 
+        {/* Tutoriais Section */}
+        {activeCategory === 'tutoriais' && <TutoriaisSection />}
+
         {/* Jovi.ia Section */}
         {activeCategory === 'jovi_ia' && <JoviAIChat />}
 
@@ -799,7 +803,7 @@ export default function Dashboard() {
         }
 
         {/* Categories */}
-        {activeCategory !== 'sorteios' && activeCategory !== 'jovi_ia' && activeCategory !== 'veo3' && activeCategory !== 'loja' && filteredCategoryOrder.map((categoryKey) => {
+        {activeCategory !== 'sorteios' && activeCategory !== 'jovi_ia' && activeCategory !== 'veo3' && activeCategory !== 'loja' && activeCategory !== 'tutoriais' && filteredCategoryOrder.map((categoryKey) => {
           const categoryPlatforms = filteredPlatforms.filter((p) => p.category === categoryKey);
           if (categoryPlatforms.length === 0) return null;
           const config = CATEGORY_CONFIG[categoryKey];
