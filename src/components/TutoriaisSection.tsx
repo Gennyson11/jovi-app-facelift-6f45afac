@@ -14,6 +14,11 @@ const TUTORIALS: Tutorial[] = [
     title: 'COMO TER ACESSO AO COMBO DE IAs EM UM SÓ LUGAR',
     youtubeId: 'naSd57R3H68',
   },
+  {
+    id: '2',
+    title: 'Tutorial 2',
+    youtubeId: 'OWBC4sirtKQ',
+  },
 ];
 
 export default function TutoriaisSection() {
