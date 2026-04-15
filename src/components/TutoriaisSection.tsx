@@ -11,7 +11,7 @@ interface Tutorial {
 const TUTORIALS: Tutorial[] = [
   {
     id: '1',
-    title: 'Tutorial 1',
+    title: 'COMO TER ACESSO AO COMBO DE IAs EM UM SÓ LUGAR',
     youtubeId: 'naSd57R3H68',
   },
 ];
