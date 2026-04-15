@@ -41,6 +41,7 @@ interface DashboardSidebarProps {
 }
 
 const DASHBOARD_ITEMS_BASE = [
+  { id: 'tutoriais', label: 'Tutoriais', icon: GraduationCap, category: 'tutoriais' },
   { id: 'ferramentas', label: 'Ferramentas', icon: Wrench, category: 'ai_tools' },
   { id: 'streamings', label: 'Streamings', icon: Clapperboard, category: 'streamings' },
   { id: 'softwares', label: 'Softwares', icon: Monitor, category: 'software' },
