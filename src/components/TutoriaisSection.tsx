@@ -16,7 +16,7 @@ const TUTORIALS: Tutorial[] = [
   },
   {
     id: '2',
-    title: 'Tutorial 2',
+    title: 'COMO FAZER LOGIN NO FLOW ULTRA PELO DICLOAK',
     youtubeId: 'OWBC4sirtKQ',
   },
 ];
