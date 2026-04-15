@@ -11,15 +11,8 @@ interface Tutorial {
 const TUTORIALS: Tutorial[] = [
   {
     id: '1',
-    title: 'Tutorial 1 - Em breve',
-    youtubeId: 'dQw4w9WgXcQ',
-    description: 'Descrição do tutorial',
-  },
-  {
-    id: '2',
-    title: 'Tutorial 2 - Em breve',
-    youtubeId: 'dQw4w9WgXcQ',
-    description: 'Descrição do tutorial',
+    title: 'Tutorial 1',
+    youtubeId: 'naSd57R3H68',
   },
 ];
 
