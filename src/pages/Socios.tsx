@@ -362,15 +362,22 @@ export default function Socios() {
       const expirationDate = new Date();
       expirationDate.setDate(expirationDate.getDate() + reenablePlan);
 
-      const { error } = await supabase
-        .from('profiles')
-        .update({ 
-          has_access: true,
-          access_expires_at: expirationDate.toISOString()
-        })
-        .eq('id', reenableClient.id);
+      const accessToken = await getFreshAccessToken();
 
-      if (error) throw error;
+      // Use setup-users edge function to reactivate (grants platform access via service role)
+      const { data: functionData, error: functionError } = await supabase.functions.invoke('setup-users', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        },
+        body: {
+          action: 'reactivate_client',
+          client_profile_id: reenableClient.id,
+          access_expires_at: expirationDate.toISOString()
+        }
+      });
+
+      if (functionError) throw functionError;
+      if (!functionData?.success) throw new Error(functionData?.error || 'Falha ao reativar cliente');
 
       // Deduct 1 credit
       const { error: creditError } = await supabase.rpc('deduct_socio_credit', {
