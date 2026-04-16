@@ -362,15 +362,26 @@ export default function Socios() {
       const expirationDate = new Date();
       expirationDate.setDate(expirationDate.getDate() + reenablePlan);
 
-      const { error } = await supabase
-        .from('profiles')
-        .update({ 
+      const accessToken = await getFreshAccessToken();
+
+      // Use setup-users edge function to reactivate (grants platform access via service role)
+      const { data: functionData, error: functionError } = await supabase.functions.invoke('setup-users', {
+        headers: {
+          Authorization: `Bearer ${accessToken}`
+        },
+        body: {
+          action: 'create_user',
+          email: reenableClient.email,
+          password: Math.random().toString(36).slice(-10), // dummy password, will be updated by existing user flow
+          role: 'user',
+          partner_id: user?.id,
+          name: reenableClient.name || undefined,
           has_access: true,
           access_expires_at: expirationDate.toISOString()
-        })
-        .eq('id', reenableClient.id);
+        }
+      });
 
-      if (error) throw error;
+      if (functionError) throw functionError;
 
       // Deduct 1 credit
       const { error: creditError } = await supabase.rpc('deduct_socio_credit', {
