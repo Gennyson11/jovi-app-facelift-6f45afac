@@ -1739,6 +1739,9 @@ export default function Admin() {
                                     Liberar
                                   </>}
                               </Button>
+                              <Button variant="ghost" size="icon" className="text-yellow-500 hover:text-yellow-600 hover:bg-yellow-500/10" onClick={() => resetUserPassword(userProfile.email)} title="Resetar senha">
+                                <KeyRound className="w-4 h-4" />
+                              </Button>
                               <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover:bg-destructive/10" onClick={() => deleteUser(userProfile.id, userProfile.email)} title="Deletar usuário">
                                 <Trash2 className="w-4 h-4" />
                               </Button>
