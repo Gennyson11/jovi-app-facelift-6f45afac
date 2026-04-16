@@ -587,6 +587,26 @@ export default function Admin() {
     fetchData();
   };
 
+
+  const resetUserPassword = async (userEmail: string) => {
+    const newPassword = window.prompt(`Nova senha para ${userEmail} (mínimo 6 caracteres):`, '123456');
+    if (!newPassword || newPassword.length < 6) return;
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      const { data, error } = await supabase.functions.invoke('admin-reset-password', {
+        body: { email: userEmail, new_password: newPassword },
+        headers: session?.access_token ? { Authorization: `Bearer ${session.access_token}` } : undefined,
+      });
+      if (error || (data as any)?.error) {
+        toast({ title: 'Erro', description: (data as any)?.error || error?.message || 'Falha ao resetar', variant: 'destructive' });
+        return;
+      }
+      toast({ title: '✅ Senha alterada', description: `Nova senha de ${userEmail}: ${newPassword}` });
+    } catch (e: any) {
+      toast({ title: 'Erro', description: e.message, variant: 'destructive' });
+    }
+  };
+
   // Delete user - now calls edge function to delete from auth.users as well
   const deleteUser = async (profileId: string, userEmail: string) => {
     const confirmed = window.confirm(`Tem certeza que deseja deletar o usuário "${userEmail}"? Esta ação não pode ser desfeita e o usuário não poderá mais fazer login.`);
