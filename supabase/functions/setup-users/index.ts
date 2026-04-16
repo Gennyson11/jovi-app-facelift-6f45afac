@@ -266,6 +266,82 @@ serve(async (req) => {
       );
     }
 
+    if (action === "reactivate_client") {
+      // Sócios and admins can reactivate a client
+      if (!isAdmin && !isSocio) {
+        return new Response(
+          JSON.stringify({ error: "Forbidden" }),
+          { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      if (!client_profile_id || !access_expires_at) {
+        return new Response(
+          JSON.stringify({ error: "Missing client_profile_id or access_expires_at" }),
+          { status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+        );
+      }
+
+      // Verify ownership for sócios
+      if (isSocio && !isAdmin) {
+        const { data: clientProfile } = await supabaseAdmin
+          .from("profiles")
+          .select("partner_id")
+          .eq("id", client_profile_id)
+          .single();
+        
+        if (!clientProfile || clientProfile.partner_id !== callerUserId) {
+          return new Response(
+            JSON.stringify({ error: "Forbidden - Not your client" }),
+            { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+          );
+        }
+      }
+
+      // Update profile access
+      const { error: updateError } = await supabaseAdmin
+        .from("profiles")
+        .update({ has_access: true, access_expires_at })
+        .eq("id", client_profile_id);
+
+      if (updateError) {
+        console.error("Error updating profile:", updateError);
+        throw updateError;
+      }
+
+      // Re-grant all platform access
+      const { data: platforms } = await supabaseAdmin
+        .from("streaming_platforms")
+        .select("id");
+
+      if (platforms && platforms.length > 0) {
+        await supabaseAdmin
+          .from("user_platform_access")
+          .delete()
+          .eq("user_id", client_profile_id);
+
+        const accessEntries = platforms.map((p) => ({
+          user_id: client_profile_id,
+          platform_id: p.id,
+        }));
+
+        const { error: accessError } = await supabaseAdmin
+          .from("user_platform_access")
+          .insert(accessEntries);
+
+        if (accessError) {
+          console.error("Error granting platform access:", accessError);
+        } else {
+          console.log(`Reactivated client ${client_profile_id} with ${platforms.length} platforms`);
+        }
+      }
+
+      return new Response(
+        JSON.stringify({ success: true, message: "Client reactivated" }),
+        { headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
     if (action === "update_password") {
       // Only admins can update passwords
       if (!isAdmin) {
