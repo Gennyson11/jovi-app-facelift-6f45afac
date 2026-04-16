@@ -370,18 +370,14 @@ export default function Socios() {
           Authorization: `Bearer ${accessToken}`
         },
         body: {
-          action: 'create_user',
-          email: reenableClient.email,
-          password: Math.random().toString(36).slice(-10), // dummy password, will be updated by existing user flow
-          role: 'user',
-          partner_id: user?.id,
-          name: reenableClient.name || undefined,
-          has_access: true,
+          action: 'reactivate_client',
+          client_profile_id: reenableClient.id,
           access_expires_at: expirationDate.toISOString()
         }
       });
 
       if (functionError) throw functionError;
+      if (!functionData?.success) throw new Error(functionData?.error || 'Falha ao reativar cliente');
 
       // Deduct 1 credit
       const { error: creditError } = await supabase.rpc('deduct_socio_credit', {
