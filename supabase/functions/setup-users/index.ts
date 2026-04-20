@@ -81,7 +81,7 @@ serve(async (req) => {
     const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const validRoles = ["admin", "user", "socio"];
-    const validActions = ["create_user", "update_password", "delete_user", "delete_users_without_access", "delete_orphan_auth_users", "delete_client", "update_client", "delete_auth_user_by_id"];
+    const validActions = ["create_user", "update_password", "delete_user", "delete_users_without_access", "delete_orphan_auth_users", "delete_client", "update_client", "delete_auth_user_by_id", "reactivate_client"];
 
     if (!action || !validActions.includes(action)) {
       return new Response(
