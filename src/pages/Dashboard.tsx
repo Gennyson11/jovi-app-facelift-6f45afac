@@ -1011,6 +1011,39 @@ export default function Dashboard() {
         </DialogContent>
       </Dialog>
 
+      {/* Link Choice Popup (multiple links) */}
+      <Dialog open={!!linkChoicePlatform} onOpenChange={(open) => !open && setLinkChoicePlatform(null)}>
+        <DialogContent className="bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-foreground">
+              {linkChoicePlatform?.cover_image_url && (
+                <img src={linkChoicePlatform.cover_image_url} alt={linkChoicePlatform.name} className="w-10 h-10 object-cover rounded" />
+              )}
+              {linkChoicePlatform?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 mt-2">
+            <p className="text-sm text-muted-foreground mb-3">Escolha qual link deseja abrir:</p>
+            {linkChoicePlatform && [linkChoicePlatform.website_url, ...((linkChoicePlatform.additional_urls as string[] | null) || [])]
+              .filter((u): u is string => !!u && u.trim().length > 0)
+              .map((url, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="w-full justify-start text-left"
+                  onClick={() => {
+                    window.open(url, '_blank');
+                    setLinkChoicePlatform(null);
+                  }}
+                >
+                  <ExternalLink className="w-4 h-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">Acesso {String(idx + 1).padStart(2, '0')}</span>
+                </Button>
+              ))}
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* WhatsApp Group Popup */}
       <Dialog open={showWhatsAppPopup} onOpenChange={setShowWhatsAppPopup}>
         <DialogContent className="sm:max-w-lg p-0 overflow-hidden">
