@@ -1003,7 +1003,10 @@ export default function Admin() {
       access_type: platformAccessType,
       category: platformCategory,
       cover_image_url: platformCoverUrl || null,
-      website_url: platformWebsiteUrl || null
+      website_url: platformWebsiteUrl || null,
+      additional_urls: platformAccessType === 'link_only'
+        ? platformAdditionalUrls.map((u) => u.trim()).filter((u) => u.length > 0)
+        : []
     };
     if (editingPlatform) {
       const {
