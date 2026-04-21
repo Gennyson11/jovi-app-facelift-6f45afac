@@ -180,6 +180,7 @@ export default function Admin() {
   const [platformCoverUrl, setPlatformCoverUrl] = useState('');
   const [platformCredentials, setPlatformCredentials] = useState<Array<{login: string;password: string;}>>([{ login: '', password: '' }]);
   const [platformWebsiteUrl, setPlatformWebsiteUrl] = useState('');
+  const [platformAdditionalUrls, setPlatformAdditionalUrls] = useState<string[]>([]);
   const [platformCategory, setPlatformCategory] = useState<PlatformCategory>('streamings');
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
