@@ -62,6 +62,7 @@ interface Platform {
   access_type: AccessType;
   category: PlatformCategory;
   website_url: string | null;
+  additional_urls?: string[] | null;
 }
 interface UserProfile {
   id: string;
@@ -125,6 +126,7 @@ export default function Dashboard() {
   const [products, setProducts] = useState<Product[]>([]);
   const [showWhatsAppPopup, setShowWhatsAppPopup] = useState(false);
   const [partnerInfo, setPartnerInfo] = useState<{name: string | null;whatsapp: string | null;} | null>(null);
+  const [linkChoicePlatform, setLinkChoicePlatform] = useState<Platform | null>(null);
   const {
     user,
     signOut,
@@ -324,7 +326,14 @@ export default function Dashboard() {
     // Increment click count
     incrementClickCount(platform.id);
     if (platform.access_type === 'link_only' && platform.website_url) {
-      window.open(platform.website_url, '_blank');
+      const extras = Array.isArray(platform.additional_urls)
+        ? platform.additional_urls.filter((u) => typeof u === 'string' && u.trim().length > 0)
+        : [];
+      if (extras.length > 0) {
+        setLinkChoicePlatform(platform);
+      } else {
+        window.open(platform.website_url, '_blank');
+      }
     } else if (platform.access_type === 'credentials') {
       // Load credentials from streaming_credentials table
       const {
@@ -999,6 +1008,39 @@ export default function Dashboard() {
             </div> : <p className="text-muted-foreground">
               Nenhuma credencial cadastrada para esta plataforma.
             </p>}
+        </DialogContent>
+      </Dialog>
+
+      {/* Link Choice Popup (multiple links) */}
+      <Dialog open={!!linkChoicePlatform} onOpenChange={(open) => !open && setLinkChoicePlatform(null)}>
+        <DialogContent className="bg-card border-border">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-3 text-foreground">
+              {linkChoicePlatform?.cover_image_url && (
+                <img src={linkChoicePlatform.cover_image_url} alt={linkChoicePlatform.name} className="w-10 h-10 object-cover rounded" />
+              )}
+              {linkChoicePlatform?.name}
+            </DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 mt-2">
+            <p className="text-sm text-muted-foreground mb-3">Escolha qual link deseja abrir:</p>
+            {linkChoicePlatform && [linkChoicePlatform.website_url, ...((linkChoicePlatform.additional_urls as string[] | null) || [])]
+              .filter((u): u is string => !!u && u.trim().length > 0)
+              .map((url, idx) => (
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="w-full justify-start text-left"
+                  onClick={() => {
+                    window.open(url, '_blank');
+                    setLinkChoicePlatform(null);
+                  }}
+                >
+                  <ExternalLink className="w-4 h-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">Acesso {String(idx + 1).padStart(2, '0')}</span>
+                </Button>
+              ))}
+          </div>
         </DialogContent>
       </Dialog>
 

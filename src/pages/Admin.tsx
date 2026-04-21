@@ -37,6 +37,7 @@ interface Platform {
   access_type: AccessType;
   category: PlatformCategory;
   website_url: string | null;
+  additional_urls?: string[] | null;
 }
 interface UserProfile {
   id: string;
@@ -179,6 +180,7 @@ export default function Admin() {
   const [platformCoverUrl, setPlatformCoverUrl] = useState('');
   const [platformCredentials, setPlatformCredentials] = useState<Array<{login: string;password: string;}>>([{ login: '', password: '' }]);
   const [platformWebsiteUrl, setPlatformWebsiteUrl] = useState('');
+  const [platformAdditionalUrls, setPlatformAdditionalUrls] = useState<string[]>([]);
   const [platformCategory, setPlatformCategory] = useState<PlatformCategory>('streamings');
   const [uploadingImage, setUploadingImage] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -945,6 +947,7 @@ export default function Admin() {
       setPlatformAccessType(platform.access_type || 'credentials');
       setPlatformCoverUrl(platform.cover_image_url || '');
       setPlatformWebsiteUrl(platform.website_url || '');
+      setPlatformAdditionalUrls(Array.isArray(platform.additional_urls) ? platform.additional_urls.filter(Boolean) : []);
       setPlatformCategory(platform.category || 'streamings');
       // Don't show access distribution when editing
       setAccessDistribution('none');
@@ -969,6 +972,7 @@ export default function Admin() {
       setPlatformCoverUrl('');
       setPlatformCredentials([{ login: '', password: '' }]);
       setPlatformWebsiteUrl('');
+      setPlatformAdditionalUrls([]);
       setPlatformCategory('streamings');
       // Reset access distribution for new platforms
       setAccessDistribution('none');
@@ -999,7 +1003,10 @@ export default function Admin() {
       access_type: platformAccessType,
       category: platformCategory,
       cover_image_url: platformCoverUrl || null,
-      website_url: platformWebsiteUrl || null
+      website_url: platformWebsiteUrl || null,
+      additional_urls: platformAccessType === 'link_only'
+        ? platformAdditionalUrls.map((u) => u.trim()).filter((u) => u.length > 0)
+        : []
     };
     if (editingPlatform) {
       const {
@@ -2731,6 +2738,49 @@ export default function Admin() {
               </Label>
               <Input id="platform-website" value={platformWebsiteUrl} onChange={(e) => setPlatformWebsiteUrl(e.target.value)} placeholder="https://www.netflix.com" className="bg-background/50 border-border" />
             </div>
+
+            {platformAccessType === 'link_only' && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Links adicionais</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPlatformAdditionalUrls((prev) => [...prev, ''])}
+                  >
+                    + Adicionar link
+                  </Button>
+                </div>
+                {platformAdditionalUrls.length === 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    Nenhum link extra. Clique em "Adicionar link" para incluir mais opções.
+                  </p>
+                )}
+                {platformAdditionalUrls.map((url, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <Input
+                      value={url}
+                      onChange={(e) =>
+                        setPlatformAdditionalUrls((prev) => prev.map((u, i) => (i === idx ? e.target.value : u)))
+                      }
+                      placeholder={`Link ${idx + 2} (ex: https://...)`}
+                      className="bg-background/50 border-border"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      onClick={() =>
+                        setPlatformAdditionalUrls((prev) => prev.filter((_, i) => i !== idx))
+                      }
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
 
             <div className="space-y-2">
               <Label htmlFor="platform-status">Status</Label>
