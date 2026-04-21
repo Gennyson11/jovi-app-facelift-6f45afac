@@ -947,6 +947,7 @@ export default function Admin() {
       setPlatformAccessType(platform.access_type || 'credentials');
       setPlatformCoverUrl(platform.cover_image_url || '');
       setPlatformWebsiteUrl(platform.website_url || '');
+      setPlatformAdditionalUrls(Array.isArray(platform.additional_urls) ? platform.additional_urls.filter(Boolean) : []);
       setPlatformCategory(platform.category || 'streamings');
       // Don't show access distribution when editing
       setAccessDistribution('none');
