@@ -1013,7 +1013,7 @@ export default function Dashboard() {
 
       {/* Link Choice Popup (multiple links) */}
       <Dialog open={!!linkChoicePlatform} onOpenChange={(open) => !open && setLinkChoicePlatform(null)}>
-        <DialogContent className="bg-card border-border max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-card border-border">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3 text-foreground">
               {linkChoicePlatform?.cover_image_url && (
@@ -1022,51 +1022,23 @@ export default function Dashboard() {
               {linkChoicePlatform?.name}
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-4 mt-4">
+          <div className="space-y-2 mt-2">
+            <p className="text-sm text-muted-foreground mb-3">Escolha qual link deseja abrir:</p>
             {linkChoicePlatform && [linkChoicePlatform.website_url, ...((linkChoicePlatform.additional_urls as string[] | null) || [])]
               .filter((u): u is string => !!u && u.trim().length > 0)
               .map((url, idx) => (
-                <div key={idx} className="space-y-3 p-4 rounded-lg bg-background/30 border border-border">
-                  <div className="flex items-center justify-between mb-2">
-                    <span className="text-xs font-semibold text-primary uppercase tracking-wide">
-                      Acesso {String(idx + 1).padStart(2, '0')}
-                    </span>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => copyToClipboard(url, 'Link')}
-                    >
-                      <Copy className="w-3 h-3 mr-1" />
-                      Copiar
-                    </Button>
-                  </div>
-
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium text-muted-foreground">Link</label>
-                    <div className="flex items-center gap-2">
-                      <div
-                        className="flex-1 bg-background/50 border border-border rounded-md px-3 py-2 text-foreground cursor-pointer hover:bg-background/70 transition-colors text-sm truncate"
-                        onClick={() => copyToClipboard(url, 'Link')}
-                        title={url}
-                      >
-                        {url}
-                      </div>
-                      <Button variant="outline" size="icon" onClick={() => copyToClipboard(url, 'Link')}>
-                        <Copy className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  </div>
-
-                  <Button
-                    className="w-full"
-                    onClick={() => {
-                      window.open(url, '_blank');
-                    }}
-                  >
-                    <ExternalLink className="w-4 h-4 mr-2" />
-                    Abrir Site
-                  </Button>
-                </div>
+                <Button
+                  key={idx}
+                  variant="outline"
+                  className="w-full justify-start text-left"
+                  onClick={() => {
+                    window.open(url, '_blank');
+                    setLinkChoicePlatform(null);
+                  }}
+                >
+                  <ExternalLink className="w-4 h-4 mr-2 flex-shrink-0" />
+                  <span className="truncate">Acesso {String(idx + 1).padStart(2, '0')}</span>
+                </Button>
               ))}
           </div>
         </DialogContent>
