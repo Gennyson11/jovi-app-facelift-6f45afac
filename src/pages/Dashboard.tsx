@@ -1024,7 +1024,12 @@ export default function Dashboard() {
           </DialogHeader>
 
           {linkChoicePlatform && (() => {
-            const urls = [linkChoicePlatform.website_url, ...((linkChoicePlatform.additional_urls as string[] | null) || [])]
+            const extras = Array.isArray(linkChoicePlatform.additional_urls)
+              ? (linkChoicePlatform.additional_urls as unknown[]).filter(
+                  (u): u is string => typeof u === 'string' && u.trim().length > 0
+                )
+              : [];
+            const urls = [linkChoicePlatform.website_url, ...extras]
               .filter((u): u is string => !!u && u.trim().length > 0);
             return (
               <div className="space-y-3 mt-2">
