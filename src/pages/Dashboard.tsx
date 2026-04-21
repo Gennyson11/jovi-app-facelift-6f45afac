@@ -126,6 +126,7 @@ export default function Dashboard() {
   const [products, setProducts] = useState<Product[]>([]);
   const [showWhatsAppPopup, setShowWhatsAppPopup] = useState(false);
   const [partnerInfo, setPartnerInfo] = useState<{name: string | null;whatsapp: string | null;} | null>(null);
+  const [linkChoicePlatform, setLinkChoicePlatform] = useState<Platform | null>(null);
   const {
     user,
     signOut,
