@@ -972,6 +972,7 @@ export default function Admin() {
       setPlatformCoverUrl('');
       setPlatformCredentials([{ login: '', password: '' }]);
       setPlatformWebsiteUrl('');
+      setPlatformAdditionalUrls([]);
       setPlatformCategory('streamings');
       // Reset access distribution for new platforms
       setAccessDistribution('none');
