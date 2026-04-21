@@ -37,6 +37,7 @@ interface Platform {
   access_type: AccessType;
   category: PlatformCategory;
   website_url: string | null;
+  additional_urls?: string[] | null;
 }
 interface UserProfile {
   id: string;
