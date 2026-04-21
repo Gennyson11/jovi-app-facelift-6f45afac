@@ -1031,7 +1031,9 @@ export default function Dashboard() {
                 <Button
                   className="w-full bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 text-primary-foreground font-semibold"
                   onClick={() => {
-                    urls.forEach((u) => window.open(u, '_blank'));
+                    urls.forEach((u, i) => {
+                      setTimeout(() => window.open(u, '_blank', 'noopener,noreferrer'), i * 150);
+                    });
                     setLinkChoicePlatform(null);
                   }}
                 >
@@ -1039,22 +1041,9 @@ export default function Dashboard() {
                   Abrir todos os links
                 </Button>
 
-                <div className="space-y-3">
-                  {urls.map((url, idx) => (
-                    <Button
-                      key={idx}
-                      variant="outline"
-                      className="w-full justify-center"
-                      onClick={() => {
-                        window.open(url, '_blank');
-                        setLinkChoicePlatform(null);
-                      }}
-                    >
-                      <ExternalLink className="w-4 h-4 mr-2" />
-                      Acesso {String(idx + 1).padStart(2, '0')}
-                    </Button>
-                  ))}
-                </div>
+                <p className="text-xs text-muted-foreground text-center">
+                  ⚠️ Permita pop-ups no navegador para abrir todas as abas.
+                </p>
               </div>
             );
           })()}
