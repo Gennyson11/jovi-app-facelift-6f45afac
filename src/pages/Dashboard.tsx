@@ -1013,7 +1013,7 @@ export default function Dashboard() {
 
       {/* Link Choice Popup (multiple links) */}
       <Dialog open={!!linkChoicePlatform} onOpenChange={(open) => !open && setLinkChoicePlatform(null)}>
-        <DialogContent className="bg-card border-border max-w-md overflow-x-hidden">
+        <DialogContent className="bg-card border-border w-[calc(100vw-2rem)] max-w-md overflow-x-hidden">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3 text-foreground min-w-0">
               {linkChoicePlatform?.cover_image_url && (
@@ -1039,41 +1039,35 @@ export default function Dashboard() {
                   Abrir todos os links
                 </Button>
 
-                <div className="space-y-2">
+                <div className="space-y-3">
                   {urls.map((url, idx) => (
-                    <div key={idx} className="space-y-1">
+                    <div key={idx} className="space-y-1 min-w-0">
                       <label className="text-xs text-muted-foreground font-medium">
                         Acesso {String(idx + 1).padStart(2, '0')}
                       </label>
-                      <div className="flex items-center gap-2">
-                        <div
-                          className="flex-1 min-w-0 bg-background/50 border border-border rounded-md px-3 py-2 text-sm text-foreground truncate cursor-pointer hover:border-primary/50 transition-colors"
-                          onClick={() => copyToClipboard(url, 'Link')}
-                          title={url}
-                        >
+                      <div
+                        className="flex items-center gap-2 bg-background/50 border border-border rounded-md px-3 py-2 cursor-pointer hover:border-primary/50 transition-colors min-w-0"
+                        onClick={() => {
+                          window.open(url, '_blank');
+                          setLinkChoicePlatform(null);
+                        }}
+                        title={url}
+                      >
+                        <ExternalLink className="w-4 h-4 text-primary flex-shrink-0" />
+                        <span className="flex-1 min-w-0 text-sm text-foreground truncate">
                           {url}
-                        </div>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="flex-shrink-0 border-primary/40 hover:bg-primary/10"
-                          onClick={() => copyToClipboard(url, 'Link')}
+                        </span>
+                        <button
+                          type="button"
+                          className="flex-shrink-0 p-1 rounded hover:bg-primary/10 text-muted-foreground hover:text-primary transition-colors"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            copyToClipboard(url, 'Link');
+                          }}
                           title="Copiar link"
                         >
                           <Copy className="w-4 h-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="flex-shrink-0 border-primary/40 hover:bg-primary/10"
-                          onClick={() => {
-                            window.open(url, '_blank');
-                            setLinkChoicePlatform(null);
-                          }}
-                          title="Abrir link"
-                        >
-                          <ExternalLink className="w-4 h-4" />
-                        </Button>
+                        </button>
                       </div>
                     </div>
                   ))}
