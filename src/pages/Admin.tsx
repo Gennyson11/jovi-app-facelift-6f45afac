@@ -2739,6 +2739,49 @@ export default function Admin() {
               <Input id="platform-website" value={platformWebsiteUrl} onChange={(e) => setPlatformWebsiteUrl(e.target.value)} placeholder="https://www.netflix.com" className="bg-background/50 border-border" />
             </div>
 
+            {platformAccessType === 'link_only' && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <Label>Links adicionais</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setPlatformAdditionalUrls((prev) => [...prev, ''])}
+                  >
+                    + Adicionar link
+                  </Button>
+                </div>
+                {platformAdditionalUrls.length === 0 && (
+                  <p className="text-xs text-muted-foreground">
+                    Nenhum link extra. Clique em "Adicionar link" para incluir mais opções.
+                  </p>
+                )}
+                {platformAdditionalUrls.map((url, idx) => (
+                  <div key={idx} className="flex items-center gap-2">
+                    <Input
+                      value={url}
+                      onChange={(e) =>
+                        setPlatformAdditionalUrls((prev) => prev.map((u, i) => (i === idx ? e.target.value : u)))
+                      }
+                      placeholder={`Link ${idx + 2} (ex: https://...)`}
+                      className="bg-background/50 border-border"
+                    />
+                    <Button
+                      type="button"
+                      variant="destructive"
+                      size="icon"
+                      onClick={() =>
+                        setPlatformAdditionalUrls((prev) => prev.filter((_, i) => i !== idx))
+                      }
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
+                ))}
+              </div>
+            )}
+
             <div className="space-y-2">
               <Label htmlFor="platform-status">Status</Label>
               <select id="platform-status" value={platformStatus} onChange={(e) => setPlatformStatus(e.target.value as StreamingStatus)} className="w-full h-10 px-3 rounded-md border border-input bg-background text-foreground">
