@@ -930,7 +930,7 @@ export default function Dashboard() {
       setShowPassword({});
       setPlatformCredentials([]);
     }}>
-        <DialogContent className="bg-card border-border max-h-[90vh] overflow-y-auto">
+        <DialogContent className="bg-card border-border max-h-[90vh] overflow-y-auto overflow-x-hidden max-w-md">
           <DialogHeader>
             <DialogTitle className="flex items-center gap-3 text-foreground">
               {selectedPlatform?.cover_image_url ? <img src={selectedPlatform.cover_image_url} alt={selectedPlatform.name} className="w-10 h-10 object-cover rounded" /> : <span className="text-3xl">
@@ -940,8 +940,8 @@ export default function Dashboard() {
             </DialogTitle>
           </DialogHeader>
           
-          {platformCredentials.length > 0 ? <div className="space-y-4 mt-4">
-              {platformCredentials.map((cred, index) => <div key={index} className="space-y-3 p-4 rounded-lg bg-background/30 border border-border">
+          {platformCredentials.length > 0 ? <div className="space-y-4 mt-4 min-w-0">
+              {platformCredentials.map((cred, index) => <div key={index} className="space-y-3 p-4 rounded-lg bg-background/30 border border-border min-w-0 overflow-hidden">
                   {platformCredentials.length > 1 && <div className="flex items-center justify-between mb-2">
                       <span className="text-xs font-semibold text-primary uppercase tracking-wide">
                         Acesso {String(index + 1).padStart(2, '0')}
@@ -971,11 +971,11 @@ export default function Dashboard() {
 
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">Login</label>
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 bg-background/50 border border-border rounded-md px-3 py-2 text-foreground cursor-pointer hover:bg-background/70 transition-colors text-sm" onClick={() => copyToClipboard(cred.login, 'Login')}>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex-1 min-w-0 bg-background/50 border border-border rounded-md px-3 py-2 text-foreground cursor-pointer hover:bg-background/70 transition-colors text-sm truncate" onClick={() => copyToClipboard(cred.login, 'Login')} title={cred.login}>
                         {cred.login}
                       </div>
-                      <Button variant="outline" size="icon" onClick={() => copyToClipboard(cred.login, 'Login')}>
+                      <Button variant="outline" size="icon" className="flex-shrink-0" onClick={() => copyToClipboard(cred.login, 'Login')}>
                         <Copy className="w-4 h-4" />
                       </Button>
                     </div>
@@ -983,17 +983,17 @@ export default function Dashboard() {
                   
                   <div className="space-y-2">
                     <label className="text-sm font-medium text-muted-foreground">Senha</label>
-                    <div className="flex items-center gap-2">
-                      <div className="flex-1 bg-background/50 border border-border rounded-md px-3 py-2 text-foreground font-mono cursor-pointer hover:bg-background/70 transition-colors text-sm" onClick={() => copyToClipboard(cred.password, 'Senha')}>
+                    <div className="flex items-center gap-2 min-w-0">
+                      <div className="flex-1 min-w-0 bg-background/50 border border-border rounded-md px-3 py-2 text-foreground font-mono cursor-pointer hover:bg-background/70 transition-colors text-sm truncate" onClick={() => copyToClipboard(cred.password, 'Senha')}>
                         {showPassword[index] ? cred.password : '••••••••'}
                       </div>
-                      <Button variant="outline" size="icon" onClick={() => setShowPassword((prev) => ({
+                      <Button variant="outline" size="icon" className="flex-shrink-0" onClick={() => setShowPassword((prev) => ({
                   ...prev,
                   [index]: !prev[index]
                 }))}>
                         {showPassword[index] ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                       </Button>
-                      <Button variant="outline" size="icon" onClick={() => copyToClipboard(cred.password, 'Senha')}>
+                      <Button variant="outline" size="icon" className="flex-shrink-0" onClick={() => copyToClipboard(cred.password, 'Senha')}>
                         <Copy className="w-4 h-4" />
                       </Button>
                     </div>
