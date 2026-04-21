@@ -1013,34 +1013,74 @@ export default function Dashboard() {
 
       {/* Link Choice Popup (multiple links) */}
       <Dialog open={!!linkChoicePlatform} onOpenChange={(open) => !open && setLinkChoicePlatform(null)}>
-        <DialogContent className="bg-card border-border">
+        <DialogContent className="bg-card border-border max-w-md overflow-x-hidden">
           <DialogHeader>
-            <DialogTitle className="flex items-center gap-3 text-foreground">
+            <DialogTitle className="flex items-center gap-3 text-foreground min-w-0">
               {linkChoicePlatform?.cover_image_url && (
-                <img src={linkChoicePlatform.cover_image_url} alt={linkChoicePlatform.name} className="w-10 h-10 object-cover rounded" />
+                <img src={linkChoicePlatform.cover_image_url} alt={linkChoicePlatform.name} className="w-10 h-10 object-cover rounded flex-shrink-0" />
               )}
-              {linkChoicePlatform?.name}
+              <span className="truncate">{linkChoicePlatform?.name}</span>
             </DialogTitle>
           </DialogHeader>
-          <div className="space-y-2 mt-2">
-            <p className="text-sm text-muted-foreground mb-3">Escolha qual link deseja abrir:</p>
-            {linkChoicePlatform && [linkChoicePlatform.website_url, ...((linkChoicePlatform.additional_urls as string[] | null) || [])]
-              .filter((u): u is string => !!u && u.trim().length > 0)
-              .map((url, idx) => (
+
+          {linkChoicePlatform && (() => {
+            const urls = [linkChoicePlatform.website_url, ...((linkChoicePlatform.additional_urls as string[] | null) || [])]
+              .filter((u): u is string => !!u && u.trim().length > 0);
+            return (
+              <div className="space-y-3 mt-2">
                 <Button
-                  key={idx}
-                  variant="outline"
-                  className="w-full justify-start text-left"
+                  className="w-full bg-gradient-to-r from-primary to-primary/80 hover:opacity-90 text-primary-foreground font-semibold"
                   onClick={() => {
-                    window.open(url, '_blank');
+                    urls.forEach((u) => window.open(u, '_blank'));
                     setLinkChoicePlatform(null);
                   }}
                 >
-                  <ExternalLink className="w-4 h-4 mr-2 flex-shrink-0" />
-                  <span className="truncate">Acesso {String(idx + 1).padStart(2, '0')}</span>
+                  <ExternalLink className="w-4 h-4 mr-2" />
+                  Abrir todos os links
                 </Button>
-              ))}
-          </div>
+
+                <div className="space-y-2">
+                  {urls.map((url, idx) => (
+                    <div key={idx} className="space-y-1">
+                      <label className="text-xs text-muted-foreground font-medium">
+                        Acesso {String(idx + 1).padStart(2, '0')}
+                      </label>
+                      <div className="flex items-center gap-2">
+                        <div
+                          className="flex-1 min-w-0 bg-background/50 border border-border rounded-md px-3 py-2 text-sm text-foreground truncate cursor-pointer hover:border-primary/50 transition-colors"
+                          onClick={() => copyToClipboard(url, 'Link')}
+                          title={url}
+                        >
+                          {url}
+                        </div>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="flex-shrink-0 border-primary/40 hover:bg-primary/10"
+                          onClick={() => copyToClipboard(url, 'Link')}
+                          title="Copiar link"
+                        >
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="icon"
+                          className="flex-shrink-0 border-primary/40 hover:bg-primary/10"
+                          onClick={() => {
+                            window.open(url, '_blank');
+                            setLinkChoicePlatform(null);
+                          }}
+                          title="Abrir link"
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
         </DialogContent>
       </Dialog>
 
