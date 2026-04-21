@@ -1,0 +1,1 @@
+ALTER TABLE public.streaming_platforms ADD COLUMN IF NOT EXISTS additional_urls jsonb NOT NULL DEFAULT '[]'::jsonb;

@@ -339,6 +339,7 @@ export type Database = {
       streaming_platforms: {
         Row: {
           access_type: Database["public"]["Enums"]["access_type"]
+          additional_urls: Json
           category: Database["public"]["Enums"]["platform_category"]
           cover_image_url: string | null
           created_at: string
@@ -351,6 +352,7 @@ export type Database = {
         }
         Insert: {
           access_type?: Database["public"]["Enums"]["access_type"]
+          additional_urls?: Json
           category?: Database["public"]["Enums"]["platform_category"]
           cover_image_url?: string | null
           created_at?: string
@@ -363,6 +365,7 @@ export type Database = {
         }
         Update: {
           access_type?: Database["public"]["Enums"]["access_type"]
+          additional_urls?: Json
           category?: Database["public"]["Enums"]["platform_category"]
           cover_image_url?: string | null
           created_at?: string
