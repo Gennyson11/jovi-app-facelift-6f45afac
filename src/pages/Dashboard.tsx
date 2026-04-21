@@ -326,7 +326,14 @@ export default function Dashboard() {
     // Increment click count
     incrementClickCount(platform.id);
     if (platform.access_type === 'link_only' && platform.website_url) {
-      window.open(platform.website_url, '_blank');
+      const extras = Array.isArray(platform.additional_urls)
+        ? platform.additional_urls.filter((u) => typeof u === 'string' && u.trim().length > 0)
+        : [];
+      if (extras.length > 0) {
+        setLinkChoicePlatform(platform);
+      } else {
+        window.open(platform.website_url, '_blank');
+      }
     } else if (platform.access_type === 'credentials') {
       // Load credentials from streaming_credentials table
       const {
