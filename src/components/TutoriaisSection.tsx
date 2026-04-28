@@ -21,7 +21,7 @@ const TUTORIALS: Tutorial[] = [
   },
   {
     id: '3',
-    title: 'TUTORIAL JOVITOOLS',
+    title: 'COMO USAR O SEEDANCE E O KLING ILIMITADO',
     youtubeId: 'f1jbzABkt18',
   },
 ];
