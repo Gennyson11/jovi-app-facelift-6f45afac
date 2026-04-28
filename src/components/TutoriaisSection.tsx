@@ -19,6 +19,11 @@ const TUTORIALS: Tutorial[] = [
     title: 'COMO FAZER LOGIN NO FLOW ULTRA PELO DICLOAK',
     youtubeId: 'OWBC4sirtKQ',
   },
+  {
+    id: '3',
+    title: 'TUTORIAL JOVITOOLS',
+    youtubeId: 'f1jbzABkt18',
+  },
 ];
 
 export default function TutoriaisSection() {
