@@ -145,7 +145,7 @@ const Revendedores = () => {
           <div className="card-glass-blue px-6 py-6 space-y-4">
             {[
               "Acesso ao painel de revendedor",
-               "R$ 130,00 Mensal",
+               "R$ 150,00 Mensal",
               "Cadastro de até 100 usuários",
               "Revenda com 100% de lucro",
               "Novas ferramentas adicionadas toda semana",
