@@ -7,7 +7,7 @@ import { useSubscription } from '@/hooks/useSubscription';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
-import { LogOut, Eye, EyeOff, Copy, Loader2, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Lock, Clock, Megaphone, X, MousePointerClick, Zap, QrCode, ShieldX } from 'lucide-react';
+import { LogOut, Eye, EyeOff, Copy, Loader2, CheckCircle, AlertTriangle, ExternalLink, KeyRound, Link, Lock, Clock, Megaphone, X, MousePointerClick, Zap, QrCode, ShieldX, RefreshCw } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import DashboardSidebar from '@/components/DashboardSidebar';
@@ -396,24 +396,30 @@ export default function Dashboard() {
       <div className="flex-1 min-w-0">
         {/* Header */}
         <header className="border-b border-border bg-card/50 backdrop-blur-sm sticky top-0 z-40">
-          <div className="px-4 lg:px-8 py-4 flex items-center justify-between">
-            <div className="flex items-center gap-3 ml-12 lg:ml-0">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-magenta to-primary flex items-center justify-center shadow-lg shadow-magenta/30">
-                <Zap className="w-5 h-5 text-white" />
-              </div>
-              <div>
-                <h1 className="text-lg font-display font-bold bg-gradient-to-r from-cyan to-primary bg-clip-text text-transparent">
-                  JoviTools
-                </h1>
-                <p className="text-xs text-muted-foreground">
-                  {userProfile ? `Olá, ${userProfile.name || userProfile.email}` : 'Painel de Controle'}
-                </p>
-              </div>
+          <div className="px-4 lg:px-8 py-5 flex items-center justify-between gap-4">
+            <div className="ml-12 lg:ml-0 min-w-0">
+              <h1 className="text-2xl md:text-3xl font-display font-bold text-foreground truncate">
+                Minhas Assinaturas
+              </h1>
+              <p className="text-xs md:text-sm text-muted-foreground mt-0.5">
+                Escolha a plataforma que deseja acessar abaixo
+              </p>
             </div>
-            <div className="flex items-center gap-3">
-              {hasAccess && getRemainingDaysText() && <span className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium ${userProfile?.access_expires_at === null ? 'bg-purple-500/10 text-purple-400' : 'bg-primary/10 text-primary'}`}>
-                  {getRemainingDaysText()}
-                </span>}
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                onClick={() => window.location.reload()}
+                className="w-10 h-10 rounded-xl bg-secondary/60 border border-border hover:border-primary/50 hover:bg-secondary text-muted-foreground hover:text-foreground transition-all flex items-center justify-center"
+                title="Atualizar"
+              >
+                <RefreshCw className="w-4 h-4" />
+              </button>
+              <button
+                onClick={handleLogout}
+                className="w-10 h-10 rounded-xl bg-destructive/10 border border-destructive/40 hover:bg-destructive/20 text-destructive transition-all flex items-center justify-center"
+                title="Sair"
+              >
+                <LogOut className="w-4 h-4" />
+              </button>
             </div>
           </div>
         </header>
