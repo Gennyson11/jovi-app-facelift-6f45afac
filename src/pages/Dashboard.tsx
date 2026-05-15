@@ -530,6 +530,8 @@ export default function Dashboard() {
           let progress = 0;
           let startLabel = '';
           let endLabel = '';
+          let startShort = '';
+          let endShort = '';
           if (expiresAt) {
             const diffMs = expiresAt.getTime() - now.getTime();
             daysLeft = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
@@ -541,7 +543,8 @@ export default function Dashboard() {
             const fmtLong = (d: Date) => `${String(d.getDate()).padStart(2, '0')} de ${d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')}.`;
             startLabel = fmtLong(start);
             endLabel = fmtLong(expiresAt);
-            (window as any).__hubDates = { startShort: fmt(start), endShort: fmt(expiresAt) };
+            startShort = fmt(start);
+            endShort = fmt(expiresAt);
           }
           const ringSize = 110;
           const stroke = 7;
@@ -572,9 +575,9 @@ export default function Dashboard() {
                       {!isLifetime && expiresAt ? (
                         <>
                           <div className="flex items-center gap-3 text-2xl md:text-3xl font-display font-bold mb-3">
-                            <span className="text-foreground">{(window as any).__hubDates?.startShort}</span>
+                            <span className="text-foreground">{startShort}</span>
                             <span className="text-primary">→</span>
-                            <span className="text-foreground">{(window as any).__hubDates?.endShort}</span>
+                            <span className="text-foreground">{endShort}</span>
                           </div>
                           <div className="relative h-2 rounded-full bg-secondary/60 overflow-hidden mb-2">
                             <div
