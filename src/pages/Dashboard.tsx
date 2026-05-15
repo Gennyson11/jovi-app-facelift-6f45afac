@@ -520,51 +520,158 @@ export default function Dashboard() {
             <img src={dashboardBanner} alt="JoviTools Banner" className="w-full h-auto object-cover block" style={{ margin: '-1px 0', padding: 0 }} />
           </div>}
 
-        {/* Account Validity Card */}
-        {hasAccess && userProfile && <div className="mb-6 p-4 rounded-xl bg-card border border-border">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 rounded-full bg-green-500/10 flex items-center justify-center">
-                  <Clock className="w-6 h-6 text-green-500" />
+        {/* Minhas Assinaturas — Hub Central panel */}
+        {hasAccess && userProfile && (() => {
+          const isLifetime = userProfile.access_expires_at === null;
+          const expiresAt = isLifetime ? null : new Date(userProfile.access_expires_at!);
+          const now = new Date();
+          const totalSpan = 30; // assumed window in days for progress visualization
+          let daysLeft = 0;
+          let progress = 0;
+          let startLabel = '';
+          let endLabel = '';
+          let startShort = '';
+          let endShort = '';
+          if (expiresAt) {
+            const diffMs = expiresAt.getTime() - now.getTime();
+            daysLeft = Math.max(0, Math.ceil(diffMs / (1000 * 60 * 60 * 24)));
+            const start = new Date(expiresAt.getTime() - totalSpan * 86400000);
+            const total = expiresAt.getTime() - start.getTime();
+            const elapsed = now.getTime() - start.getTime();
+            progress = Math.max(0, Math.min(100, (elapsed / total) * 100));
+            const fmt = (d: Date) => `${String(d.getDate()).padStart(2, '0')}/${String(d.getMonth() + 1).padStart(2, '0')}`;
+            const fmtLong = (d: Date) => `${String(d.getDate()).padStart(2, '0')} de ${d.toLocaleDateString('pt-BR', { month: 'short' }).replace('.', '')}.`;
+            startLabel = fmtLong(start);
+            endLabel = fmtLong(expiresAt);
+            startShort = fmt(start);
+            endShort = fmt(expiresAt);
+          }
+          const ringSize = 110;
+          const stroke = 7;
+          const radius = (ringSize - stroke) / 2;
+          const circ = 2 * Math.PI * radius;
+          const ringProgress = isLifetime ? 100 : Math.max(0, Math.min(100, ((totalSpan - daysLeft) / totalSpan) * 100));
+          const dashOffset = circ - (ringProgress / 100) * circ;
+          const ringColor = isLifetime
+            ? 'hsl(280 90% 65%)'
+            : daysLeft <= 3
+            ? 'hsl(0 84% 60%)'
+            : daysLeft <= 7
+            ? 'hsl(38 95% 60%)'
+            : 'hsl(150 80% 55%)';
+
+          return (
+            <section className="mb-8">
+              <div className="mb-5">
+                <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground">Minhas Assinaturas</h2>
+                <p className="text-sm text-muted-foreground mt-1">Acompanhe a validade do seu acesso e as plataformas disponíveis abaixo</p>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+                {/* Validity card — spans 2 cols */}
+                <div className="card-neon lg:col-span-2 p-6">
+                  <div className="flex items-start justify-between gap-4 flex-wrap">
+                    <div className="flex-1 min-w-[240px]">
+                      {!isLifetime && expiresAt ? (
+                        <>
+                          <div className="flex items-center gap-3 text-2xl md:text-3xl font-display font-bold mb-3">
+                            <span className="text-foreground">{startShort}</span>
+                            <span className="text-primary">→</span>
+                            <span className="text-foreground">{endShort}</span>
+                          </div>
+                          <div className="relative h-2 rounded-full bg-secondary/60 overflow-hidden mb-2">
+                            <div
+                              className="absolute inset-y-0 left-0 rounded-full"
+                              style={{
+                                width: `${progress}%`,
+                                background: 'linear-gradient(90deg, hsl(220 90% 56%), hsl(220 100% 70%))',
+                                boxShadow: '0 0 12px hsl(220 100% 60% / 0.6)',
+                              }}
+                            />
+                            <div
+                              className="absolute top-1/2 -translate-y-1/2 w-3.5 h-3.5 rounded-full bg-primary-foreground border-2 border-primary"
+                              style={{ left: `calc(${progress}% - 7px)`, boxShadow: '0 0 10px hsl(220 100% 60%)' }}
+                            />
+                          </div>
+                          <div className="flex justify-between text-[10px] uppercase tracking-wider text-muted-foreground font-semibold">
+                            <span>{startLabel}</span>
+                            <span>{endLabel}</span>
+                          </div>
+                        </>
+                      ) : (
+                        <>
+                          <div className="text-3xl font-display font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent mb-2">
+                            Acesso Vitalício
+                          </div>
+                          <p className="text-sm text-muted-foreground">Sua assinatura não tem data de expiração.</p>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Days remaining ring */}
+                    <div className="relative flex items-center justify-center" style={{ width: ringSize, height: ringSize }}>
+                      <svg width={ringSize} height={ringSize} className="-rotate-90">
+                        <circle cx={ringSize / 2} cy={ringSize / 2} r={radius} stroke="hsl(225 35% 18%)" strokeWidth={stroke} fill="none" />
+                        <circle
+                          cx={ringSize / 2}
+                          cy={ringSize / 2}
+                          r={radius}
+                          stroke={ringColor}
+                          strokeWidth={stroke}
+                          fill="none"
+                          strokeDasharray={circ}
+                          strokeDashoffset={dashOffset}
+                          strokeLinecap="round"
+                          style={{ filter: `drop-shadow(0 0 8px ${ringColor})`, transition: 'stroke-dashoffset 0.6s ease' }}
+                        />
+                      </svg>
+                      <div className="absolute inset-0 flex flex-col items-center justify-center">
+                        <span className="text-3xl font-display font-black" style={{ color: ringColor }}>
+                          {isLifetime ? '∞' : daysLeft}
+                        </span>
+                        <span className="text-[9px] uppercase tracking-widest text-muted-foreground font-semibold mt-0.5">
+                          {isLifetime ? 'vitalício' : 'dias rest.'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="neon-divider my-5" />
+
+                  <div className="flex items-center justify-between gap-3 flex-wrap">
+                    <div className="flex items-center gap-3">
+                      <div className="w-11 h-11 rounded-xl bg-gradient-to-br from-primary/30 to-accent/20 border border-primary/40 flex items-center justify-center">
+                        <Zap className="w-5 h-5 text-primary" />
+                      </div>
+                      <div>
+                        <p className="text-sm font-bold text-foreground">JoviTools Premium</p>
+                        <p className="text-xs text-muted-foreground">Plano ativo</p>
+                      </div>
+                    </div>
+                    <span className="badge-active-pulse">ATIVO</span>
+                  </div>
                 </div>
-                <div>
-                  <p className="text-sm text-muted-foreground">Validade da Sua Conta</p>
-                  <p className="text-xl font-bold text-green-500">
-                    {(() => {
-                    if (userProfile.access_expires_at === null) {
-                      return 'Acesso Vitalício';
-                    }
-                    const expiresAt = new Date(userProfile.access_expires_at);
-                    const now = new Date();
-                    const diffMs = expiresAt.getTime() - now.getTime();
-                    if (diffMs <= 0) return 'Expirado';
 
-
-                    const days = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-                    const hours = Math.floor(diffMs % (1000 * 60 * 60 * 24) / (1000 * 60 * 60));
-                    if (days > 0) {
-                      return `${days}d ${hours}h restantes`;
-                    }
-                    return `${hours}h restantes`;
-                  })()}
+                {/* Upsell card */}
+                <div className="card-neon p-6 flex flex-col items-center justify-center text-center min-h-[200px]">
+                  <div className="w-14 h-14 rounded-2xl bg-primary/10 border border-primary/30 flex items-center justify-center mb-3">
+                    <span className="text-2xl">🛒</span>
+                  </div>
+                  <h3 className="text-lg font-display font-bold text-foreground mb-1">Adicionar Ferramentas</h3>
+                  <p className="text-xs text-muted-foreground mb-4 max-w-[220px]">
+                    Potencialize seus resultados com novas assinaturas ilimitadas.
                   </p>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {userProfile.access_expires_at === null ? 'Sem data de expiração' : `Expira em ${new Date(userProfile.access_expires_at).toLocaleDateString('pt-BR', {
-                    day: '2-digit',
-                    month: 'long',
-                    year: 'numeric'
-                  })} às ${new Date(userProfile.access_expires_at).toLocaleTimeString('pt-BR', {
-                    hour: '2-digit',
-                    minute: '2-digit'
-                  })}`}
-                  </p>
+                  <button
+                    onClick={() => navigate('/planos')}
+                    className="btn-neon-gradient"
+                  >
+                    Explorar Opções
+                  </button>
                 </div>
               </div>
-              <div className={`px-3 py-1.5 rounded-full border text-sm font-medium ${userProfile.access_expires_at === null ? 'border-purple-500/30 text-purple-400 bg-purple-500/10' : 'border-green-500/30 text-green-500 bg-green-500/10'}`}>
-                {userProfile.access_expires_at === null ? '∞ Vitalício' : '✓ Ativa'}
-              </div>
-            </div>
-          </div>}
+            </section>
+          );
+        })()}
 
         {/* Warning Banner */}
         {hasAccess && <div className="mb-6 p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-sm">
