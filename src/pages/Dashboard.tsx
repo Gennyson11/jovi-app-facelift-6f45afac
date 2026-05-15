@@ -568,11 +568,6 @@ export default function Dashboard() {
 
           return (
             <section className="mb-8">
-              <div className="mb-5">
-                <h2 className="text-2xl md:text-3xl font-display font-bold text-foreground">Minhas Assinaturas</h2>
-                <p className="text-sm text-muted-foreground mt-1">Acompanhe a validade do seu acesso e as plataformas disponíveis abaixo</p>
-              </div>
-
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
                 {/* Validity card — spans 2 cols */}
                 <div className="card-neon lg:col-span-2 p-6">
