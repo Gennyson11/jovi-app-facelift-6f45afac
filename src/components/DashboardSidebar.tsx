@@ -115,23 +115,52 @@ export default function DashboardSidebar({
   };
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full bg-card border-r border-border">
-      {/* Header */}
-      <div className="p-4 border-b border-border flex items-center justify-between">
-        {!isCollapsed && (
-          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-            Dashboard
-          </h2>
+    <div className="flex flex-col h-full bg-card border-r border-border/50 relative">
+      {/* Brand + Status */}
+      <div className="p-4 border-b border-border/50 flex items-center justify-between gap-2">
+        {!isCollapsed ? (
+          <div className="flex items-center gap-3 min-w-0">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center shadow-[0_0_20px_hsl(220_90%_56%/0.4)] flex-shrink-0">
+              <span className="text-primary-foreground font-display font-black text-base">JT</span>
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-display font-bold text-foreground truncate">JoviTools</p>
+              <p className="text-[10px] uppercase tracking-wider font-semibold flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-emerald-400">Portal Ativo</span>
+              </p>
+            </div>
+          </div>
+        ) : (
+          <div className="w-10 h-10 mx-auto rounded-xl bg-gradient-to-br from-primary to-accent flex items-center justify-center">
+            <span className="text-primary-foreground font-display font-black text-base">JT</span>
+          </div>
         )}
         <Button
           variant="ghost"
           size="icon"
           onClick={() => setIsCollapsed(!isCollapsed)}
-          className="hidden lg:flex h-8 w-8"
+          className="hidden lg:flex h-8 w-8 flex-shrink-0"
         >
           <ChevronLeft className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")} />
         </Button>
       </div>
+
+      {/* User Welcome Block */}
+      {userProfile && !isCollapsed && (
+        <div className="px-4 py-4 border-b border-border/50">
+          <p className="text-xs text-muted-foreground mb-1">Bem-vindo de volta 👋</p>
+          <div className="flex items-center gap-2 mb-1">
+            <p className="text-base font-bold text-foreground truncate">
+              {userProfile.name || userProfile.email.split('@')[0]}
+            </p>
+            <span className="text-[10px] font-mono px-2 py-0.5 rounded-md bg-primary/15 text-primary border border-primary/30">
+              #{userProfile.id.slice(0, 4).toUpperCase()}
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground truncate">{userProfile.email}</p>
+        </div>
+      )}
 
       <ScrollArea className="flex-1">
         {/* Dashboard Section */}
@@ -223,47 +252,19 @@ export default function DashboardSidebar({
       </ScrollArea>
 
       {/* Footer */}
-      <div className="mt-auto border-t border-border">
-        {/* User Profile */}
-        {userProfile && (
-          <div className={cn(
-            "p-4 flex items-center gap-3",
-            isCollapsed && "justify-center"
-          )}>
-            {userProfile.avatar_url ? (
-              <img 
-                src={userProfile.avatar_url} 
-                alt="Avatar" 
-                className="w-10 h-10 rounded-full object-cover flex-shrink-0"
-              />
-            ) : (
-              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0">
-                {getInitials(userProfile.name, userProfile.email)}
-              </div>
-            )}
-            {!isCollapsed && (
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
-                  {userProfile.name || userProfile.email.split('@')[0]}
-                </p>
-                <p className="text-xs text-muted-foreground truncate">
-                  {userProfile.email}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
+      <div className="mt-auto border-t border-border/50 p-3 space-y-2">
         {/* Logout */}
         <button
           onClick={onLogout}
           className={cn(
-            "w-full flex items-center gap-3 px-6 py-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all border-t border-border",
+            "w-full flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-semibold transition-all",
+            "bg-destructive/10 text-destructive border border-destructive/30",
+            "hover:bg-destructive/20 hover:shadow-[0_0_20px_hsl(0_84%_60%/0.3)]",
             isCollapsed && "justify-center px-2"
           )}
         >
           <LogOut className="h-5 w-5 flex-shrink-0" />
-          {!isCollapsed && <span>Sair</span>}
+          {!isCollapsed && <span>Sair da conta</span>}
         </button>
       </div>
     </div>
