@@ -18,11 +18,15 @@ const Index = () => {
       <FAQSection />
       
       {/* Footer */}
-      <footer className="py-8 px-4 border-t border-border/30">
-        <div className="max-w-6xl mx-auto text-center">
+      <footer className="py-10 px-4 border-t border-border/40 mt-8">
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
           <p className="text-muted-foreground text-sm">
-            © 2024 JoviTools. Todos os direitos reservados.
+            © 2024 <span className="text-foreground font-semibold">JoviTools</span>. Todos os direitos reservados.
           </p>
+          <div className="flex items-center gap-2 text-xs text-muted-foreground">
+            <span className="status-dot status-dot-success" />
+            Plataforma online
+          </div>
         </div>
       </footer>
 

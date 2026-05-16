@@ -25,17 +25,14 @@ const PricingSection = () => {
         </div>
 
         {/* Pricing Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 max-w-7xl mx-auto items-stretch">
           {/* Monthly Plan */}
           <div
-            className="relative p-6 md:p-8 rounded-3xl card-glass-blue border-2 border-primary/30 transition-all duration-500 group hover:scale-[1.02] md:hover:scale-105 hover:border-primary/60"
-            style={{
-              boxShadow: '0 0 60px -20px hsl(220 90% 56% / 0.4), inset 0 1px 0 0 hsl(220 90% 56% / 0.15)'
-            }}>
+            className="panel panel-hover panel-flush p-6 md:p-8 animate-fade-up">
             
             <div className="flex justify-center mb-4 md:mb-6">
-              <span className="px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-display font-bold bg-primary text-primary-foreground shadow-lg shadow-primary/30">
-                MAIS POPULAR
+              <span className="px-4 py-1.5 rounded-full text-[11px] tracking-wider font-display font-bold bg-secondary/60 text-muted-foreground border border-border/60">
+                INICIANTE
               </span>
             </div>
 
@@ -73,14 +70,12 @@ const PricingSection = () => {
 
           {/* Quarterly Plan - Featured */}
           <div
-            className="relative p-8 rounded-3xl card-glass-blue border-2 border-primary/50 transition-all duration-500 group hover:scale-105 hover:border-primary/80"
-            style={{
-              boxShadow: '0 0 100px -20px hsl(220 90% 56% / 0.5), inset 0 1px 0 0 hsl(220 90% 56% / 0.2)'
-            }}>
+            className="panel panel-hover panel-flush p-8 md:scale-[1.04] border-primary/50 animate-fade-up"
+            style={{ animationDelay: '80ms', boxShadow: '0 0 60px -10px hsl(220 90% 56% / 0.45), 0 1px 0 0 hsl(220 90% 56% / 0.2) inset' }}>
             
             <div className="flex justify-center mb-6">
-              <span className="px-6 py-2 rounded-full text-sm font-display font-bold bg-accent text-accent-foreground shadow-lg shadow-accent/30">
-                MELHOR CUSTO
+              <span className="px-5 py-2 rounded-full text-xs tracking-wider font-display font-bold btn-pill-gradient text-primary-foreground">
+                ⭐ MAIS POPULAR
               </span>
             </div>
 
@@ -119,14 +114,12 @@ const PricingSection = () => {
 
           {/* Annual Plan */}
           <div
-            className="relative p-6 md:p-8 rounded-3xl card-glass-blue border-2 border-primary/30 transition-all duration-500 group hover:scale-[1.02] md:hover:scale-105 hover:border-primary/60"
-            style={{
-              boxShadow: '0 0 60px -20px hsl(220 90% 56% / 0.4), inset 0 1px 0 0 hsl(220 90% 56% / 0.15)'
-            }}>
+            className="panel panel-hover panel-flush p-6 md:p-8 animate-fade-up"
+            style={{ animationDelay: '160ms' }}>
             
             <div className="flex justify-center mb-4 md:mb-6">
-              <span className="px-4 md:px-6 py-1.5 md:py-2 rounded-full text-xs md:text-sm font-display font-bold bg-primary text-primary-foreground shadow-lg shadow-primary/30">
-                ECONOMIA MÁXIMA
+              <span className="px-4 py-1.5 rounded-full text-[11px] tracking-wider font-display font-bold bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+                💰 ECONOMIA MÁXIMA
               </span>
             </div>
 
