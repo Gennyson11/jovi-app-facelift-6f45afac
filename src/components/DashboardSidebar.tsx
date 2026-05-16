@@ -115,20 +115,13 @@ export default function DashboardSidebar({
   };
 
   const SidebarContent = () => (
-    <div className="flex flex-col h-full border-r border-border/60 backdrop-blur-xl"
-         style={{ background: "linear-gradient(180deg, hsl(225 50% 6% / 0.95) 0%, hsl(225 50% 4% / 0.95) 100%)" }}>
-      {/* Header — Portal status */}
-      <div className="p-4 border-b border-border/60 flex items-center justify-between">
+    <div className="flex flex-col h-full bg-card border-r border-border">
+      {/* Header */}
+      <div className="p-4 border-b border-border flex items-center justify-between">
         {!isCollapsed && (
-          <div className="flex flex-col">
-            <h2 className="text-sm font-display font-bold text-foreground">
-              Hub Central
-            </h2>
-            <span className="flex items-center gap-1.5 text-[10px] uppercase tracking-wider text-emerald-400 mt-0.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-              Portal Ativo
-            </span>
-          </div>
+          <h2 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+            Dashboard
+          </h2>
         )}
         <Button
           variant="ghost"
@@ -139,22 +132,6 @@ export default function DashboardSidebar({
           <ChevronLeft className={cn("h-4 w-4 transition-transform", isCollapsed && "rotate-180")} />
         </Button>
       </div>
-
-      {/* Welcome block with #ID chip */}
-      {!isCollapsed && userProfile && (
-        <div className="px-4 py-3 border-b border-border/40">
-          <p className="text-xs text-muted-foreground">Bem-vindo de volta 👋</p>
-          <div className="flex items-center gap-2 mt-1">
-            <p className="text-sm font-semibold text-foreground truncate">
-              {userProfile.name || userProfile.email.split('@')[0]}
-            </p>
-            <span className="chip">#{userProfile.id.slice(-4).toUpperCase()}</span>
-          </div>
-          <p className="text-[11px] text-muted-foreground/80 truncate mt-0.5">
-            {userProfile.email}
-          </p>
-        </div>
-      )}
 
       <ScrollArea className="flex-1">
         {/* Dashboard Section */}
@@ -175,10 +152,10 @@ export default function DashboardSidebar({
                   key={item.id}
                   onClick={() => handleItemClick(item)}
                   className={cn(
-                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
-                    isActive
-                      ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-[0_4px_20px_-4px_hsl(220_90%_56%/0.5)]"
-                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/40 hover:translate-x-0.5",
+                    "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+                    isActive 
+                      ? "bg-primary text-primary-foreground" 
+                      : "text-muted-foreground hover:text-foreground hover:bg-secondary/50",
                     isCollapsed && "justify-center px-2"
                   )}
                 >
@@ -208,10 +185,10 @@ export default function DashboardSidebar({
                 onClick={() => handleGeneralItemClick(item)}
                 disabled={item.disabled}
                 className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200",
-                  isActive
-                    ? "bg-gradient-to-r from-primary to-accent text-primary-foreground shadow-[0_4px_20px_-4px_hsl(220_90%_56%/0.5)]"
-                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/40 hover:translate-x-0.5",
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
+                  isActive 
+                    ? "bg-primary text-primary-foreground" 
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/50",
                   item.disabled && "opacity-50 cursor-not-allowed",
                   isCollapsed && "justify-center px-2"
                 )}
@@ -230,9 +207,9 @@ export default function DashboardSidebar({
                   setIsMobileOpen(false);
                 }}
                 className={cn(
-                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all mt-2",
+                  "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all mt-2",
                   location.pathname === SOCIO_ITEM.href
-                    ? "bg-gradient-to-r from-amber-500 to-orange-600 text-white shadow-[0_4px_20px_-4px_hsl(35_95%_55%/0.5)]"
+                    ? "bg-gradient-to-r from-amber-500 to-orange-600 text-white" 
                     : "text-amber-500 hover:text-amber-400 hover:bg-amber-500/10 border border-amber-500/30",
                   isCollapsed && "justify-center px-2"
                 )}
@@ -246,44 +223,47 @@ export default function DashboardSidebar({
       </ScrollArea>
 
       {/* Footer */}
-      <div className="mt-auto border-t border-border/60">
-        {/* Avatar + online indicator */}
+      <div className="mt-auto border-t border-border">
+        {/* User Profile */}
         {userProfile && (
           <div className={cn(
-            "px-4 py-3 flex items-center gap-3",
-            isCollapsed && "justify-center px-2"
+            "p-4 flex items-center gap-3",
+            isCollapsed && "justify-center"
           )}>
-            <div className="relative flex-shrink-0">
-              {userProfile.avatar_url ? (
-                <img src={userProfile.avatar_url} alt="Avatar" className="w-9 h-9 rounded-full object-cover ring-2 ring-primary/30" />
-              ) : (
-                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-primary to-accent flex items-center justify-center text-primary-foreground font-bold text-xs">
-                  {getInitials(userProfile.name, userProfile.email)}
-                </div>
-              )}
-              <span className="absolute -bottom-0.5 -right-0.5 w-3 h-3 rounded-full bg-emerald-400 ring-2 ring-card animate-pulse" />
-            </div>
+            {userProfile.avatar_url ? (
+              <img 
+                src={userProfile.avatar_url} 
+                alt="Avatar" 
+                className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+              />
+            ) : (
+              <div className="w-10 h-10 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm flex-shrink-0">
+                {getInitials(userProfile.name, userProfile.email)}
+              </div>
+            )}
             {!isCollapsed && (
               <div className="flex-1 min-w-0">
-                <p className="text-xs font-medium text-foreground truncate">
+                <p className="text-sm font-medium text-foreground truncate">
                   {userProfile.name || userProfile.email.split('@')[0]}
                 </p>
-                <p className="text-[10px] text-emerald-400">Online agora</p>
+                <p className="text-xs text-muted-foreground truncate">
+                  {userProfile.email}
+                </p>
               </div>
             )}
           </div>
         )}
 
-        {/* Logout — destructive */}
+        {/* Logout */}
         <button
           onClick={onLogout}
           className={cn(
-            "w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-destructive/90 hover:text-destructive hover:bg-destructive/10 transition-all border-t border-border/60",
+            "w-full flex items-center gap-3 px-6 py-4 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-secondary/50 transition-all border-t border-border",
             isCollapsed && "justify-center px-2"
           )}
         >
           <LogOut className="h-5 w-5 flex-shrink-0" />
-          {!isCollapsed && <span>Sair da conta</span>}
+          {!isCollapsed && <span>Sair</span>}
         </button>
       </div>
     </div>
