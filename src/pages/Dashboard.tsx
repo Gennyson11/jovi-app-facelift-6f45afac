@@ -935,6 +935,7 @@ export default function Dashboard() {
       setSelectedPlatform(null);
       setShowPassword({});
       setPlatformCredentials([]);
+      setOtpCodes({});
     }}>
         <DialogContent className="bg-card border-border max-h-[90vh] overflow-y-auto overflow-x-hidden max-w-md">
           <DialogHeader>
