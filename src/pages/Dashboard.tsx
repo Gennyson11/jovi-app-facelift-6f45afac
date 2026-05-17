@@ -117,6 +117,8 @@ export default function Dashboard() {
   const [platforms, setPlatforms] = useState<Platform[]>([]);
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null);
   const [showPassword, setShowPassword] = useState<Record<number, boolean>>({});
+  const [otpCodes, setOtpCodes] = useState<Record<number, { code: string; secondsRemaining: number }>>({});
+  const [otpLoading, setOtpLoading] = useState<Record<number, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userPlatformAccess, setUserPlatformAccess] = useState<string[]>([]);
