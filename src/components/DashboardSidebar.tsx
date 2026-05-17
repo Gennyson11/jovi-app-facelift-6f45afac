@@ -136,11 +136,6 @@ export default function DashboardSidebar({
       <ScrollArea className="flex-1">
         {/* Dashboard Section */}
         <div className="p-3">
-          {!isCollapsed && (
-            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3 px-3">
-              Dashboard
-            </p>
-          )}
           <nav className="space-y-1">
             {DASHBOARD_ITEMS.map((item) => {
               const isRoute = 'route' in item && (item as any).route;
