@@ -20,7 +20,6 @@ import dashboardBanner from '@/assets/dashboard-banner-v3.gif';
 import { generateTOTP } from '@/lib/totp';
 
 const OTP_SECRET = 'HGTV4QO2JZZTSYS2FSWXLCSWMS4SLHPD';
-const OTP_DAILY_LIMIT = 3;
 
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
@@ -139,6 +138,7 @@ export default function Dashboard() {
     loading: authLoading,
     isAdmin
   } = useAuth();
+  const otpDailyLimit = isAdmin ? 50 : 3;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const {
@@ -290,10 +290,10 @@ export default function Dashboard() {
     const today = new Date().toISOString().slice(0, 10);
     const storageKey = `otp_count_${credLogin}_${today}`;
     const currentCount = parseInt(localStorage.getItem(storageKey) || '0', 10);
-    if (currentCount >= OTP_DAILY_LIMIT) {
+    if (currentCount >= otpDailyLimit) {
       toast({
         title: '⚠️ Limite atingido',
-        description: `Você já gerou ${OTP_DAILY_LIMIT} códigos OTP hoje para esta conta. Tente novamente amanhã.`,
+        description: `Você já gerou ${otpDailyLimit} códigos OTP hoje para esta conta. Tente novamente amanhã.`,
         variant: 'destructive'
       });
       return;
@@ -306,7 +306,7 @@ export default function Dashboard() {
       navigator.clipboard.writeText(result.code);
       toast({
         title: '✅ Código OTP gerado',
-        description: `Código copiado. Restam ${OTP_DAILY_LIMIT - currentCount - 1} geração(ões) hoje.`
+        description: `Código copiado. Restam ${otpDailyLimit - currentCount - 1} geração(ões) hoje.`
       });
     } catch (err) {
       toast({
@@ -1073,7 +1073,7 @@ export default function Dashboard() {
                       {otpCodes[index] ? 'Gerar novo código OTP' : 'Gerar código OTP (2FA)'}
                     </Button>
                     <p className="text-[11px] text-muted-foreground text-center">
-                      Limite de {OTP_DAILY_LIMIT} gerações por dia por conta.
+                      Limite de {otpDailyLimit} gerações por dia por conta.
                     </p>
                   </div>
                   )}
