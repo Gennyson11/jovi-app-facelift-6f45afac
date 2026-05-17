@@ -286,6 +286,39 @@ export default function Dashboard() {
     });
   };
 
+  const handleGenerateOtp = async (credLogin: string, index: number) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const storageKey = `otp_count_${credLogin}_${today}`;
+    const currentCount = parseInt(localStorage.getItem(storageKey) || '0', 10);
+    if (currentCount >= OTP_DAILY_LIMIT) {
+      toast({
+        title: '⚠️ Limite atingido',
+        description: `Você já gerou ${OTP_DAILY_LIMIT} códigos OTP hoje para esta conta. Tente novamente amanhã.`,
+        variant: 'destructive'
+      });
+      return;
+    }
+    setOtpLoading(prev => ({ ...prev, [index]: true }));
+    try {
+      const result = await generateTOTP(OTP_SECRET);
+      localStorage.setItem(storageKey, String(currentCount + 1));
+      setOtpCodes(prev => ({ ...prev, [index]: result }));
+      navigator.clipboard.writeText(result.code);
+      toast({
+        title: '✅ Código OTP gerado',
+        description: `Código copiado. Restam ${OTP_DAILY_LIMIT - currentCount - 1} geração(ões) hoje.`
+      });
+    } catch (err) {
+      toast({
+        title: 'Erro ao gerar OTP',
+        description: 'Não foi possível gerar o código.',
+        variant: 'destructive'
+      });
+    } finally {
+      setOtpLoading(prev => ({ ...prev, [index]: false }));
+    }
+  };
+
   // Check if user's access has expired
   const isAccessExpired = () => {
     if (!userProfile) return true;
