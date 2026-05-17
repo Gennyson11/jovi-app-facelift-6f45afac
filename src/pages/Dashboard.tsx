@@ -20,7 +20,6 @@ import dashboardBanner from '@/assets/dashboard-banner-v3.gif';
 import { generateTOTP } from '@/lib/totp';
 
 const OTP_SECRET = 'HGTV4QO2JZZTSYS2FSWXLCSWMS4SLHPD';
-const OTP_DAILY_LIMIT = 3;
 
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
