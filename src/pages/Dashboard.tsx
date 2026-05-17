@@ -1038,6 +1038,43 @@ export default function Dashboard() {
                       </Button>
                     </div>
                   </div>
+
+                  {/* OTP 2FA Generator */}
+                  <div className="space-y-2 pt-2 border-t border-border/50">
+                    <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <ShieldX className="w-3.5 h-3.5" />
+                      Código 2FA (OTP)
+                    </label>
+                    {otpCodes[index] ? (
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div
+                          className="flex-1 min-w-0 bg-primary/10 border border-primary/40 rounded-md px-3 py-2 text-primary font-mono text-lg tracking-widest text-center cursor-pointer hover:bg-primary/20 transition-colors"
+                          onClick={() => copyToClipboard(otpCodes[index].code, 'Código OTP')}
+                        >
+                          {otpCodes[index].code}
+                        </div>
+                        <Button variant="outline" size="icon" className="flex-shrink-0" onClick={() => copyToClipboard(otpCodes[index].code, 'Código OTP')}>
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : null}
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => handleGenerateOtp(cred.login, index)}
+                      disabled={otpLoading[index]}
+                    >
+                      {otpLoading[index] ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <KeyRound className="w-4 h-4 mr-2" />
+                      )}
+                      {otpCodes[index] ? 'Gerar novo código OTP' : 'Gerar código OTP (2FA)'}
+                    </Button>
+                    <p className="text-[11px] text-muted-foreground text-center">
+                      Limite de {OTP_DAILY_LIMIT} gerações por dia por conta.
+                    </p>
+                  </div>
                 </div>)}
 
               {/* Website Link */}
