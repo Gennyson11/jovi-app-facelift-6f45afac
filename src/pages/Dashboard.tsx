@@ -1067,30 +1067,47 @@ export default function Dashboard() {
                       Código 2FA (OTP)
                     </label>
                     {otpCodes[index] ? (
-                      <div className="flex items-center gap-2 min-w-0">
-                        <div
-                          className="flex-1 min-w-0 bg-primary/10 border border-primary/40 rounded-md px-3 py-2 text-primary font-mono text-lg tracking-widest text-center cursor-pointer hover:bg-primary/20 transition-colors"
-                          onClick={() => copyToClipboard(otpCodes[index].code, 'Código OTP')}
-                        >
-                          {otpCodes[index].code}
+                      <>
+                        <div className="flex items-center gap-2 min-w-0">
+                          <div
+                            className="flex-1 min-w-0 bg-primary/10 border border-primary/40 rounded-md px-3 py-2 text-primary font-mono text-lg tracking-widest text-center cursor-pointer hover:bg-primary/20 transition-colors"
+                            onClick={() => copyToClipboard(otpCodes[index].code, 'Código OTP')}
+                          >
+                            {otpCodes[index].code}
+                          </div>
+                          <Button variant="outline" size="icon" className="flex-shrink-0" onClick={() => copyToClipboard(otpCodes[index].code, 'Código OTP')}>
+                            <Copy className="w-4 h-4" />
+                          </Button>
                         </div>
-                        <Button variant="outline" size="icon" className="flex-shrink-0" onClick={() => copyToClipboard(otpCodes[index].code, 'Código OTP')}>
-                          <Copy className="w-4 h-4" />
-                        </Button>
-                      </div>
+                        <div className="flex items-center gap-2">
+                          <div className="flex-1 h-1.5 bg-border rounded-full overflow-hidden">
+                            <div
+                              className={`h-full transition-all duration-1000 ${otpCodes[index].secondsRemaining > 0 ? 'bg-primary' : 'bg-destructive'}`}
+                              style={{ width: `${(otpCodes[index].secondsRemaining / 30) * 100}%` }}
+                            />
+                          </div>
+                          <span className={`text-xs font-mono ${otpCodes[index].secondsRemaining > 0 ? 'text-muted-foreground' : 'text-destructive'}`}>
+                            {otpCodes[index].secondsRemaining > 0 ? `${otpCodes[index].secondsRemaining}s` : 'Expirado'}
+                          </span>
+                        </div>
+                      </>
                     ) : null}
                     <Button
                       variant="outline"
                       className="w-full"
                       onClick={() => handleGenerateOtp(cred.login, index)}
-                      disabled={otpLoading[index]}
+                      disabled={otpLoading[index] || (!!otpCodes[index] && otpCodes[index].secondsRemaining > 0)}
                     >
                       {otpLoading[index] ? (
                         <Loader2 className="w-4 h-4 mr-2 animate-spin" />
                       ) : (
                         <KeyRound className="w-4 h-4 mr-2" />
                       )}
-                      {otpCodes[index] ? 'Gerar novo código OTP' : 'Gerar código OTP (2FA)'}
+                      {otpCodes[index]
+                        ? otpCodes[index].secondsRemaining > 0
+                          ? `Aguarde ${otpCodes[index].secondsRemaining}s`
+                          : 'Gerar novo código OTP'
+                        : 'Gerar código OTP (2FA)'}
                     </Button>
                     <p className="text-[11px] text-muted-foreground text-center">
                       Limite de {otpDailyLimit} gerações por dia por conta.
