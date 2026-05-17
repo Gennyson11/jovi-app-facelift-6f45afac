@@ -319,6 +319,26 @@ export default function Dashboard() {
     }
   };
 
+  // Countdown timer for OTP codes (30s validity)
+  useEffect(() => {
+    const entries = Object.entries(otpCodes);
+    if (entries.length === 0) return;
+    if (!entries.some(([, v]) => v.secondsRemaining > 0)) return;
+    const interval = setInterval(() => {
+      setOtpCodes((prev) => {
+        const next: typeof prev = {};
+        let changed = false;
+        for (const [k, v] of Object.entries(prev)) {
+          const s = Math.max(0, v.secondsRemaining - 1);
+          if (s !== v.secondsRemaining) changed = true;
+          next[k as any] = { code: v.code, secondsRemaining: s };
+        }
+        return changed ? next : prev;
+      });
+    }, 1000);
+    return () => clearInterval(interval);
+  }, [otpCodes]);
+
   // Check if user's access has expired
   const isAccessExpired = () => {
     if (!userProfile) return true;
