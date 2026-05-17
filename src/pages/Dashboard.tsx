@@ -302,7 +302,7 @@ export default function Dashboard() {
     try {
       const result = await generateTOTP(OTP_SECRET);
       localStorage.setItem(storageKey, String(currentCount + 1));
-      setOtpCodes(prev => ({ ...prev, [index]: result }));
+      setOtpCodes(prev => ({ ...prev, [index]: { code: result.code, secondsRemaining: 30 } }));
       navigator.clipboard.writeText(result.code);
       toast({
         title: '✅ Código OTP gerado',
