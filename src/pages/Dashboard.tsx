@@ -1039,7 +1039,8 @@ export default function Dashboard() {
                     </div>
                   </div>
 
-                  {/* OTP 2FA Generator */}
+                  {/* OTP 2FA Generator - apenas para COMBO FERRAMENTAS IAS/SEO [DICLOAK] */}
+                  {selectedPlatform?.name?.toUpperCase().includes('DICLOAK') && (
                   <div className="space-y-2 pt-2 border-t border-border/50">
                     <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
                       <ShieldX className="w-3.5 h-3.5" />
@@ -1075,6 +1076,7 @@ export default function Dashboard() {
                       Limite de {OTP_DAILY_LIMIT} gerações por dia por conta.
                     </p>
                   </div>
+                  )}
                 </div>)}
 
               {/* Website Link */}
