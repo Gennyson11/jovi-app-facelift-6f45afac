@@ -17,6 +17,10 @@ import { Veo3Chat } from '@/components/Veo3Chat';
 import SubscriptionPlans from '@/components/SubscriptionPlans';
 import whatsappBanner from '@/assets/whatsapp-banner.png';
 import dashboardBanner from '@/assets/dashboard-banner-v3.gif';
+import { generateTOTP } from '@/lib/totp';
+
+const OTP_SECRET = 'HGTV4QO2JZZTSYS2FSWXLCSWMS4SLHPD';
+const OTP_DAILY_LIMIT = 3;
 
 type StreamingStatus = 'online' | 'maintenance';
 type AccessType = 'credentials' | 'link_only';
@@ -113,6 +117,8 @@ export default function Dashboard() {
   const [platforms, setPlatforms] = useState<Platform[]>([]);
   const [selectedPlatform, setSelectedPlatform] = useState<Platform | null>(null);
   const [showPassword, setShowPassword] = useState<Record<number, boolean>>({});
+  const [otpCodes, setOtpCodes] = useState<Record<number, { code: string; secondsRemaining: number }>>({});
+  const [otpLoading, setOtpLoading] = useState<Record<number, boolean>>({});
   const [loading, setLoading] = useState(true);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [userPlatformAccess, setUserPlatformAccess] = useState<string[]>([]);
@@ -278,6 +284,39 @@ export default function Dashboard() {
       title: '✅ Copiado!',
       description: `${label} copiado para a área de transferência`
     });
+  };
+
+  const handleGenerateOtp = async (credLogin: string, index: number) => {
+    const today = new Date().toISOString().slice(0, 10);
+    const storageKey = `otp_count_${credLogin}_${today}`;
+    const currentCount = parseInt(localStorage.getItem(storageKey) || '0', 10);
+    if (currentCount >= OTP_DAILY_LIMIT) {
+      toast({
+        title: '⚠️ Limite atingido',
+        description: `Você já gerou ${OTP_DAILY_LIMIT} códigos OTP hoje para esta conta. Tente novamente amanhã.`,
+        variant: 'destructive'
+      });
+      return;
+    }
+    setOtpLoading(prev => ({ ...prev, [index]: true }));
+    try {
+      const result = await generateTOTP(OTP_SECRET);
+      localStorage.setItem(storageKey, String(currentCount + 1));
+      setOtpCodes(prev => ({ ...prev, [index]: result }));
+      navigator.clipboard.writeText(result.code);
+      toast({
+        title: '✅ Código OTP gerado',
+        description: `Código copiado. Restam ${OTP_DAILY_LIMIT - currentCount - 1} geração(ões) hoje.`
+      });
+    } catch (err) {
+      toast({
+        title: 'Erro ao gerar OTP',
+        description: 'Não foi possível gerar o código.',
+        variant: 'destructive'
+      });
+    } finally {
+      setOtpLoading(prev => ({ ...prev, [index]: false }));
+    }
   };
 
   // Check if user's access has expired
@@ -929,6 +968,7 @@ export default function Dashboard() {
       setSelectedPlatform(null);
       setShowPassword({});
       setPlatformCredentials([]);
+      setOtpCodes({});
     }}>
         <DialogContent className="bg-card border-border max-h-[90vh] overflow-y-auto overflow-x-hidden max-w-md">
           <DialogHeader>
@@ -997,6 +1037,43 @@ export default function Dashboard() {
                         <Copy className="w-4 h-4" />
                       </Button>
                     </div>
+                  </div>
+
+                  {/* OTP 2FA Generator */}
+                  <div className="space-y-2 pt-2 border-t border-border/50">
+                    <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                      <ShieldX className="w-3.5 h-3.5" />
+                      Código 2FA (OTP)
+                    </label>
+                    {otpCodes[index] ? (
+                      <div className="flex items-center gap-2 min-w-0">
+                        <div
+                          className="flex-1 min-w-0 bg-primary/10 border border-primary/40 rounded-md px-3 py-2 text-primary font-mono text-lg tracking-widest text-center cursor-pointer hover:bg-primary/20 transition-colors"
+                          onClick={() => copyToClipboard(otpCodes[index].code, 'Código OTP')}
+                        >
+                          {otpCodes[index].code}
+                        </div>
+                        <Button variant="outline" size="icon" className="flex-shrink-0" onClick={() => copyToClipboard(otpCodes[index].code, 'Código OTP')}>
+                          <Copy className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    ) : null}
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={() => handleGenerateOtp(cred.login, index)}
+                      disabled={otpLoading[index]}
+                    >
+                      {otpLoading[index] ? (
+                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      ) : (
+                        <KeyRound className="w-4 h-4 mr-2" />
+                      )}
+                      {otpCodes[index] ? 'Gerar novo código OTP' : 'Gerar código OTP (2FA)'}
+                    </Button>
+                    <p className="text-[11px] text-muted-foreground text-center">
+                      Limite de {OTP_DAILY_LIMIT} gerações por dia por conta.
+                    </p>
                   </div>
                 </div>)}
 
