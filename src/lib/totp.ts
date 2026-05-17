@@ -28,7 +28,7 @@ export async function generateTOTP(secret: string, period = 30, digits = 6): Pro
 
   const cryptoKey = await crypto.subtle.importKey(
     'raw',
-    key,
+    key.buffer.slice(key.byteOffset, key.byteOffset + key.byteLength) as ArrayBuffer,
     { name: 'HMAC', hash: 'SHA-1' },
     false,
     ['sign']
