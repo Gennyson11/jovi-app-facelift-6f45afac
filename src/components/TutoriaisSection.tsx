@@ -42,16 +42,6 @@ const CATEGORIES: Category[] = [
     iconColor: 'text-amber-400',
     tutorials: [
       {
-        id: 'c1',
-        title: 'COMO FAZER LOGIN NO FLOW ULTRA PELO DICLOAK',
-        youtubeId: 'OWBC4sirtKQ',
-        description: 'Passo a passo completo para entrar no Flow Ultra utilizando o DiCloak com segurança.',
-        tags: [
-          { label: 'IMPORTANTE', variant: 'primary' },
-          { label: 'DICLOAK', variant: 'neutral' },
-        ],
-      },
-      {
         id: 'c2',
         title: 'COMO USAR O SEEDANCE E O KLING ILIMITADO',
         youtubeId: 'f1jbzABkt18',
@@ -90,7 +80,18 @@ const CATEGORIES: Category[] = [
     icon: Film,
     iconGradient: 'from-violet-500/20 to-purple-600/20 border-violet-500/30',
     iconColor: 'text-violet-400',
-    tutorials: [],
+    tutorials: [
+      {
+        id: 'v1',
+        title: 'COMO FAZER LOGIN NO FLOW ULTRA PELO DICLOAK',
+        youtubeId: 'OWBC4sirtKQ',
+        description: 'Passo a passo completo para entrar no Flow Ultra utilizando o DiCloak com segurança.',
+        tags: [
+          { label: 'IMPORTANTE', variant: 'primary' },
+          { label: 'DICLOAK', variant: 'neutral' },
+        ],
+      },
+    ],
   },
   {
     id: 'grok',
