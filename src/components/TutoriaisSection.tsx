@@ -100,7 +100,18 @@ const CATEGORIES: Category[] = [
     icon: Zap,
     iconGradient: 'from-cyan-500/20 to-blue-600/20 border-cyan-500/30',
     iconColor: 'text-cyan-400',
-    tutorials: [],
+    tutorials: [
+      {
+        id: 'cgp1',
+        title: 'COMO USAR O CHATGPT PLUS',
+        youtubeId: 's5wERuuD-6s',
+        description: 'Tutorial de acesso e uso do ChatGPT Plus.',
+        tags: [
+          { label: 'CHATGPT', variant: 'primary' },
+          { label: 'IMPORTANTE', variant: 'neutral' },
+        ],
+      },
+    ],
   },
 ];
 
