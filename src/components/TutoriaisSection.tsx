@@ -43,12 +43,12 @@ const CATEGORIES: Category[] = [
     tutorials: [
       {
         id: 'c3',
-        title: 'COMECE POR AQUI',
+        title: 'COMO ENTRAR NO DICLOAK PELO OTP SEM ERRO',
         youtubeId: 'qqZHqibPPxM',
-        description: 'Vídeo inicial para ativação e primeiros passos.',
+        description: 'Passo a passo para entrar no DiCloak utilizando OTP sem erros.',
         tags: [
           { label: 'IMPORTANTE', variant: 'primary' },
-          { label: 'INÍCIO', variant: 'neutral' },
+          { label: 'DICLOAK', variant: 'neutral' },
         ],
       },
       {
