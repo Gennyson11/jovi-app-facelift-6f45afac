@@ -8,11 +8,6 @@ import {
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-} from '@/components/ui/dialog';
 
 interface TutorialTag {
   label: string;
@@ -110,7 +105,7 @@ const CATEGORIES: Category[] = [
 ];
 
 export default function TutoriaisSection() {
-  const [active, setActive] = useState<Tutorial | null>(null);
+  const [playing, setPlaying] = useState<Record<string, boolean>>({});
 
   return (
     <div className="mb-10">
@@ -175,25 +170,37 @@ export default function TutoriaisSection() {
                         key={t.id}
                         className="group overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-b from-card/70 to-card/30 hover:border-emerald-500/40 transition-colors flex flex-col"
                       >
-                        <button
-                          type="button"
-                          onClick={() => setActive(t)}
-                          className="relative block aspect-video w-full overflow-hidden"
-                          aria-label={`Assistir ${t.title}`}
-                        >
-                          <img
-                            src={`https://img.youtube.com/vi/${t.youtubeId}/hqdefault.jpg`}
-                            alt={t.title}
-                            loading="lazy"
-                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                          />
-                          <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-background/10 to-transparent" />
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <div className="w-14 h-14 rounded-full bg-background/70 backdrop-blur border border-white/20 flex items-center justify-center group-hover:bg-emerald-500/80 group-hover:border-emerald-300 transition-colors">
-                              <PlayCircle className="w-8 h-8 text-white" strokeWidth={1.5} />
-                            </div>
-                          </div>
-                        </button>
+                        <div className="relative aspect-video w-full overflow-hidden bg-black">
+                          {playing[t.id] ? (
+                            <iframe
+                              src={`https://www.youtube.com/embed/${t.youtubeId}?autoplay=1`}
+                              title={t.title}
+                              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                              allowFullScreen
+                              className="absolute inset-0 w-full h-full"
+                            />
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => setPlaying((p) => ({ ...p, [t.id]: true }))}
+                              className="absolute inset-0 w-full h-full"
+                              aria-label={`Assistir ${t.title}`}
+                            >
+                              <img
+                                src={`https://img.youtube.com/vi/${t.youtubeId}/hqdefault.jpg`}
+                                alt={t.title}
+                                loading="lazy"
+                                className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                              />
+                              <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-background/10 to-transparent" />
+                              <div className="absolute inset-0 flex items-center justify-center">
+                                <div className="w-14 h-14 rounded-full bg-background/70 backdrop-blur border border-white/20 flex items-center justify-center group-hover:bg-emerald-500/80 group-hover:border-emerald-300 transition-colors">
+                                  <PlayCircle className="w-8 h-8 text-white" strokeWidth={1.5} />
+                                </div>
+                              </div>
+                            </button>
+                          )}
+                        </div>
 
                         <div className="p-5 flex flex-col gap-3 flex-1">
                           {t.tags && t.tags.length > 0 && (
@@ -229,7 +236,7 @@ export default function TutoriaisSection() {
                             </span>
                             <Button
                               size="sm"
-                              onClick={() => setActive(t)}
+                              onClick={() => setPlaying((p) => ({ ...p, [t.id]: true }))}
                               className="rounded-full bg-emerald-500 hover:bg-emerald-400 text-background font-semibold"
                             >
                               Assistir aqui
@@ -245,31 +252,6 @@ export default function TutoriaisSection() {
           );
         })}
       </Accordion>
-
-      <Dialog open={!!active} onOpenChange={(open) => !open && setActive(null)}>
-        <DialogContent className="max-w-4xl p-0 overflow-hidden border-border/70 bg-background">
-          <DialogTitle className="sr-only">{active?.title ?? 'Tutorial'}</DialogTitle>
-          {active && (
-            <div className="aspect-video w-full bg-black">
-              <iframe
-                src={`https://www.youtube.com/embed/${active.youtubeId}?autoplay=1`}
-                title={active.title}
-                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                allowFullScreen
-                className="w-full h-full"
-              />
-            </div>
-          )}
-          {active && (
-            <div className="p-5">
-              <h3 className="font-display font-bold text-foreground text-lg">{active.title}</h3>
-              {active.description && (
-                <p className="text-sm text-muted-foreground mt-1">{active.description}</p>
-              )}
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
