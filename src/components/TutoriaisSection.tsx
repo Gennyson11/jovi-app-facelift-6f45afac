@@ -51,6 +51,16 @@ const CATEGORIES: Category[] = [
           { label: 'DICLOAK', variant: 'neutral' },
         ],
       },
+      {
+        id: 'c2',
+        title: 'COMO USAR O SEEDANCE E O KLING ILIMITADO',
+        youtubeId: 'f1jbzABkt18',
+        description: 'Aprenda a usar Seedance e Kling de forma ilimitada e sem bloqueios.',
+        tags: [
+          { label: 'VÍDEO IA', variant: 'primary' },
+          { label: 'AVANÇADO', variant: 'neutral' },
+        ],
+      },
     ],
   },
   {
@@ -80,18 +90,7 @@ const CATEGORIES: Category[] = [
     icon: Film,
     iconGradient: 'from-violet-500/20 to-purple-600/20 border-violet-500/30',
     iconColor: 'text-violet-400',
-    tutorials: [
-      {
-        id: 'v1',
-        title: 'COMO USAR O SEEDANCE E O KLING ILIMITADO',
-        youtubeId: 'f1jbzABkt18',
-        description: 'Aprenda a usar Seedance e Kling de forma ilimitada e sem bloqueios.',
-        tags: [
-          { label: 'VÍDEO IA', variant: 'primary' },
-          { label: 'AVANÇADO', variant: 'neutral' },
-        ],
-      },
-    ],
+    tutorials: [],
   },
   {
     id: 'grok',
