@@ -70,18 +70,7 @@ const CATEGORIES: Category[] = [
     icon: Package,
     iconGradient: 'from-orange-500/20 to-red-600/20 border-orange-500/30',
     iconColor: 'text-orange-400',
-    tutorials: [
-      {
-        id: 'j1',
-        title: 'COMO TER ACESSO AO COMBO DE IAs EM UM SÓ LUGAR',
-        youtubeId: 'naSd57R3H68',
-        description: 'Tutorial completo do portal mostrando como acessar todas as IAs em um único lugar.',
-        tags: [
-          { label: 'COMBO', variant: 'primary' },
-          { label: 'PORTAL', variant: 'neutral' },
-        ],
-      },
-    ],
+    tutorials: [],
   },
   {
     id: 'veo3',
