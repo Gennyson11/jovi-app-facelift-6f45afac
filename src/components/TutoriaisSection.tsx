@@ -65,7 +65,7 @@ const CATEGORIES: Category[] = [
   },
   {
     id: 'jovitools',
-    title: 'Métodos',
+    title: 'JoviHub',
     description: 'Métodos atualizados para lucrar no digital de forma prática e rápida.',
     icon: Package,
     iconGradient: 'from-orange-500/20 to-red-600/20 border-orange-500/30',
@@ -105,7 +105,7 @@ const CATEGORIES: Category[] = [
   },
   {
     id: 'chatgpt_plus',
-    title: 'Métodos',
+    title: 'JoviHub',
     description: 'Tutoriais de IA conversacional, login e uso prático.',
     icon: Zap,
     iconGradient: 'from-cyan-500/20 to-blue-600/20 border-cyan-500/30',
