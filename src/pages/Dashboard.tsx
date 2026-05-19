@@ -300,9 +300,15 @@ export default function Dashboard() {
     }
     setOtpLoading(prev => ({ ...prev, [index]: true }));
     try {
-      const result = await generateTOTP(OTP_SECRET);
+      let result = await generateTOTP(OTP_SECRET);
+      // Se o código atual está prestes a expirar (<8s), aguarda a próxima janela
+      // para entregar um código fresco — evita que o cliente cole um OTP já expirado.
+      if (result.secondsRemaining < 8) {
+        await new Promise(r => setTimeout(r, (result.secondsRemaining + 1) * 1000));
+        result = await generateTOTP(OTP_SECRET);
+      }
       localStorage.setItem(storageKey, String(currentCount + 1));
-      setOtpCodes(prev => ({ ...prev, [index]: { code: result.code, secondsRemaining: 30 } }));
+      setOtpCodes(prev => ({ ...prev, [index]: { code: result.code, secondsRemaining: result.secondsRemaining } }));
       navigator.clipboard.writeText(result.code);
       toast({
         title: '✅ Código OTP gerado',
