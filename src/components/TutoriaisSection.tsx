@@ -1,4 +1,5 @@
-import { Lock, Package, Film, Zap, Play, LucideIcon } from 'lucide-react';
+import { useState } from 'react';
+import { Lock, Package, Film, Zap, Play, LucideIcon, PlayCircle } from 'lucide-react';
 import {
   Accordion,
   AccordionContent,
@@ -6,12 +7,24 @@ import {
   AccordionTrigger,
 } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+} from '@/components/ui/dialog';
+
+interface TutorialTag {
+  label: string;
+  variant?: 'primary' | 'neutral';
+}
 
 interface Tutorial {
   id: string;
   title: string;
   youtubeId: string;
   description?: string;
+  tags?: TutorialTag[];
 }
 
 interface Category {
@@ -37,6 +50,11 @@ const CATEGORIES: Category[] = [
         id: 'c1',
         title: 'COMO FAZER LOGIN NO FLOW ULTRA PELO DICLOAK',
         youtubeId: 'OWBC4sirtKQ',
+        description: 'Passo a passo completo para entrar no Flow Ultra utilizando o DiCloak com segurança.',
+        tags: [
+          { label: 'IMPORTANTE', variant: 'primary' },
+          { label: 'DICLOAK', variant: 'neutral' },
+        ],
       },
     ],
   },
@@ -52,6 +70,11 @@ const CATEGORIES: Category[] = [
         id: 'j1',
         title: 'COMO TER ACESSO AO COMBO DE IAs EM UM SÓ LUGAR',
         youtubeId: 'naSd57R3H68',
+        description: 'Tutorial completo do portal mostrando como acessar todas as IAs em um único lugar.',
+        tags: [
+          { label: 'COMBO', variant: 'primary' },
+          { label: 'PORTAL', variant: 'neutral' },
+        ],
       },
     ],
   },
@@ -67,6 +90,11 @@ const CATEGORIES: Category[] = [
         id: 'v1',
         title: 'COMO USAR O SEEDANCE E O KLING ILIMITADO',
         youtubeId: 'f1jbzABkt18',
+        description: 'Aprenda a usar Seedance e Kling de forma ilimitada e sem bloqueios.',
+        tags: [
+          { label: 'VÍDEO IA', variant: 'primary' },
+          { label: 'AVANÇADO', variant: 'neutral' },
+        ],
       },
     ],
   },
@@ -82,6 +110,8 @@ const CATEGORIES: Category[] = [
 ];
 
 export default function TutoriaisSection() {
+  const [active, setActive] = useState<Tutorial | null>(null);
+
   return (
     <div className="mb-10">
       <div className="flex items-center justify-between gap-3 mb-6 flex-wrap">
@@ -143,22 +173,68 @@ export default function TutoriaisSection() {
                     {cat.tutorials.map((t) => (
                       <div
                         key={t.id}
-                        className="overflow-hidden rounded-xl border border-border/60 bg-background/40"
+                        className="group overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-b from-card/70 to-card/30 hover:border-emerald-500/40 transition-colors flex flex-col"
                       >
-                        <div className="aspect-video w-full">
-                          <iframe
-                            src={`https://www.youtube.com/embed/${t.youtubeId}`}
-                            title={t.title}
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                            className="w-full h-full"
+                        <button
+                          type="button"
+                          onClick={() => setActive(t)}
+                          className="relative block aspect-video w-full overflow-hidden"
+                          aria-label={`Assistir ${t.title}`}
+                        >
+                          <img
+                            src={`https://img.youtube.com/vi/${t.youtubeId}/hqdefault.jpg`}
+                            alt={t.title}
                             loading="lazy"
+                            className="absolute inset-0 w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                           />
-                        </div>
-                        <div className="p-3">
-                          <h4 className="font-semibold text-foreground text-sm leading-snug">
+                          <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-background/10 to-transparent" />
+                          <div className="absolute inset-0 flex items-center justify-center">
+                            <div className="w-14 h-14 rounded-full bg-background/70 backdrop-blur border border-white/20 flex items-center justify-center group-hover:bg-emerald-500/80 group-hover:border-emerald-300 transition-colors">
+                              <PlayCircle className="w-8 h-8 text-white" strokeWidth={1.5} />
+                            </div>
+                          </div>
+                        </button>
+
+                        <div className="p-5 flex flex-col gap-3 flex-1">
+                          {t.tags && t.tags.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                              {t.tags.map((tag, i) => (
+                                <span
+                                  key={i}
+                                  className={
+                                    tag.variant === 'primary'
+                                      ? 'inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold tracking-wide bg-emerald-500/15 text-emerald-400 border border-emerald-500/40'
+                                      : 'inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide bg-background/50 text-muted-foreground border border-border/70'
+                                  }
+                                >
+                                  {tag.label}
+                                </span>
+                              ))}
+                            </div>
+                          )}
+
+                          <h4 className="font-display font-bold text-foreground text-base sm:text-lg leading-snug">
                             {t.title}
                           </h4>
+
+                          {t.description && (
+                            <p className="text-sm text-muted-foreground leading-relaxed">
+                              {t.description}
+                            </p>
+                          )}
+
+                          <div className="mt-auto pt-2 flex items-center justify-between gap-3">
+                            <span className="text-xs text-muted-foreground">
+                              Player disponível
+                            </span>
+                            <Button
+                              size="sm"
+                              onClick={() => setActive(t)}
+                              className="rounded-full bg-emerald-500 hover:bg-emerald-400 text-background font-semibold"
+                            >
+                              Assistir aqui
+                            </Button>
+                          </div>
                         </div>
                       </div>
                     ))}
@@ -169,6 +245,31 @@ export default function TutoriaisSection() {
           );
         })}
       </Accordion>
+
+      <Dialog open={!!active} onOpenChange={(open) => !open && setActive(null)}>
+        <DialogContent className="max-w-4xl p-0 overflow-hidden border-border/70 bg-background">
+          <DialogTitle className="sr-only">{active?.title ?? 'Tutorial'}</DialogTitle>
+          {active && (
+            <div className="aspect-video w-full bg-black">
+              <iframe
+                src={`https://www.youtube.com/embed/${active.youtubeId}?autoplay=1`}
+                title={active.title}
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                allowFullScreen
+                className="w-full h-full"
+              />
+            </div>
+          )}
+          {active && (
+            <div className="p-5">
+              <h3 className="font-display font-bold text-foreground text-lg">{active.title}</h3>
+              {active.description && (
+                <p className="text-sm text-muted-foreground mt-1">{active.description}</p>
+              )}
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
