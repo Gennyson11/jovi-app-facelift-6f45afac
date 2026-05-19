@@ -94,7 +94,7 @@ const CATEGORIES: Category[] = [
     ],
   },
   {
-    id: 'grok',
+    id: 'chatgpt_plus',
     title: 'ChatGPT Plus',
     description: 'Tutoriais de IA conversacional, login e uso prático.',
     icon: Zap,
