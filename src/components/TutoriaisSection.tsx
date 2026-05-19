@@ -164,11 +164,11 @@ export default function TutoriaisSection() {
                     </p>
                   </div>
                 ) : (
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pt-1">
                     {cat.tutorials.map((t) => (
                       <div
                         key={t.id}
-                        className="group overflow-hidden rounded-2xl border border-border/60 bg-gradient-to-b from-card/70 to-card/30 hover:border-emerald-500/40 transition-colors flex flex-col"
+                        className="group overflow-hidden rounded-xl border border-border/60 bg-gradient-to-b from-card/70 to-card/30 hover:border-emerald-500/40 transition-colors flex flex-col"
                       >
                         <div className="relative aspect-video w-full overflow-hidden bg-black">
                           {playing[t.id] ? (
@@ -194,24 +194,24 @@ export default function TutoriaisSection() {
                               />
                               <div className="absolute inset-0 bg-gradient-to-t from-background/70 via-background/10 to-transparent" />
                               <div className="absolute inset-0 flex items-center justify-center">
-                                <div className="w-14 h-14 rounded-full bg-background/70 backdrop-blur border border-white/20 flex items-center justify-center group-hover:bg-emerald-500/80 group-hover:border-emerald-300 transition-colors">
-                                  <PlayCircle className="w-8 h-8 text-white" strokeWidth={1.5} />
+                                <div className="w-11 h-11 rounded-full bg-background/70 backdrop-blur border border-white/20 flex items-center justify-center group-hover:bg-emerald-500/80 group-hover:border-emerald-300 transition-colors">
+                                  <PlayCircle className="w-6 h-6 text-white" strokeWidth={1.5} />
                                 </div>
                               </div>
                             </button>
                           )}
                         </div>
 
-                        <div className="p-5 flex flex-col gap-3 flex-1">
+                        <div className="p-3.5 flex flex-col gap-2 flex-1">
                           {t.tags && t.tags.length > 0 && (
-                            <div className="flex flex-wrap gap-2">
+                            <div className="flex flex-wrap gap-1.5">
                               {t.tags.map((tag, i) => (
                                 <span
                                   key={i}
                                   className={
                                     tag.variant === 'primary'
-                                      ? 'inline-flex items-center rounded-full px-3 py-1 text-[11px] font-bold tracking-wide bg-emerald-500/15 text-emerald-400 border border-emerald-500/40'
-                                      : 'inline-flex items-center rounded-full px-3 py-1 text-[11px] font-semibold tracking-wide bg-background/50 text-muted-foreground border border-border/70'
+                                      ? 'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-bold tracking-wide bg-emerald-500/15 text-emerald-400 border border-emerald-500/40'
+                                      : 'inline-flex items-center rounded-full px-2.5 py-0.5 text-[10px] font-semibold tracking-wide bg-background/50 text-muted-foreground border border-border/70'
                                   }
                                 >
                                   {tag.label}
@@ -220,24 +220,24 @@ export default function TutoriaisSection() {
                             </div>
                           )}
 
-                          <h4 className="font-display font-bold text-foreground text-base sm:text-lg leading-snug">
+                          <h4 className="font-display font-bold text-foreground text-sm leading-snug">
                             {t.title}
                           </h4>
 
                           {t.description && (
-                            <p className="text-sm text-muted-foreground leading-relaxed">
+                            <p className="text-xs text-muted-foreground leading-relaxed line-clamp-2">
                               {t.description}
                             </p>
                           )}
 
-                          <div className="mt-auto pt-2 flex items-center justify-between gap-3">
-                            <span className="text-xs text-muted-foreground">
+                          <div className="mt-auto pt-2 flex items-center justify-between gap-2">
+                            <span className="text-[11px] text-muted-foreground">
                               Player disponível
                             </span>
                             <Button
                               size="sm"
                               onClick={() => setPlaying((p) => ({ ...p, [t.id]: true }))}
-                              className="rounded-full bg-emerald-500 hover:bg-emerald-400 text-background font-semibold"
+                              className="h-8 px-3 text-xs rounded-full bg-emerald-500 hover:bg-emerald-400 text-background font-semibold"
                             >
                               Assistir aqui
                             </Button>
