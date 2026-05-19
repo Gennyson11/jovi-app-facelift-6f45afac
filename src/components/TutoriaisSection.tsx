@@ -42,6 +42,16 @@ const CATEGORIES: Category[] = [
     iconColor: 'text-amber-400',
     tutorials: [
       {
+        id: 'c3',
+        title: 'COMECE POR AQUI',
+        youtubeId: 'qqZHqibPPxM',
+        description: 'Vídeo inicial para ativação e primeiros passos.',
+        tags: [
+          { label: 'IMPORTANTE', variant: 'primary' },
+          { label: 'INÍCIO', variant: 'neutral' },
+        ],
+      },
+      {
         id: 'c2',
         title: 'COMO USAR O SEEDANCE E O KLING ILIMITADO',
         youtubeId: 'f1jbzABkt18',
