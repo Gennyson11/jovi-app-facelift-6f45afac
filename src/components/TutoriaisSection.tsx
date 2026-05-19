@@ -65,7 +65,7 @@ const CATEGORIES: Category[] = [
   },
   {
     id: 'jovitools',
-    title: 'JoviHub',
+    title: 'Métodos',
     description: 'Métodos atualizados para lucrar no digital de forma prática e rápida.',
     icon: Package,
     iconGradient: 'from-orange-500/20 to-red-600/20 border-orange-500/30',
