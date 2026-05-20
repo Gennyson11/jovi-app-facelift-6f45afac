@@ -45,7 +45,7 @@ const CATEGORIES: Category[] = [
         id: 'c1',
         title: 'COMO USAR +40 FERRAMENTAS DE DESIGN, SEO E ANÚNCIOS',
         youtubeId: 'S56hex47YEI',
-        description: 'Descubra como acessar e utilizar mais de 40 ferramentas de design, SEO e anúncios de forma prática.',
+        description: 'Descubra como acessar e utilizar mais de 40 ferramentas de design, SEO e espionagem de anúncios de forma prática.',
         tags: [
           { label: 'IMPORTANTE', variant: 'primary' },
           { label: 'FERRAMENTAS', variant: 'neutral' },
