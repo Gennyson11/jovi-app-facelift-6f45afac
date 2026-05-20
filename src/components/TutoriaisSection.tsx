@@ -70,7 +70,18 @@ const CATEGORIES: Category[] = [
     icon: Package,
     iconGradient: 'from-orange-500/20 to-red-600/20 border-orange-500/30',
     iconColor: 'text-orange-400',
-    tutorials: [],
+    tutorials: [
+      {
+        id: 'j1',
+        title: 'NOVO TUTORIAL',
+        youtubeId: 'cypQudFUt5Y',
+        description: 'Tutorial de método digital.',
+        tags: [
+          { label: 'MÉTODO', variant: 'primary' },
+          { label: 'NOVO', variant: 'neutral' },
+        ],
+      },
+    ],
   },
   {
     id: 'veo3',
