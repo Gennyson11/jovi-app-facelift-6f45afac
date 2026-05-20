@@ -75,7 +75,7 @@ const CATEGORIES: Category[] = [
         id: 'j1',
         title: 'MÉTODO COM VEO 3, KLING, SORA 2 E SEEDANCE ILIMITADO',
         youtubeId: 'cypQudFUt5Y',
-        description: 'Tutorial de método digital.',
+        description: 'Aprenda a usar Veo 3, Kling, Sora 2 e Seedance de forma ilimitada com o método completo.',
         tags: [
           { label: 'MÉTODO', variant: 'primary' },
           { label: 'NOVO', variant: 'neutral' },
