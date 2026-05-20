@@ -149,7 +149,7 @@ export default function TutoriaisSection() {
           className="border-emerald-500/40 text-emerald-400 bg-emerald-500/5 gap-2 px-3 py-1 rounded-full font-semibold tracking-wide"
         >
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-          TUTORIAIS POR PRODUTO
+          TUTORIAIS
         </Badge>
       </div>
 
