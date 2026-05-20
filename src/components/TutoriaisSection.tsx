@@ -73,7 +73,7 @@ const CATEGORIES: Category[] = [
     tutorials: [
       {
         id: 'j1',
-        title: 'NOVO TUTORIAL',
+        title: 'MÉTODO COM VEO 3, KLING, SORA 2 E SEEDANCE ILIMITADO',
         youtubeId: 'cypQudFUt5Y',
         description: 'Tutorial de método digital.',
         tags: [
