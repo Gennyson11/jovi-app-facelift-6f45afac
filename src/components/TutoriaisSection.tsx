@@ -93,9 +93,9 @@ const CATEGORIES: Category[] = [
       },
       {
         id: 'j2',
-        title: 'COMO CRIAR VÍDEOS COM IA NO KLING 2.0 MASTER',
+        title: 'MÉTODO CAPCUT PRO PARA PC — TUTORIAL COMPLETO',
         youtubeId: 'Sq1teUt0-lw',
-        description: 'Tutorial completo de como criar vídeos profissionais usando o Kling 2.0 Master com Inteligência Artificial.',
+        description: 'Tutorial completo do método CapCut Pro para PC, ensinando a usar a ferramenta de edição de vídeo de forma profissional.',
         tags: [
           { label: 'MÉTODO', variant: 'primary' },
           { label: 'KLING', variant: 'neutral' },
