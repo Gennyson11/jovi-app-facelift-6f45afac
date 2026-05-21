@@ -138,7 +138,7 @@ export default function Dashboard() {
     loading: authLoading,
     isAdmin
   } = useAuth();
-  const otpDailyLimit = isAdmin ? 50 : 7;
+  const otpDailyLimit = isAdmin ? 50 : 4;
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const {
