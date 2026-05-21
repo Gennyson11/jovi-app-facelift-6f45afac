@@ -91,6 +91,16 @@ const CATEGORIES: Category[] = [
           { label: 'NOVO', variant: 'neutral' },
         ],
       },
+      {
+        id: 'j2',
+        title: 'COMO CRIAR VÍDEOS COM IA NO KLING 2.0 MASTER',
+        youtubeId: 'Sq1teUt0-lw',
+        description: 'Tutorial completo de como criar vídeos profissionais usando o Kling 2.0 Master com Inteligência Artificial.',
+        tags: [
+          { label: 'MÉTODO', variant: 'primary' },
+          { label: 'KLING', variant: 'neutral' },
+        ],
+      },
     ],
   },
   {
