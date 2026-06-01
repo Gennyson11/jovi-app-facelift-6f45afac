@@ -11,6 +11,7 @@ import { LogOut, Eye, EyeOff, Copy, Loader2, CheckCircle, AlertTriangle, Externa
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import DashboardSidebar from '@/components/DashboardSidebar';
+import MigrationBanner from '@/components/MigrationBanner';
 import JoviAIChat from '@/components/JoviAIChat';
 import TutoriaisSection from '@/components/TutoriaisSection';
 import { Veo3Chat } from '@/components/Veo3Chat';
@@ -482,6 +483,8 @@ export default function Dashboard() {
             </div>
           </div>
         </header>
+
+      <MigrationBanner />
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-8">
