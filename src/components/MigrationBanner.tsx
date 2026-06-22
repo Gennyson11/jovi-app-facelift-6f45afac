@@ -2,7 +2,7 @@ import { Sparkles, MessageCircle, ArrowRight } from "lucide-react";
 
 const MigrationBanner = () => {
   const whatsappUrl =
-    "https://api.whatsapp.com/send/?phone=558499889568&text=Quero+migrar+para+a+nova+plataforma+Corex-IA&type=phone_number&app_absent=0";
+    "https://api.whatsapp.com/send/?phone=558499889568&text=Quero+migrar+para+a+nova+plataforma+JoviTools&type=phone_number&app_absent=0";
 
   return (
     <div className="relative z-40 w-full border-b border-primary/40 bg-gradient-to-r from-primary/20 via-accent/15 to-primary/20 backdrop-blur-sm">
@@ -13,12 +13,12 @@ const MigrationBanner = () => {
           <p className="text-xs sm:text-sm md:text-base text-foreground font-medium">
             Estamos em <span className="text-primary font-bold">fase de migração</span> para{" "}
             <a
-              href="https://www.corex-ia.online"
+              href="https://www.jovitools.com"
               target="_blank"
               rel="noopener noreferrer"
               className="text-primary font-bold underline underline-offset-2 hover:text-primary/80"
             >
-              www.corex-ia.online
+              www.jovitools.com
             </a>
             <span className="hidden sm:inline"> — plataforma mais estável e completa.</span>
           </p>
