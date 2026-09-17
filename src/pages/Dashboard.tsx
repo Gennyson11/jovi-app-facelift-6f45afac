@@ -12,6 +12,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import DashboardSidebar from '@/components/DashboardSidebar';
 import MigrationBanner from '@/components/MigrationBanner';
+import CountdownBanner from '@/components/CountdownBanner';
 import JoviAIChat from '@/components/JoviAIChat';
 import TutoriaisSection from '@/components/TutoriaisSection';
 import { Veo3Chat } from '@/components/Veo3Chat';
@@ -485,6 +486,7 @@ export default function Dashboard() {
         </header>
 
       <MigrationBanner />
+      <CountdownBanner />
 
       {/* Main Content */}
       <main className="max-w-6xl mx-auto px-4 py-8">
