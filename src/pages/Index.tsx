@@ -5,6 +5,7 @@ import ToolsSection from "@/components/ToolsSection";
 import PricingSection from "@/components/PricingSection";
 import FAQSection from "@/components/FAQSection";
 import MigrationBanner from "@/components/MigrationBanner";
+import CountdownBanner from "@/components/CountdownBanner";
 
 
 const Index = () => {
@@ -13,6 +14,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
       <MigrationBanner />
+      <CountdownBanner />
       <HeroSection onAccessClick={() => navigate('/login')} />
       <FeaturesSection />
       <ToolsSection />
