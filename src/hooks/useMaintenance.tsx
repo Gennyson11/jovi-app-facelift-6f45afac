@@ -89,9 +89,19 @@ export function useMaintenance() {
           filter: 'key=eq.maintenance_mode'
         },
         (payload) => {
-          if (payload.new && 'value' in payload.new && typeof payload.new.value === 'object' && !Array.isArray(payload.new.value)) {
-            const settings = payload.new.value as unknown as MaintenanceSettings;
-            setIsMaintenanceMode(settings.enabled);
+          const raw = payload.new && 'value' in payload.new ? (payload.new as { value?: unknown }).value : null;
+          let settings: MaintenanceSettings | null = null;
+          if (typeof raw === 'string') {
+            try {
+              settings = JSON.parse(raw) as MaintenanceSettings;
+            } catch {
+              settings = null;
+            }
+          } else if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+            settings = raw as unknown as MaintenanceSettings;
+          }
+          if (settings) {
+            setIsMaintenanceMode(!!settings.enabled);
             setMaintenanceMessage(settings.message || 'O site está em manutenção. Voltaremos em breve!');
           }
         }
