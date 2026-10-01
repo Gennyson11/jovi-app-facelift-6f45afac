@@ -573,12 +573,6 @@ export default function Dashboard() {
               <p className="text-muted-foreground text-sm mb-4">
                 Entre em contato com o administrador para mais informações ou para solicitar a liberação do seu acesso.
               </p>
-              <Button
-            onClick={() => window.open('https://wa.me/558499889568?text=preciso%20de%20suporte!', '_blank')}
-            className="bg-green-500 hover:bg-green-600 text-white">
-            
-                Falar com Suporte via WhatsApp
-              </Button>
             </div> :
         <div className="mb-6">
               <SubscriptionPlans subscriptionEnd={accessExpiresAt} />
@@ -849,7 +843,7 @@ export default function Dashboard() {
                           className="flex-1 py-3 px-4 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-semibold text-sm transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                           disabled={product.stock === 0}
                           onClick={() => {
-                            window.open('https://api.whatsapp.com/send/?phone=558499889568&text=Preciso+de+suporte&type=phone_number&app_absent=0', '_blank');
+                            window.open('https://www.jovitools.com', '_blank');
                           }}>
                           
                               {product.stock === 0 ? 'Indisponível' : 'COMPRAR'}
@@ -857,7 +851,7 @@ export default function Dashboard() {
                             <button
                           className="py-3 px-3 bg-blue-500 hover:bg-blue-600 text-white rounded-lg transition-colors"
                           onClick={() => {
-                            window.open('https://api.whatsapp.com/send/?phone=558499889568&text=Preciso+de+suporte&type=phone_number&app_absent=0', '_blank');
+                            window.open('https://www.jovitools.com', '_blank');
                           }}>
                           
                               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
