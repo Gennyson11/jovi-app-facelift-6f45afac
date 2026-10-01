@@ -1,8 +1,8 @@
-import { Sparkles, MessageCircle, ArrowRight } from "lucide-react";
+import { Sparkles, ArrowRight } from "lucide-react";
 
 const MigrationBanner = () => {
-  const whatsappUrl =
-    "https://api.whatsapp.com/send/?phone=558499889568&text=Quero+migrar+para+a+nova+plataforma+JoviTools&type=phone_number&app_absent=0";
+  const siteUrl = "https://www.jovitools.com";
+
 
   return (
     <div className="relative z-40 w-full border-b border-primary/40 bg-gradient-to-r from-primary/20 via-accent/15 to-primary/20 backdrop-blur-sm">
@@ -24,12 +24,11 @@ const MigrationBanner = () => {
           </p>
         </div>
         <a
-          href={whatsappUrl}
+          href={siteUrl}
           target="_blank"
           rel="noopener noreferrer"
           className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-primary text-primary-foreground text-xs sm:text-sm font-bold hover:bg-primary/90 transition-all hover:scale-105 shadow-lg shadow-primary/30 shrink-0"
         >
-          <MessageCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
           Migrar agora
           <ArrowRight className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
         </a>

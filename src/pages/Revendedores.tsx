@@ -2,9 +2,10 @@ import { AlertTriangle, AlertCircle, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Revendedores = () => {
-  const handleWhatsApp = () => {
-    window.open("https://wa.me/558499889568?text=Olá! Tenho interesse em me tornar revendedor JoviTools.", "_blank");
+  const handleSite = () => {
+    window.open("https://www.jovitools.com", "_blank");
   };
+
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
