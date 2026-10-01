@@ -16,7 +16,6 @@ import Revendedores from "./pages/Revendedores";
 import Socios from "./pages/Socios";
 import Invite from "./pages/Invite";
 import Credits from "./pages/Credits";
-import FloatingWhatsApp from "./components/FloatingWhatsApp";
 import MaintenanceScreen from "./components/MaintenanceScreen";
 import MusicPlayer from "./components/MusicPlayer";
 
@@ -85,7 +84,6 @@ const App = () => (
         <BrowserRouter>
           <AppRoutes />
         </BrowserRouter>
-        <FloatingWhatsApp />
       </TooltipProvider>
     </AuthProvider>
   </QueryClientProvider>

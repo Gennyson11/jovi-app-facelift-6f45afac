@@ -2,9 +2,10 @@ import { AlertTriangle, AlertCircle, ChevronRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
 const Revendedores = () => {
-  const handleWhatsApp = () => {
-    window.open("https://wa.me/558499889568?text=Olá! Tenho interesse em me tornar revendedor JoviTools.", "_blank");
+  const handleSite = () => {
+    window.open("https://www.jovitools.com", "_blank");
   };
+
 
   return (
     <div className="min-h-screen bg-background overflow-x-hidden">
@@ -163,7 +164,7 @@ const Revendedores = () => {
           <p className="text-muted-foreground text-sm">
             Ao utilizar a plataforma, você concorda com todos os termos e condições acima descritos.
           </p>
-          <Button variant="hero" size="lg" className="px-10 group" onClick={handleWhatsApp}>
+          <Button variant="hero" size="lg" className="px-10 group" onClick={handleSite}>
             Quero me tornar revendedor
             <ChevronRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
           </Button>

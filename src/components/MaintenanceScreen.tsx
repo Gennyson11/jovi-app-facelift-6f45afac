@@ -45,20 +45,20 @@ export default function MaintenanceScreen({ message = 'Estamos preparando algo i
         {/* Buttons */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
           <a
-            href="https://wa.me/5511999999999"
+            href="https://www.jovitools.com"
             target="_blank"
             rel="noopener noreferrer"
             className="px-8 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm uppercase tracking-wider hover:bg-primary/90 transition-all shadow-[var(--shadow-primary)] hover:shadow-[var(--shadow-primary-intense)]"
           >
-            Consulte Mais Informação
+            Visitar novo site
           </a>
           <a
-            href="https://wa.me/5511999999999"
+            href="https://www.jovitools.com"
             target="_blank"
             rel="noopener noreferrer"
             className="px-8 py-3 rounded-lg border border-primary/50 text-primary font-semibold text-sm uppercase tracking-wider hover:bg-primary/10 transition-all"
           >
-            Consulte Mais Informação
+            Visitar novo site
           </a>
         </div>
 

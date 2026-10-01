@@ -54,7 +54,7 @@ const CREDITOS_ITEM = { id: 'creditos', label: 'Meus Créditos', icon: Ticket, h
 
 const GENERAL_ITEMS = [
   { id: 'sorteios', label: 'Sorteios', icon: Gift, category: 'sorteios', disabled: false },
-  { id: 'suporte', label: 'Suporte', icon: Headphones, href: 'https://bit.ly/whatsapp-suportejt', external: true },
+  { id: 'suporte', label: 'Suporte', icon: Headphones, href: 'https://www.jovitools.com', external: true },
   { id: 'configuracoes', label: 'Configurações', icon: Settings, href: '/settings', route: true },
 ];
 
