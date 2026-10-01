@@ -24,10 +24,23 @@ export function useMaintenance() {
         return;
       }
 
-      if (data?.value && typeof data.value === 'object' && !Array.isArray(data.value)) {
-        const settings = data.value as unknown as MaintenanceSettings;
-        setIsMaintenanceMode(settings.enabled);
-        setMaintenanceMessage(settings.message || 'O site está em manutenção. Voltaremos em breve!');
+      if (data?.value) {
+        // value pode vir como objeto (jsonb) ou como string JSON — tratar ambos
+        let settings: MaintenanceSettings | null = null;
+        if (typeof data.value === 'string') {
+          try {
+            settings = JSON.parse(data.value) as MaintenanceSettings;
+          } catch {
+            settings = null;
+          }
+        } else if (typeof data.value === 'object' && !Array.isArray(data.value)) {
+          settings = data.value as unknown as MaintenanceSettings;
+        }
+
+        if (settings) {
+          setIsMaintenanceMode(!!settings.enabled);
+          setMaintenanceMessage(settings.message || 'O site está em manutenção. Voltaremos em breve!');
+        }
       }
     } catch (error) {
       console.error('Error fetching maintenance status:', error);
@@ -76,9 +89,19 @@ export function useMaintenance() {
           filter: 'key=eq.maintenance_mode'
         },
         (payload) => {
-          if (payload.new && 'value' in payload.new && typeof payload.new.value === 'object' && !Array.isArray(payload.new.value)) {
-            const settings = payload.new.value as unknown as MaintenanceSettings;
-            setIsMaintenanceMode(settings.enabled);
+          const raw = payload.new && 'value' in payload.new ? (payload.new as { value?: unknown }).value : null;
+          let settings: MaintenanceSettings | null = null;
+          if (typeof raw === 'string') {
+            try {
+              settings = JSON.parse(raw) as MaintenanceSettings;
+            } catch {
+              settings = null;
+            }
+          } else if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
+            settings = raw as unknown as MaintenanceSettings;
+          }
+          if (settings) {
+            setIsMaintenanceMode(!!settings.enabled);
             setMaintenanceMessage(settings.message || 'O site está em manutenção. Voltaremos em breve!');
           }
         }
