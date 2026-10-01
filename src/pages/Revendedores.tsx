@@ -164,7 +164,7 @@ const Revendedores = () => {
           <p className="text-muted-foreground text-sm">
             Ao utilizar a plataforma, você concorda com todos os termos e condições acima descritos.
           </p>
-          <Button variant="hero" size="lg" className="px-10 group" onClick={handleWhatsApp}>
+          <Button variant="hero" size="lg" className="px-10 group" onClick={handleSite}>
             Quero me tornar revendedor
             <ChevronRight className="ml-2 w-5 h-5 transition-transform group-hover:translate-x-1" />
           </Button>
